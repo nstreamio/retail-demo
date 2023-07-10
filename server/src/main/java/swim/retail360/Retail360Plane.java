@@ -9,11 +9,16 @@ import swim.server.ServerLoader;
 
 public class Retail360Plane extends AbstractPlane {
 
+  public Retail360Plane() {}
+
   @SwimRoute("/customer/:id")
   private AgentRoute<CustomerAgent> customerAgent;
 
   @SwimRoute("/order/:id")
   private AgentRoute<OrderAgent> orderAgent;
+
+  @SwimRoute("/store/:id")
+  private AgentRoute<StoreAgent> storeAgent;
 
   public static void main(String[] args) throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServer();
@@ -26,6 +31,8 @@ public class Retail360Plane extends AbstractPlane {
     // be done in external processes instead
     final ClientRuntime client = new ClientRuntime();
     client.start();
+    final Simulator sim = new Simulator(client, "warp://localhost:9001", 1000);
+    sim.run();
   }
 
 }

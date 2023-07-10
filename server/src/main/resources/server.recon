@@ -1,9 +1,9 @@
-tutorial: @fabric {
+retail360: @fabric {
   @plane(class: "swim.retail360.Retail360Plane")
 }
 
 @web(port: 9001) {
-  space: "tutorial"
+  space: "retail360"
   documentRoot: "./ui/"
   @websocket {
     serverCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level

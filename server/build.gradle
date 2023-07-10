@@ -14,13 +14,13 @@ plugins {
 }
 
 group = 'org.swimos'
-description = 'Tutorial- Web Agents'
-ext.moduleName = 'swim.tutorial'
+description = 'Customer 360 Retail Demo'
+ext.moduleName = 'swim.retail360'
 sourceCompatibility = 11
 version = project.property('swim.version')
-mainClassName = 'swim.tutorial.TutorialPlane'
+mainClassName = 'swim.retail360.Retail360Plane'
 
-//def moduleName = 'swim.tutorial'
+//def moduleName = 'swim.retail360'
 def jvmVersion = System.getProperty('java.version').split('\\.')[0] as Integer
 def useModules = jvmVersion >= 9 && !project.hasProperty('no-modules')
 
@@ -107,7 +107,7 @@ afterEvaluate {
 
   ospackage {
     release '1'
-    prefix '/opt/swim-tutorial'
+    prefix '/opt/swim-retail360'
   }
 
   task packageDeb(type: Deb) {

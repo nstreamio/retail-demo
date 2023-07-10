@@ -43,56 +43,92 @@ public class OrderAgent extends AbstractAgent {
   @SwimLane("status")
   private final ValueLane<Value> status = this.<Value>valueLane();
 
+  @SwimLane("state")
+  private final ValueLane<Value> state = this.<Value>valueLane();
+
   @SwimLane("placeOrder")
   public final CommandLane<Value> placeOrder = this.<Value>commandLane()
       .onCommand(v -> {
-        logMessage("placeOrder: commanded with " + Recon.toString(v));
+        // logMessage("placeOrder: commanded with " + Recon.toString(v));
         if (v.get("customerId").isDefined() && v.get("customerName").isDefined()) {
           this.id.set(this.nodeUri().pathName());
           this.customerId.set(v.get("customerId").stringValue());
           this.customerName.set(v.get("customerName").stringValue());
+          Record products = Record.of();
 
           if (v.get("productA").isDefined()) {
             this.productA.set(v.get("productA").intValue());
+            products.slot("productA", v.get("productA").intValue());
           }
           if (v.get("productB").isDefined()) {
-            this.productA.set(v.get("productB").intValue());
+            this.productB.set(v.get("productB").intValue());
+            products.slot("productB", v.get("productB").intValue());
           }
           if (v.get("productC").isDefined()) {
-            this.productA.set(v.get("productC").intValue());
+            this.productC.set(v.get("productC").intValue());
+            products.slot("productC", v.get("productC").intValue());
           }
           if (v.get("productD").isDefined()) {
-            this.productA.set(v.get("productD").intValue());
+            this.productD.set(v.get("productD").intValue());
+            products.slot("productD", v.get("productD").intValue());
           }
           if (v.get("productE").isDefined()) {
-            this.productA.set(v.get("productE").intValue());
+            this.productE.set(v.get("productE").intValue());
+            products.slot("productE", v.get("productE").intValue());
           }
 
           long ts = System.currentTimeMillis();
           this.statusHistory.put(ts, "orderPlaced");
-          this.status.set(Record.of().slot("eventTime", ts).slot("eventName", "orderPlaced"));
+          Value newStatus = Record.of().slot("eventTime", ts).slot("eventName", "orderPlaced");
+          this.status.set(newStatus);
+          Record orderDetail = Record.of();
+          orderDetail.slot("customerId", v.get("customerId").stringValue());
+          orderDetail.slot("orderId", this.nodeUri().pathName());
+          orderDetail.slot("products", products);
+          orderDetail.slot("ts", ts);
+          orderDetail.slot("status", newStatus);
+          this.state.set(orderDetail);
+          this.command("/store/main", "addOrder", Record.of().slot("orderId", this.nodeUri().pathName()));
         }
       });
 
   @SwimLane("updateOrder")
   public final CommandLane<Value> updateOrder = this.<Value>commandLane()
       .onCommand(v -> {
-        if (status.get().get("eventName").equals("orderPlaced")) {
-          long ts = System.currentTimeMillis();
+        Record orderDetail = Record.of();
+        long ts = System.currentTimeMillis();
+        Value oldState = this.state.get();
+        orderDetail.slot("customerId", oldState.get("customerId").stringValue());
+        orderDetail.slot("orderId", this.nodeUri().pathName());
+        orderDetail.slot("products", oldState.get("products"));
+        orderDetail.slot("ts", ts);
+        if (status.get().get("eventName").stringValue().equals("orderPlaced")) {
           this.statusHistory.put(ts, "orderProcessed");
-          this.status.set(Record.of().slot("eventTime", ts).slot("eventName", "orderProcessed"));
+          Record state = Record.of()
+              .slot("customerId", oldState.get("customerId").stringValue())
+              .slot("orderId", this.nodeUri().pathName())
+              .slot("eventTime", ts)
+              .slot("eventName", "orderProcessed");
+          Value newStatus = Record.of().slot("eventTime", ts).slot("eventName", "orderProcessed");
+          this.status.set(newStatus);
+          orderDetail.slot("status", newStatus);
+          this.state.set(orderDetail);
         }
 
-        if (status.get().get("eventName").equals("orderProcessed")) {
-          long ts = System.currentTimeMillis();
+        else if (status.get().get("eventName").stringValue().equals("orderProcessed")) {
           this.statusHistory.put(ts, "readyForPickup");
-          this.status.set(Record.of().slot("eventTime", ts).slot("eventName", "readyForPickup"));
+          Value newStatus = Record.of().slot("eventTime", ts).slot("eventName", "readyForPickup");
+          this.status.set(newStatus);
+          orderDetail.slot("status", newStatus);
+          this.state.set(orderDetail);
         }
 
-        if (status.get().get("eventName").equals("readyForPickup")) {
-          long ts = System.currentTimeMillis();
+        else if (status.get().get("eventName").stringValue().equals("readyForPickup")) {
           this.statusHistory.put(ts, "pickupCompleted");
-          this.status.set(Record.of().slot("eventTime", ts).slot("eventName", "pickupCompleted"));
+          Value newStatus = Record.of().slot("eventTime", ts).slot("eventName", "pickupCompleted");
+          this.status.set(newStatus);
+          orderDetail.slot("status", newStatus);
+          this.state.set(orderDetail);
         }
       });
 
