@@ -104,11 +104,7 @@ public class OrderAgent extends AbstractAgent {
         orderDetail.slot("ts", ts);
         if (status.get().get("eventName").stringValue().equals("orderPlaced")) {
           this.statusHistory.put(ts, "orderProcessed");
-          Record state = Record.of()
-              .slot("customerId", oldState.get("customerId").stringValue())
-              .slot("orderId", this.nodeUri().pathName())
-              .slot("eventTime", ts)
-              .slot("eventName", "orderProcessed");
+          Record state = Record.of();
           Value newStatus = Record.of().slot("eventTime", ts).slot("eventName", "orderProcessed");
           this.status.set(newStatus);
           orderDetail.slot("status", newStatus);

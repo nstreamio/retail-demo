@@ -22,7 +22,13 @@ public class CustomerAgent extends AbstractAgent {
   @SwimLane("orders")
   private final JoinValueLane<String, Value> orders = this.<String, Value>joinValueLane()
       .didUpdate((orderId, newStatus, oldStatus) -> {
-        logMessage("order " + orderId + " changed to " + newStatus + ".");
+        // logMessage("order " + orderId + " changed to " + newStatus + ".");
+      });
+
+  @SwimLane("state")
+  private final JoinValueLane<String, Value> state = this.<String, Value>joinValueLane()
+      .didUpdate((orderId, newStatus, oldStatus) -> {
+        // logMessage("state " + orderId + " changed to " + newStatus + ".");
       });
 
   @SwimLane("placeOrder")
@@ -66,6 +72,7 @@ public class CustomerAgent extends AbstractAgent {
 
           this.context.command("/order/" + orderId, "placeOrder", orderInfo);
           orders.downlink(orderId).nodeUri("/order/" + orderId).laneUri("status").open();
+          state.downlink(orderId).nodeUri("/order/" + orderId).laneUri("state").open();
         }
       });
 

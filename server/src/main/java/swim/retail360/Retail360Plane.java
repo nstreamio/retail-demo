@@ -31,7 +31,7 @@ public class Retail360Plane extends AbstractPlane {
     // be done in external processes instead
     final ClientRuntime client = new ClientRuntime();
     client.start();
-    final Simulator sim = new Simulator(client, "warp://localhost:9001", 1000);
+    final Simulator sim = new Simulator(client, "warp://localhost:9001", 5);
     sim.run();
   }
 

@@ -74,8 +74,9 @@ class Simulator {
     // System.out.println(("generateCustomers"));
     for (int i = 0; i < this.numCustomers; ++i) {
       CustomerSimState state = this.customerStates[i];
-      Value params = Record.of().slot("customerName", state.name);
+      Value params = Record.of().slot("customerId", state.name);
       this.ref.command(this.hostUri, "/customer/" + state.name, "initialize", params);
+      this.ref.command(this.hostUri, "/store/main", "addCustomer", params);
     }
   }
 
