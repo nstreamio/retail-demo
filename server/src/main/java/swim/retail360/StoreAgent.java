@@ -3,6 +3,7 @@ package swim.retail360;
 import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
 import swim.api.lane.CommandLane;
+import swim.api.lane.JoinMapLane;
 import swim.api.lane.JoinValueLane;
 import swim.recon.Recon;
 import swim.structure.Record;
@@ -33,7 +34,7 @@ public class StoreAgent extends AbstractAgent {
       });
 
   @SwimLane("customers")
-  private final JoinValueLane<String, Value> customers = this.<String, Value>joinValueLane()
+  private final JoinMapLane<String, String, Value> customers = this.<String, String, Value>joinMapLane()
       .didUpdate((customerId, newState, oldState) -> {
         logMessage("customer state for " + customerId + " changed to " + Recon.toString(newState) + ".");
       });
