@@ -61,7 +61,7 @@ const rootModel = new swim.Model();
 rootModel.hostUri(host);
 rootModel.nodeUri("/store/main");
 rootEntityTrait = rootModel.appendTrait(swim.retaildemo.StoreEntityTrait, "entity");
-rootEntityTrait.ordersRelation.insertModel();
+//rootEntityTrait.ordersRelation.insertModel();
 rootModel.mount();
 
 const rootSelectableTrait = rootModel.appendTrait(swim.SelectableTrait, "selectable");

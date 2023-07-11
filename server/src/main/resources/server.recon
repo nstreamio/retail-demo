@@ -1,3 +1,5 @@
+@kernel(class: "swim.meta.MetaKernel")
+
 retail360: @fabric {
   @plane(class: "swim.retail360.Retail360Plane")
 }

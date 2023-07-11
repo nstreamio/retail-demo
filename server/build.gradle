@@ -31,6 +31,7 @@ repositories {
 dependencies {
   api group: 'org.swimos', name: 'swim-server', version: version
   api group: 'org.swimos', name: 'swim-client', version: version
+  api group: 'org.swimos', name:'swim-meta', version: version
 }
 
 afterEvaluate {
