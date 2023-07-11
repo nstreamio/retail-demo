@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Swim Retail Demo</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+</head>
+<body swim-theme style="display: flex;">
+<script src="libs/swim-core.min.js"></script>
+<script src="libs/swim-host.min.js"></script>
+<script src="libs/swim-ui.min.js"></script>
+<script src="libs/swim-ux.min.js"></script>
+<script src="libs/swim-vis.min.js"></script>
+<script src="libs/swim-gui.min.js"></script>
+<script src="libs/retail-demo.min.js"></script>
+<script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const folioController = new swim.EntityFolioController();
+folioController.mount();
+const folioView = folioController.folio.attachView().flexGrow(1);
+
+folioController.appBar.insertController();
+folioController.navBar.insertController();
+
+const activityController = swim.ActivityService.getActivityController();
+
+const boardController = new swim.BoardController();
+boardController.handle.setIcon(swim.VectorIcon.create(24, 24, "M19 5v2h-4V5h4M9 5v6H5V5h4m10 8v6h-4v-6h4M9 17v2H5v-2h4M21 3h-8v6h8V3zM11 3H3v10h8V3zm10 8h-8v10h8V11zm-10 4H3v6h8v-6z"));
+activityController.setTab("board", boardController);
+
+const warpProtocol = window.location.protocol === "https:" ? "warps:\/\/" : "warp:\/\/";
+const host = warpProtocol + window.location.host;
+
+const rootModel = new swim.Model();
+rootModel.hostUri(host);
+rootModel.nodeUri("/store/main");
+rootEntityTrait = rootModel.appendTrait(swim.retaildemo.StoreEntityTrait, "entity");
+rootEntityTrait.ordersRelation.insertModel();
+rootModel.mount();
+
+const rootSelectableTrait = rootModel.appendTrait(swim.SelectableTrait, "selectable");
+const navController = new swim.EntityNavController();
+navController.entity.setTrait(rootEntityTrait);
+folioController.appendChild(navController);
+folioController.sheets.addController(navController);
+rootSelectableTrait.select();
+folioController.showEntityCover(rootEntityTrait);
+folioController.folio.insertView(bodyView);
+
+    </script>
+</body>
+</html>
