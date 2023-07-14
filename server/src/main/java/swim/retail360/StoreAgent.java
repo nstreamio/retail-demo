@@ -34,7 +34,7 @@ public class StoreAgent extends AbstractAgent {
       });
 
   @SwimLane("customers")
-  private final JoinMapLane<String, String, Value> customers = this.<String, String, Value>joinMapLane()
+  private final JoinValueLane<String, Value> customers = this.<String, Value>joinValueLane()
       .didUpdate((customerId, newState, oldState) -> {
         logMessage("customer state for " + customerId + " changed to " + Recon.toString(newState) + ".");
       });
@@ -44,6 +44,6 @@ public class StoreAgent extends AbstractAgent {
       .onCommand(v -> {
         // logMessage("addOrder invoked with " + Recon.toString(v));
         String customerId = v.get("customerId").stringValue("");
-        customers.downlink(customerId).nodeUri("/customer/" + customerId).laneUri("state").open();
+        customers.downlink(customerId).nodeUri("/customer/" + customerId).laneUri("status").open();
       });
 }

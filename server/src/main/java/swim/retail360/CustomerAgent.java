@@ -3,10 +3,13 @@ package swim.retail360;
 import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
 import swim.api.lane.*;
-import swim.recon.Recon;
+import swim.structure.Form;
 import swim.structure.Record;
 import swim.structure.Value;
+import swim.structure.form.MapForm;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class CustomerAgent extends AbstractAgent {
@@ -14,10 +17,15 @@ public class CustomerAgent extends AbstractAgent {
   public CustomerAgent() {}
 
   @SwimLane("id")
-  private final ValueLane<String> id = this.<String>valueLane();
+  private final ValueLane<String> id = this.<String>valueLane()
+      .didSet((nv, ov) -> this.status.set(this.status.get().updated("id", nv)));
 
   @SwimLane("name")
-  private final ValueLane<String> name = this.<String>valueLane();
+  private final ValueLane<String> name = this.<String>valueLane()
+      .didSet((nv, ov) -> this.status.set(this.status.get().updated("name", nv)));
+
+  @SwimLane("status")
+  private final ValueLane<Value> status = this.<Value>valueLane();
 
   @SwimLane("orders")
   private final JoinValueLane<String, Value> orders = this.<String, Value>joinValueLane()
@@ -28,8 +36,31 @@ public class CustomerAgent extends AbstractAgent {
   @SwimLane("state")
   private final JoinValueLane<String, Value> state = this.<String, Value>joinValueLane()
       .didUpdate((orderId, newStatus, oldStatus) -> {
-        // logMessage("state " + orderId + " changed to " + newStatus + ".");
+        updateStatus();
       });
+
+  private void updateStatus() {
+    final int orderCount = this.state.size();
+    final Map<String, Integer> orderStatusCount = new HashMap<>();
+    Long mostRecentEvent = null;
+
+    for (final Value orderState: state.values()) {
+      if (orderState.get("ts").isDefined()) mostRecentEvent = orderState.get("ts").longValue();
+
+      final String eventType = orderState.get("status").get("eventName").stringValue(null);
+      if (eventType != null) {
+        orderStatusCount.put(eventType, orderStatusCount.getOrDefault(eventType, 0) + 1);
+      }
+    }
+
+    this.status.set(
+        this.status.get()
+            .updated("orderCount", orderCount)
+            .updated("lastEvent", mostRecentEvent)
+            .updated("orderStates", Form.forMap(Form.forString(), Form.forInteger()).mold(orderStatusCount).toValue())
+    );
+
+  }
 
   @SwimLane("placeOrder")
   public final CommandLane<Value> placeOrder = this.<Value>commandLane()
@@ -99,6 +130,11 @@ public class CustomerAgent extends AbstractAgent {
 
   private void logMessage(Object o) {
     System.out.println("[" + nodeUri() + "] " + o);
+  }
+
+  @Override
+  public void didStart() {
+    this.id.set(getProp("id").stringValue("unknown"));
   }
 
 }
