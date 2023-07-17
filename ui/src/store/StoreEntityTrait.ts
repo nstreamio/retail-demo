@@ -19,7 +19,7 @@ export class StoreEntityTrait extends EntityTrait {
 
   @TraitModelRef<StoreEntityTrait["customersRelation"]>({
     modelType: Model,
-    modelKey: "machines",
+    modelKey: "customers",
     traitType: CustomersRelationTrait,
     traitKey: "relation",
   })

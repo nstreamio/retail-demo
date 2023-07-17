@@ -36,6 +36,9 @@ export class CustomersRelationTrait extends RelationTrait {
             let customerTrait: CustomerEntityTrait = new CustomerEntityTrait();
             customerTrait.title.setValue(name, Affinity.Intrinsic);
             this.owner.entities.addTrait(customerTrait, void 0, name);
+
+            customerTrait.model!.nodeUri.setValue("/customer/" + name, Affinity.Intrinsic);
+            customerTrait.ordersRelation.insertModel();
         }
     },
     didRemove(name: string, status: Value): void {
