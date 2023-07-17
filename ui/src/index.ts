@@ -2,3 +2,5 @@
 // All rights reserved.
 
 export * from "./store";
+
+export * from "./customer";
