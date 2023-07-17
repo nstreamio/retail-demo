@@ -19,8 +19,14 @@ export class StoreBoardController extends BoardController {
     const boardView = this.sheet.attachView();
     const panelView = boardView.appendChild(PanelView).margin(7);
 
-    const orderListController = this.appendChild(OrderListController, "orderList");
-    orderListController.panel.insertView(panelView).unitWidth(1 / 3).unitHeight(1);
+    const orderPlaceListController = this.appendChild(new OrderListController("New Orders", "orderPlaced"), "newOrders");
+    orderPlaceListController.panel.insertView(panelView).unitWidth(1 / 3).unitHeight(1);
+
+    const orderProcessingListController = this.appendChild(new OrderListController("Processing", "orderProcessed"), "processingOrders");
+    orderProcessingListController.panel.insertView(panelView).unitWidth(1 / 3).unitHeight(1);
+
+    const orderReadyListController = this.appendChild(new OrderListController("Ready Orders", "readyForPickup"), "readyOrders");
+    orderReadyListController.panel.insertView(panelView).unitWidth(1 / 3).unitHeight(1);
   }
 
   @TraitViewRef<StoreBoardController["sheet"]>({

@@ -13,10 +13,20 @@ import { Trait } from "@swim/model";
 /** @public */
 export class OrderListController extends TimeTableController {
 
+  readonly listTitle: string;
+  readonly eventKey: string;
+
+  constructor(title: string, key: string) {
+    super();
+    this.listTitle = title;
+    this.eventKey = key;
+  }
+
   @TraitViewRef<OrderListController["panel"]>({
     extends: true,
     initView(panelView: PanelView): void {
       PanelController.panel.prototype.initView.call(this, panelView);
+      panelView.header.setTitle(this.owner.listTitle);
       this.owner.table.insertView();
     },
   })
@@ -40,15 +50,25 @@ export class OrderListController extends TimeTableController {
 
       let orderController = this.owner.getChild(orderId, OrderController);
 
-      if (orderController === null) {
+      if (orderController === null && this.owner.eventKey === value.get("status").get("eventName").stringValue("")) {
 
         orderController = new OrderController();
         orderController.nameCell.insertView();
         orderController.title.setValue(orderId);
         this.owner.series.addController(orderController, void 0, orderId);
 
+      }  
+
+      if (orderController !== null && this.owner.eventKey !== value.get("status").get("eventName").stringValue("")) {
+
+        this.owner.removeChild(orderId);
+
       }
+
     },
+    didRemove(orderId: string) {
+      this.owner.removeChild(orderId);
+    }
   })
   readonly ordersDownlink!: MapDownlink<this, string, Value>;
 
