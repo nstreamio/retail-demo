@@ -5,3 +5,5 @@ export { OrderEntityTraitObserver } from "./OrderEntityTraitObserver";
 export { OrdersRelationTrait } from "./OrdersRelationTrait";
 
 export { OrderBoardController } from "./OrderBoardController";
+
+export * from "./widget";
