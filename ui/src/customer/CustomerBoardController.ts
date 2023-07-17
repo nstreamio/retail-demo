@@ -6,6 +6,7 @@ import {Trait, TraitRef} from "@swim/model";
 import {TraitViewRef} from "@swim/controller";
 import {PanelView, BoardView, BoardController} from "@swim/panel";
 import {EntityTrait} from "@swim/domain";
+import { OrderListController } from "../order";
 
 /** @public */
 export class CustomerBoardController extends BoardController {
@@ -16,7 +17,16 @@ export class CustomerBoardController extends BoardController {
 
   protected initBoard(): void {
     const boardView = this.sheet.attachView();
-    boardView.appendChild(PanelView).margin(7);
+    const panelView = boardView.appendChild(PanelView).margin(7);
+
+    const orderPlaceListController = this.appendChild(new OrderListController("New Orders", "orderPlaced"), "newOrders");
+    orderPlaceListController.panel.insertView(panelView).unitWidth(1 / 3).unitHeight(1);
+
+    const orderProcessingListController = this.appendChild(new OrderListController("Processing", "orderProcessed"), "processingOrders");
+    orderProcessingListController.panel.insertView(panelView).unitWidth(1 / 3).unitHeight(1);
+
+    const orderReadyListController = this.appendChild(new OrderListController("Ready Orders", "readyForPickup"), "readyOrders");
+    orderReadyListController.panel.insertView(panelView).unitWidth(1 / 3).unitHeight(1);
   }
 
   @TraitViewRef<CustomerBoardController["sheet"]>({

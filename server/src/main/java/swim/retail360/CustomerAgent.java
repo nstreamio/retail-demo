@@ -6,7 +6,6 @@ import swim.api.lane.*;
 import swim.structure.Form;
 import swim.structure.Record;
 import swim.structure.Value;
-import swim.structure.form.MapForm;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,24 +26,24 @@ public class CustomerAgent extends AbstractAgent {
   @SwimLane("status")
   private final ValueLane<Value> status = this.<Value>valueLane();
 
-  @SwimLane("orders")
-  private final JoinValueLane<String, Value> orders = this.<String, Value>joinValueLane()
+  @SwimLane("orderStatus")
+  private final JoinValueLane<String, Value> orderStatus = this.<String, Value>joinValueLane()
       .didUpdate((orderId, newStatus, oldStatus) -> {
         // logMessage("order " + orderId + " changed to " + newStatus + ".");
       });
 
-  @SwimLane("state")
-  private final JoinValueLane<String, Value> state = this.<String, Value>joinValueLane()
+  @SwimLane("orders")
+  private final JoinValueLane<String, Value> orders = this.<String, Value>joinValueLane()
       .didUpdate((orderId, newStatus, oldStatus) -> {
         updateStatus();
       });
 
   private void updateStatus() {
-    final int orderCount = this.state.size();
+    final int orderCount = this.orders.size();
     final Map<String, Integer> orderStatusCount = new HashMap<>();
     Long mostRecentEvent = null;
 
-    for (final Value orderState: state.values()) {
+    for (final Value orderState: orders.values()) {
       if (orderState.get("ts").isDefined()) mostRecentEvent = orderState.get("ts").longValue();
 
       final String eventType = orderState.get("status").get("eventName").stringValue(null);
@@ -102,8 +101,8 @@ public class CustomerAgent extends AbstractAgent {
             orderId = UUID.randomUUID().toString();
 
           this.context.command("/order/" + orderId, "placeOrder", orderInfo);
-          orders.downlink(orderId).nodeUri("/order/" + orderId).laneUri("status").open();
-          state.downlink(orderId).nodeUri("/order/" + orderId).laneUri("state").open();
+          orderStatus.downlink(orderId).nodeUri("/order/" + orderId).laneUri("status").open();
+          orders.downlink(orderId).nodeUri("/order/" + orderId).laneUri("state").open();
         }
       });
 
@@ -111,8 +110,8 @@ public class CustomerAgent extends AbstractAgent {
   public final CommandLane<Value> pickupOrder = this.<Value>commandLane()
       .onCommand(v -> {
         final String orderId = v.get("orderId").stringValue();
-        if (orders.get(orderId).isDefined()) {
-          final String status = orders.get(orderId).get("eventName").stringValue();
+        if (orderStatus.get(orderId).isDefined()) {
+          final String status = orderStatus.get(orderId).get("eventName").stringValue();
           if (status.equals("readyForPickup")) {
             context.command("/order/" + orderId, "updateOrder", Value.empty());
           }
