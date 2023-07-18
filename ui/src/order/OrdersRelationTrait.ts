@@ -15,7 +15,7 @@ export class OrdersRelationTrait extends RelationTrait {
   }
 
   @MapDownlink<OrdersRelationTrait["orders"]>({
-    laneUri: "state",
+    laneUri: "orders",
     keyForm: Form.forString(),
     consumed: true,
     didUpdate(name: string, status: Value): void {
