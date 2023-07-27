@@ -1,7 +1,6 @@
 export { CustomerEntityTrait } from "./CustomerEntityTrait";
-
-export { CustomerEntityTraitObserver } from "./CustomerEntityTraitObserver";
+export { CustomerEntityTraitObserver } from "./CustomerEntityTrait";
 
 export { CustomersRelationTrait } from "./CustomersRelationTrait";
 
-export { CustomerBoardController } from "./CustomerBoardController";
+export {CustomerAspectTrait } from "./CustomerAspectTrait";

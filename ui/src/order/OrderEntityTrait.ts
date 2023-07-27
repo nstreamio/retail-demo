@@ -1,30 +1,31 @@
 // Copyright 2015-2022 Swim.inc
 // All rights reserved.
 import {Class, Lazy} from "@swim/util";
-import type {SheetController} from "@swim/sheet";
-import {ActivityController, EntityTrait} from "@swim/domain";
-import type {OrderEntityTraitObserver} from "./OrderEntityTraitObserver";
-import {OrderBoardController} from "./OrderBoardController";
-import { Affinity } from "@swim/component";
+import {EntityTrait, EntityTraitObserver} from "@swim/domain";
 import { Graphics, VectorIcon } from "@swim/graphics";
+import { Model, TraitModelRef } from "@swim/model";
+import { OrderAspectTrait } from "./OrderAspectTrait";
+
+/** @public */
+export interface OrderEntityTraitObserver<T extends OrderEntityTrait = OrderEntityTrait> extends EntityTraitObserver<T> {
+}
 
 /** @public */
 export class OrderEntityTrait extends EntityTrait {
-
   constructor() {
     super();
-    this.icon.setValue(OrderEntityTrait.icon, Affinity.Intrinsic);
+    this.icon.setIntrinsic(OrderEntityTrait.icon);
   }
 
   override readonly observerType?: Class<OrderEntityTraitObserver>;
 
-  override attachCoverController(coverController: SheetController): void {
-    super.attachCoverController(coverController);
-    if (coverController instanceof ActivityController) {
-      const boardController = new OrderBoardController();
-      coverController.setTab("board", boardController);
-    }
-  }
+  @TraitModelRef({
+    modelType: Model,
+    modelKey: "portal",
+    traitType: OrderAspectTrait,
+    traitKey: "aspect",
+  })
+  readonly portal!: TraitModelRef<this, OrderAspectTrait>;
 
   @Lazy
   static get icon(): Graphics {

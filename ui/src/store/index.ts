@@ -1,5 +1,4 @@
 export { StoreEntityTrait } from "./StoreEntityTrait";
+export { StoreEntityTraitObserver } from "./StoreEntityTrait";
 
-export { StoreEntityTraitObserver } from "./StoreEntityTraitObserver";
-
-export { StoreBoardController } from "./StoreBoardController";
+export {StoreAspectTrait} from "./StoreAspectTrait";

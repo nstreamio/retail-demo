@@ -1,36 +1,38 @@
 // Copyright 2015-2022 Swim.inc
 // All rights reserved.
 import {Class} from "@swim/util";
-import type {SheetController} from "@swim/sheet";
-import {ActivityController, EntityTrait} from "@swim/domain";
-import type {StoreEntityTraitObserver} from "./StoreEntityTraitObserver";
-import {StoreBoardController} from "./StoreBoardController";
+import {EntityTrait, EntityTraitObserver} from "@swim/domain";
 import { CustomersRelationTrait } from "../customer";
 import { Model, TraitModelRef } from "@swim/model";
+import { StoreAspectTrait } from "./StoreAspectTrait";
+
+/** @public */
+export interface StoreEntityTraitObserver<T extends StoreEntityTrait = StoreEntityTrait> extends EntityTraitObserver<T> {
+}
 
 /** @public */
 export class StoreEntityTrait extends EntityTrait {
   constructor() {
     super();
-    this.title.setValue("Main Store");
+    this.title.setIntrinsic("Main Store");
   }
 
-  override readonly observerType?: Class<StoreEntityTraitObserver>;
+  declare readonly observerType?: Class<StoreEntityTraitObserver>;
 
-  @TraitModelRef<StoreEntityTrait["customersRelation"]>({
+  @TraitModelRef({
+    modelType: Model,
+    modelKey: "portal",
+    traitType: StoreAspectTrait,
+    traitKey: "aspect",
+  })
+  readonly portal!: TraitModelRef<this, StoreAspectTrait>;
+
+  @TraitModelRef({
     modelType: Model,
     modelKey: "customers",
     traitType: CustomersRelationTrait,
     traitKey: "relation",
   })
   readonly customersRelation!: TraitModelRef<this, CustomersRelationTrait>;
-
-  override attachCoverController(coverController: SheetController): void {
-    super.attachCoverController(coverController);
-    if (coverController instanceof ActivityController) {
-      const boardController = new StoreBoardController();
-      coverController.setTab("board", boardController);
-    }
-  }
 
 }
