@@ -19,6 +19,7 @@ export class StoreEntityTrait extends EntityTrait {
 
   declare readonly observerType?: Class<StoreEntityTraitObserver>;
 
+  // Aspect/Portal trait showing that this entity will have a board of widgets/cards
   @TraitModelRef({
     modelType: Model,
     modelKey: "portal",
@@ -27,6 +28,7 @@ export class StoreEntityTrait extends EntityTrait {
   })
   readonly portal!: TraitModelRef<this, StoreAspectTrait>;
 
+  // Relation trait showing that this entity will have a list of customers that can be traversed to on the left
   @TraitModelRef({
     modelType: Model,
     modelKey: "customers",

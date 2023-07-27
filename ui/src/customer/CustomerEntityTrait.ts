@@ -20,6 +20,7 @@ export class CustomerEntityTrait extends EntityTrait {
 
   override readonly observerType?: Class<CustomerEntityTraitObserver>;
 
+  // Aspect/Portal trait showing that this entity will have a board of widgets/cards
   @TraitModelRef({
     modelType: Model,
     modelKey: "portal",
@@ -28,6 +29,7 @@ export class CustomerEntityTrait extends EntityTrait {
   })
   readonly portal!: TraitModelRef<this, CustomerAspectTrait>;
 
+  // Relation trait showing that this entity will have a list of orders that can be traversed to on the left
   @TraitModelRef({
     modelType: Model,
     modelKey: "orders",
@@ -36,6 +38,7 @@ export class CustomerEntityTrait extends EntityTrait {
   })
   readonly ordersRelation!: TraitModelRef<this, OrdersRelationTrait>;
 
+  // The icon of the entity, will be used in the navigation on the left
   @Lazy
   static get icon(): Graphics {
     return PolygonIcon.create(3);

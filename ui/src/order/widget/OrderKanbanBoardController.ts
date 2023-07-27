@@ -20,6 +20,10 @@ export class OrderKanbanBoardController extends BoardController {
       margin: 6,
     });
 
+    // The order kanban board consists of 3 lists of orders (the same except they have different status')
+    // Each panel takes up the full height of the sheet and 1/3 of the width
+    // We insert each widget by inserting each controller's 'panel'
+
     const orderPlaceListController = this.appendChild(new OrderListController("New Orders", "orderPlaced"), "orderPlaced");
     orderPlaceListController.panel.insertView(panelView).set({
       unitWidth: 1 / 3,

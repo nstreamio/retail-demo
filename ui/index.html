@@ -40,6 +40,12 @@ if (navigator.standalone) {
   document.body.style.height = "100%";
 }
 
+
+// Initialize and mount the top level agent (Entry point into the swim framework)
+//  For this demo it will be the 'store' agent, consisting of 2 traits:
+//  1) An 'aspect' trait named 'portal' - indicating the agent will have a board of widgets/cards
+//  2) A 'relation' trait named 'customersRelation' - indicating the agent will have navigation to a list of customer agents
+// We also set the host + node uri of the entity 
 const storeModel = new swim.Model();
 const storeTrait = storeModel.appendTrait(swim.retaildemo.StoreEntityTrait, "entity");
 storeTrait.hostUri.set("warp://localhost:9001");
