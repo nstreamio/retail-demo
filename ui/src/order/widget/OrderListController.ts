@@ -10,6 +10,7 @@ import { OrderController } from "./OrderController";
 import { TraitViewRef } from "@swim/controller";
 import { Trait } from "@swim/model";
 import { TextCellView } from "@swim/table";
+import { Uri } from "@swim/uri";
 
 /** @public */
 export class OrderListController extends TimeTableController {
@@ -58,7 +59,13 @@ export class OrderListController extends TimeTableController {
       if (orderController === null && this.owner.eventKey === value.get("status").get("eventName").stringValue("")) {
         orderController = new OrderController();
         orderController.title.setValue(orderId);
-        (orderController.nameCell.attachView() as TextCellView).content.set(orderId);
+
+        const nameCell = (orderController.nameCell.attachView() as TextCellView);
+        const customerId = value.get("customerId").stringValue(null);
+        nameCell.content.set(orderId);
+        if (customerId !== null) {
+          nameCell.hyperlink.setValue({fragment: Uri.path("/", "customer", "/", customerId, "/", "order", "/", orderId, "/").toString(),});
+        } 
         orderController.nameCell.insertView();
 
         this.owner.series.addController(orderController, void 0, orderId);
