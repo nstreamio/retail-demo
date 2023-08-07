@@ -9,6 +9,8 @@ public class StoreSimAgent extends AbstractAgent {
       "Customer0"
   };
 
+  public StoreSimAgent() {}
+
   @Override
   public void didStart() {
     for (final String customerId : CUSTOMER_NAMES) {

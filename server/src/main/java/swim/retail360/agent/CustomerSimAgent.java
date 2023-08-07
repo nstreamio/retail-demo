@@ -21,6 +21,8 @@ public class CustomerSimAgent extends AbstractAgent {
 
   private TimerRef timer;
 
+  public CustomerSimAgent() {}
+
   @SwimLane("status")
   private final ValueLane<Value> status = this.<Value>valueLane();
 
