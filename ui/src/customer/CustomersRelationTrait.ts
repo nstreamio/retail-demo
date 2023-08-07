@@ -2,11 +2,12 @@
 // All rights reserved.
 
 import {Strings, Observes} from "@swim/util";
-import {Form, type Value} from "@swim/structure";
+import {type Value} from "@swim/structure";
 import {MapDownlink} from "@swim/client";
 import {TraitModelSet} from "@swim/model";
 import {RelationTrait} from "@swim/domain";
 import {CustomerEntityTrait} from "./CustomerEntityTrait";
+import { Uri } from "@swim/uri";
 
 /** @public */
 export class CustomersRelationTrait extends RelationTrait<CustomerEntityTrait> {
@@ -38,24 +39,24 @@ export class CustomersRelationTrait extends RelationTrait<CustomerEntityTrait> {
   override readonly entities!: TraitModelSet<this, CustomerEntityTrait> & RelationTrait<CustomerEntityTrait>["entities"] & Observes<CustomerEntityTrait>;
 
   // Open a downlink to the backend to get the map of customers, we can use this to create the navigation list
-  // The nodeUri is inferred from the parent (the store)
+  // The nodeUri of the downlink is inferred from the parent (the store)
   @MapDownlink({
     laneUri: "customers",
-    keyForm: Form.forString(),
+    keyForm: Uri.form(),
     consumed: true,
-    didUpdate(id: string, status: Value): void {
+    didUpdate(nodeUri: Uri, status: Value): void {
       // If there is a new customer then insert it into the relation/navigation
-      let customerTrait = this.owner.entities.get(id);
+      let customerTrait = this.owner.entities.get(nodeUri.pathName);
       if (customerTrait === null) {
-        customerTrait = this.owner.entities.createTrait(id);
-        customerTrait.nodeUri.set("/customer/" + id); // Calculate and set the nodeUri of the customer entity
+        customerTrait = this.owner.entities.createTrait(nodeUri.pathName);
+        customerTrait.nodeUri.set(nodeUri); 
         this.owner.entities.addTrait(customerTrait);
       }
     },
-    didRemove(id: string, status: Value): void {
+    didRemove(nodeUri: Uri, status: Value): void {
       // When a customer is removed in the backend, remove it from the navigation/relation
-      this.owner.removeChild(id);
+      this.owner.removeChild(nodeUri.pathName);
     }
   })
-  readonly customers!: MapDownlink<this, string, Value>;
+  readonly customers!: MapDownlink<this, Uri, Value>;
 }

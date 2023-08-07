@@ -9,7 +9,7 @@ public class Retail360Plane extends AbstractPlane {
 
   public Retail360Plane() {}
 
-  public static void main(String[] args) throws InterruptedException {
+  public static void main(String[] args) {
     final Kernel kernel = ServerLoader.loadServer();
     final ActorSpace space = (ActorSpace) kernel.getSpace("retail360");
 
