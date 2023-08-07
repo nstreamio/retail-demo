@@ -7,6 +7,6 @@ import {TimeSeriesController} from "@swim/widget";
 export class OrderController extends TimeSeriesController {  
 
     // The order controller just extends the TimeSeriesController
-    // This provides access to the 'nameCell' to be used.
+    // This provides access to the 'nameCell' and 'currentCell' to be used.
 
 }

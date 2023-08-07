@@ -9,8 +9,10 @@ import { Value } from "@swim/structure";
 import { OrderController } from "./OrderController";
 import { TraitViewRef } from "@swim/controller";
 import { Trait } from "@swim/model";
-import { TextCellView } from "@swim/table";
+import {  ColLayout, TableLayout, TableView, TextCellView } from "@swim/table";
 import { Uri } from "@swim/uri";
+import { Length } from "@swim/math";
+import { Look } from "@swim/theme";
 
 /** @public */
 export class OrderListController extends TimeTableController {
@@ -48,6 +50,18 @@ export class OrderListController extends TimeTableController {
   })
   override readonly tablePanel!: ViewRef<this, PanelView> & TimeTableController["tablePanel"];
 
+  @ViewRef({
+    extends: true,
+    createLayout(): TableLayout {
+      const cols = new Array<ColLayout>();
+      cols.push(ColLayout.create("current", 2, 0, 0, false, false, Look.labelColor));
+      cols.push(ColLayout.create("name", 2, 0, 0, false, false, Look.accentColor));
+      return new TableLayout(null, null, null, Length.px(12), cols);
+    },
+  })
+  override readonly table!: ViewRef<this, TableView> & TimeTableController["table"];
+
+
   // Open a downlink to the backend to get the map of orders, we can use this to  populate the order lists
   // The nodeUri of the downlink is inferred from the parent (the customer)
   @MapDownlink({
@@ -64,14 +78,12 @@ export class OrderListController extends TimeTableController {
         orderController.title.setValue(nodeUri.pathName);
 
         const nameCell = (orderController.nameCell.attachView() as TextCellView);
-        const customerId = value.get("customerId").stringValue(null);
         nameCell.content.set(nodeUri.pathName);
-        if (customerId !== null) {
-          // Add deep link
-          nameCell.hyperlink.setValue({fragment: Uri.path("/", "customer", "/", customerId, "/", "order", "/", nodeUri.pathName, "/").toString(),});
-        } 
-        // We only want to insert the name cell for each order into the table
+        const currentCell = (orderController.currentCell.attachView() as TextCellView);
+        currentCell.content.set(value.get("customerId").stringValue());
+        // We only want to insert the name cell and current cell for each order into the table
         orderController.nameCell.insertView();
+        orderController.currentCell.insertView();
 
         this.owner.series.addController(orderController, void 0, nodeUri.pathName);
       }  
