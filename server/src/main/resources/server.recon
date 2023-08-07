@@ -2,6 +2,22 @@
 
 retail360: @fabric {
   @plane(class: "swim.retail360.Retail360Plane")
+
+  @node {
+      uri: "/store/main"
+      @agent(class: "swim.retail360.agent.StoreAgent")
+  }
+
+  @node {
+      uri: "/customer/:id"
+      @agent(class: "swim.retail360.agent.CustomerAgent")
+  }
+
+  @node {
+      uri: "/order/:id"
+      @agent(class: "swim.retail360.agent.OrderAgent")
+  }
+
 }
 
 @web(port: 9001) {

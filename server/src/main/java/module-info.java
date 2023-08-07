@@ -5,4 +5,5 @@ open module swim.retail360 {
   requires swim.meta;
 
   exports swim.retail360;
+  exports swim.retail360.agent;
 }
