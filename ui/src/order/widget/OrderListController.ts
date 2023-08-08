@@ -12,7 +12,8 @@ import { Trait } from "@swim/model";
 import {  ColLayout, TableLayout, TableView, TextCellView } from "@swim/table";
 import { Uri } from "@swim/uri";
 import { Length } from "@swim/math";
-import { Look } from "@swim/theme";
+import { Feel, Look } from "@swim/theme";
+import { Status } from "@swim/domain";
 
 /** @public */
 export class OrderListController extends TimeTableController {
@@ -54,7 +55,7 @@ export class OrderListController extends TimeTableController {
     extends: true,
     createLayout(): TableLayout {
       const cols = new Array<ColLayout>();
-      cols.push(ColLayout.create("current", 2, 0, 0, false, false, Look.labelColor));
+      cols.push(ColLayout.create("current", 2, 0, 0, false, false, Look.accentColor));
       cols.push(ColLayout.create("name", 2, 0, 0, false, false, Look.accentColor));
       return new TableLayout(null, null, null, Length.px(12), cols);
     },
@@ -71,6 +72,7 @@ export class OrderListController extends TimeTableController {
     didUpdate(nodeUri: Uri, value: Value): void {
 
       let orderController = this.owner.getChild(nodeUri.pathName, OrderController);
+      let moodStatus = OrderListController.orderStatusMood.get(this.owner.eventKey);
 
       // If there is a new order, and the order is the same status that his controller is managing then add it to the list
       if (orderController === null && this.owner.eventKey === value.get("status").stringValue("")) {
@@ -79,8 +81,12 @@ export class OrderListController extends TimeTableController {
 
         const nameCell = (orderController.nameCell.attachView() as TextCellView);
         nameCell.content.set(nodeUri.pathName);
+        nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+
         const currentCell = (orderController.currentCell.attachView() as TextCellView);
         currentCell.content.set(value.get("customerId").stringValue());
+        currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+
         // We only want to insert the name cell and current cell for each order into the table
         orderController.nameCell.insertView();
         orderController.currentCell.insertView();
@@ -100,7 +106,11 @@ export class OrderListController extends TimeTableController {
   })
   readonly ordersDownlink!: MapDownlink<this, Uri, Value>;
 
-
+  private static orderStatusMood: Map<String, Status> = new Map<String, Status>([
+    ["orderPlaced", Status.alert()],
+    ["orderProcessed", Status.warning()],
+    ["readyForPickup", Status.normal()]
+  ]);
 
 
 
