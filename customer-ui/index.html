@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer | Swim Retail Demo</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+      * {
+        font-family: 'Open Sans', sans-serif;
+      }
+    </style>
+</head>
+<body swim-theme style="display: flex;">
+<script src="libs/swim-core.min.js"></script>
+<script src="libs/swim-host.min.js"></script>
+<script src="libs/swim-ui.min.js"></script>
+<script src="libs/swim-ux.min.js"></script>
+<script src="libs/swim-vis.min.js"></script>
+<script src="libs/swim-maps.min.js"></script>
+<script src="libs/swim-gui.min.js"></script>
+<script src="libs/retail-demo-customer.min.js"></script>
+<script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+document.body.style.backgroundColor = "#212121";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+
+// create htmlView from document.body
+const bodyView = swim.HtmlView.fromNode(document.body).set({
+  style: {
+    boxSizing: 'border-box',
+    margin: '0',
+  },
+});
+
+/*
+  THE CUSTOM WAY, USING A SIMPLE SHEETCONTROLLER
+  THIS APPEARS AT FIRST ATTEMPT TO BE A BETTER ALBEIT RAW APPROACH FOR OUR USE CASE.
+  IT DOES NOT USE ANY EXISTING SCAFFOLDING AS A BASIS FOR THIS UI SINCE NONE OF THEM REALLY APPEAR SUITABLE.
+*/
+// create base controller (AppController ? )
+const customerController = new swim.retaildemo.CustomerController();
+
+// call insertView on base controller, passing the htmlView as the parent
+customerController.sheet.insertView(bodyView);
+
+/*
+  THE ENTITYFOLIOCONTROLLER WAY
+  THIS DOES NOT SUIT OUR USE CASE SINCE THE DESIGNS DO NOT CALL FOR FOLIO-LIKE UI SCAFFOLDING
+*/
+// const customerModel = new swim.Model();
+// const customerEntityTrait = customerModel.appendTrait(swim.retaildemo.CustomerEntityTrait, "entity");
+// const customerId = (/(?<=\/customer\/)[^\s!?\/.*#|]+(?=\/|$|\?)/gm.exec(
+//   window.location.href
+// ) ?? [""])[0];
+// customerEntityTrait.hostUri.set('warp://localhost:9001');
+// customerEntityTrait.nodeUri.set(`customer/${customerId}`);
+// customerModel.appendTrait(swim.SelectableTrait, "selectable");
+// customerModel.mount();
+
+// customerEntityTrait.portal.insertModel();
+
+// const entityFolioController = new swim.EntityFolioController();
+// entityFolioController.hostUri.set('warp://localhost:9001');
+
+// entityFolioController.folio.attachView().style.set({
+//   flexGrow: 1,
+// });
+
+// entityFolioController.appBar.insertController();
+// entityFolioController.navBar.insertController();
+
+// entityFolioController.rootEntity.setTrait(customerEntityTrait);
+
+// entityFolioController.folio.insertView(swim.HtmlView.fromNode(document.body));
+// entityFolioController.mount();
+
+    </script>
+</body>
+</html>

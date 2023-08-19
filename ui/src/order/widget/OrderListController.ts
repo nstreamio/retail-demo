@@ -70,6 +70,7 @@ export class OrderListController extends TimeTableController {
     consumed: true,
     keyForm: Uri.form(),
     didUpdate(nodeUri: Uri, value: Value): void {
+      console.log("nodeUri: ", nodeUri);
 
       let orderController = this.owner.getChild(nodeUri.pathName, OrderController);
       let moodStatus = OrderListController.orderStatusMood.get(this.owner.eventKey);

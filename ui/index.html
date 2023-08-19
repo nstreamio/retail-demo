@@ -46,31 +46,32 @@ if (navigator.standalone) {
 //  1) An 'aspect' trait named 'portal' - indicating the agent will have a board of widgets/cards
 //  2) A 'relation' trait named 'customersRelation' - indicating the agent will have navigation to a list of customer agents
 // We also set the host + node uri of the entity 
+console.log('swim: ', swim);
 const storeModel = new swim.Model();
-const storeTrait = storeModel.appendTrait(swim.retaildemo.StoreEntityTrait, "entity");
-storeTrait.hostUri.set("warp://localhost:9001");
-storeTrait.nodeUri.set("/store/main");
+const storeEntityTrait = storeModel.appendTrait(swim.retaildemo.StoreEntityTrait, "entity");
+storeEntityTrait.hostUri.set("warp://localhost:9001");
+storeEntityTrait.nodeUri.set("/store/main");
 storeModel.appendTrait(swim.SelectableTrait, "selectable");
 storeModel.mount();
 
-storeTrait.portal.insertModel();
-storeTrait.customersRelation.insertModel();
+storeEntityTrait.portal.insertModel();
+storeEntityTrait.customersRelation.insertModel();
 
 
-const folioController = new swim.EntityFolioController();
-folioController.hostUri.set("warp://localhost:9001");
+const entityFolioController = new swim.EntityFolioController();
+entityFolioController.hostUri.set("warp://localhost:9001");
 
-folioController.folio.attachView().style.set({
+entityFolioController.folio.attachView().style.set({
   flexGrow: 1,
 });
 
-folioController.appBar.insertController();
-folioController.navBar.insertController();
+entityFolioController.appBar.insertController();
+entityFolioController.navBar.insertController();
 
-folioController.rootEntity.setTrait(storeTrait);
+entityFolioController.rootEntity.setTrait(storeEntityTrait);
 
-folioController.folio.insertView(swim.HtmlView.fromNode(document.body));
-folioController.mount();
+entityFolioController.folio.insertView(swim.HtmlView.fromNode(document.body));
+entityFolioController.mount();
 
     </script>
 </body>
