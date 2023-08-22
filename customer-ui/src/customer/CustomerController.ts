@@ -15,7 +15,6 @@ import { HtmlIconView, VectorIcon } from "@swim/graphics";
 
 export class CustomerController extends BoardController {
   constructor() {
-    console.log("constructor of CustomerController");
     super();
 
     // set customerId
@@ -24,25 +23,14 @@ export class CustomerController extends BoardController {
     ) ?? [""])[0];
     this.customerId.set(customerId);
 
-    // render view
-    console.log("calling initBoard from constructor");
     // insert appBar view
     this.initBoard();
 
     // insert main view
     this.mainController.controller?.sheet.insertView(this.sheet.attachView());
-
-    // this.hostUri.set("warp://localhost:9001");
-    // console.log("this.hostUri.value: ", this.hostUri.value);
-
-    // this.nodeUri.set("customer/" + customerId);
-    // console.log("this.nodeUri.value: ", this.nodeUri.value);
-
-    // console.log("this (inside constructor): ", this);
   }
 
   protected initBoard() {
-    console.log("initBoard of CustomerController");
     const boardView = this.sheet.attachView().set({
       style: {
         width: "100%",
@@ -56,9 +44,6 @@ export class CustomerController extends BoardController {
     });
     this.appBarView.insertView(boardView);
     this.mainController.attachController();
-    // const outerPanelView = boardView.appendChild(PanelView).set({
-    //   margin,
-    // });
   }
 
   // repeated in MainController; not very DRY; there's probably a way to connect these values
@@ -87,8 +72,6 @@ export class CustomerController extends BoardController {
       });
     },
     initView(appBarView: HtmlView): void {
-      console.log("appBarView initView");
-
       const container = appBarView.appendChild("div").set({
         style: {
           width: "100%",
@@ -215,59 +198,10 @@ export class CustomerController extends BoardController {
   @ControllerRef({
     controllerType: MainController,
     controllerKey: "body",
-    didMount() {
-      // console.log("didMount");
-    },
-    didAttachController(controller, target) {
-      // console.log("didAttachController");
-      // console.log("controller: ", controller);
-      // console.log("target: ", target);
-    },
   })
   readonly mainController!: ControllerRef<
     this,
     MainController,
     [MainController]
   >;
-
-  // @ViewRef({
-  //   viewType: TextView,
-  //   createView(): TextView {
-  //     const textView = new TextView(new Text(""));
-  //     return textView;
-  //   },
-  // })
-  // readonly customerIdTextView!: ViewRef<this, TextView>;
-
-  // @ViewRef({
-  //   viewType: View, // placeholder
-  //   createView(): View {
-  //     return View.create(); // placeholder
-  //   },
-  // })
-  // readonly ordersTable!: ViewRef<this, View>;
-
-  // @ViewRef({
-  //   viewType: ButtonStack,
-  //   createView(): ButtonStack {
-  //     return ButtonStack.create(); // placeholder
-  //   },
-  //   // some event handler which conditionally creates an order via the customer node's downlink to the orders lane
-  // })
-  // readonly fab!: ViewRef<this, ButtonStack>;
-
-  // @MapDownlink({
-  //   laneUri: "status",
-  //   consumed: true,
-  //   keyForm: Uri.form(),
-  //   didConnect(): void {
-  //     console.log("status downlink did connect");
-  //   },
-  //   didUpdate(firstArg, secondArg): void {
-  //     console.log("Customer status did update");
-  //     console.log("firstStatusArg: ", firstArg);
-  //     console.log("secondStatusArg: ", secondArg);
-  //   },
-  // })
-  // readonly statusMapDownlink!: MapDownlink<this, Uri, Value>;
 }

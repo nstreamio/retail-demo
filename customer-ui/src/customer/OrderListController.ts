@@ -162,64 +162,44 @@ export class OrderListController extends TimeTableController {
   override readonly table!: ViewRef<this, TableView> &
     TimeTableController["table"];
 
+  @Property({
+    valueType: Number,
+    value: 0,
+    didSetValue(newValue, oldValue) {
+      console.log('didSetValue in OrderListController');
+      console.log('newValue: ', newValue);
+      console.log('oldValue: ', oldValue);
+    },
+    willUnmount() {
+      console.log('will unmount OrderListController');
+    },
+    willUnbindInlet() {
+      console.log('will unbind inlet OrderListController');
+    }
+  })
+  readonly ordersDisplayed!: Property<this, number>;
+
   @MapDownlink({
     hostUri: "warp://localhost:9001",
     laneUri: "orders",
     consumed: true,
     keyForm: Uri.form(),
-    didSync() {
-      console.log("didSync orders downlink from OrderListController");
-    },
     didUpdate(nodeUri: Uri, value: Value): void {
-      // console.log("ordersDownlink didUpdate");
-      // console.log("nodeUri: ", nodeUri);
-      // console.log("value: ", value);
-      // const sheetView = this.owner.sheet.attachView();
-
-      // const ordersCount = this.owner.orders.controllerCount;
-      // // console.log("ordersCount: ", ordersCount);
-
-      // const emptyStateView = sheetView.getChild(EMPTY_STATE_KEY);
-      // // console.log("emptyStateView: ", emptyStateView);
-      // // console.log("sheetView: ", sheetView);
-
-      // // if no orders and no emptyStateView exists, insert it
-      // if (!ordersCount && !emptyStateView) {
-      //   // console.log("inserting emptyStateView");
-      //   this.owner.emptyState.insertView(
-      //     sheetView,
-      //     void 0,
-      //     void 0,
-      //     EMPTY_STATE_KEY
-      //   );
-      // } else if (ordersCount && emptyStateView) {
-      //   // if orders exist and an emptyStateView exists, remove the emptyStateView
-      //   sheetView.removeChild(EMPTY_STATE_KEY);
-      //   // RATHER THAN INSERTING AND REMOVING VIEWS, CAN I CREATE A VARIABLE AND JUST REASSIGN DIFFERENT VIEWS TO IT?
-      // }
-
       let orderController = this.owner.getChild(
         nodeUri.pathName,
         OrderController
       );
 
-      // console.log(
-      //   `order ${nodeUri.pathName} ${!!orderController ? "found" : "NOT found"}`
-      // );
       const status = value.get("status").stringValue();
-      // console.log("status: ", status);
 
       if (status === "pickupCompleted") {
         if (orderController) {
-          // console.log("removing new order " + nodeUri.pathName);
           this.owner.removeChild(nodeUri.pathName);
+          this.owner.ordersDisplayed.set(this.owner.ordersDisplayed.value - 1);
         }
 
-        // If there is a new order, and the order is the same status that his controller is managing then add it to the list
+      // If there is a new order, and the order is the same status that his controller is managing then add it to the list
       } else if (orderController) {
-        // console.log("update existing order " + nodeUri.pathName);
-        // update mood of orderController
-
         let moodStatus = OrderListController.orderStatusMood.get(
           status || "unknown"
         );
@@ -230,11 +210,9 @@ export class OrderListController extends TimeTableController {
         );
         nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
 
-        const currentCell =
-          orderController.currentCell.attachView() as TextCellView;
+        const currentCell = orderController.currentCell.attachView() as TextCellView;
         currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
       } else if (orderController === null) {
-        // console.log("creating new order " + nodeUri.pathName);
         orderController = new OrderController();
         orderController.title.setValue(nodeUri.pathName);
 
@@ -248,20 +226,21 @@ export class OrderListController extends TimeTableController {
         );
         nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
 
-        const currentCell =
-          orderController.currentCell.attachView() as TextCellView;
+        const currentCell = orderController.currentCell.attachView() as TextCellView;
         currentCell.content.set(nodeUri.pathName);
         currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
 
-        // We only want to insert the name cell and current cell for each order into the table
+        // insert the name cell and current cell for each order into the table
         orderController.nameCell.insertView();
         orderController.currentCell.insertView();
 
+        // add the OrderController into the series
         this.owner.series.addController(
           orderController,
           void 0,
           nodeUri.pathName
         );
+        this.owner.ordersDisplayed.set(this.owner.ordersDisplayed.value + 1);
       }
     },
   })

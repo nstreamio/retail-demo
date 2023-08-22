@@ -3,7 +3,7 @@ import { Property } from "@swim/component";
 import { BoardController, BoardView } from "@swim/panel";
 // import { Value } from "@swim/structure";
 // import { Uri } from "@swim/uri";
-import { TraitViewRef } from "@swim/controller";
+import { ControllerRef, TraitViewRef } from "@swim/controller";
 import { Trait } from "@swim/model";
 // import { OrderController } from "../order";
 // import { View } from "@swim/view";
@@ -13,10 +13,18 @@ import { PanelView } from "@swim/panel";
 // import { CircleIcon, PolygonIcon } from "@swim/graphics";
 import { OrderListController } from "./OrderListController";
 import { ButtonItem, ButtonStack } from "@swim/button";
-import { CircleIcon, PolygonIcon } from "@swim/graphics";
+import {
+  CircleIcon,
+  HtmlIconView,
+  // CircleIcon,
+  // HtmlIconView,
+  // PolygonIcon,
+  VectorIcon,
+} from "@swim/graphics";
 import { MapDownlink } from "@swim/client";
 import { Uri } from "@swim/uri";
 import { Value } from "@swim/structure";
+import { Transform } from "@swim/math";
 // import { CircleIcon, PolygonIcon } from "@swim/graphics";
 
 enum OrderType {
@@ -26,6 +34,7 @@ enum OrderType {
 }
 
 export class MainController extends BoardController {
+  static readonly MAIN_PANEL_KEY: string = "mainPanelView";
   static readonly EMPTY_STATE_KEY: string = "emptyState";
   static readonly ORDER_LIST_CONTROLLER_KEY: string = "orderListController";
 
@@ -49,24 +58,17 @@ export class MainController extends BoardController {
     this.placeOrderDownlink.setHostUri("warp://localhost:9001");
     this.placeOrderDownlink.setNodeUri(`/customer/${this.customerId.value}`);
     this.placeOrderDownlink.open();
+
+    this.orderListController.attachController(new OrderListController(MainController.ORDER_LIST_CONTROLLER_KEY));
+    this.orderCount.bindInlet(this.orderListController.controller!.ordersDisplayed);
+    console.log('this.orderCount.inlet before: ', this.orderCount.inlet);
+    console.log('this.orderListController.controller!.ordersDisplayed: ', this.orderListController.controller!.ordersDisplayed);
+    console.log('this.orderCount.inlet after: ', this.orderCount.inlet);
   }
 
   initBoard() {
     const boardView = this.sheet.attachView();
-    const panelView = boardView.appendChild(PanelView);
-
-    // The order kanban board consists of 3 lists of orders (the same except they have different status')
-    // Each panel takes up the full height of the sheet and 1/3 of the width
-    // We insert each widget by inserting each controller's 'panel'
-
-    const orderPlaceListController = this.appendChild(
-      new OrderListController("Orders"),
-      MainController.ORDER_LIST_CONTROLLER_KEY
-    );
-    orderPlaceListController.panel.insertView(panelView).set({
-      unitWidth: 1,
-      unitHeight: 1,
-    });
+    boardView.appendChild(PanelView, MainController.MAIN_PANEL_KEY);
 
     // insert fab
     this.fab.insertView(boardView);
@@ -78,6 +80,52 @@ export class MainController extends BoardController {
     value: "",
   })
   readonly customerId!: Property<this, string>;
+
+  @Property({
+    valueType: Number,
+    extends: true,
+    binds: true,
+    didBindInlet(inlet) {
+        console.log('didBindInlet in MainController.orderCount');
+        console.log('inlet: ', inlet);
+    },
+    willUnmount() {
+      console.log('willUnmount!');
+    },
+    willSetValue() {
+      console.log('willSetValue!');
+    },
+    didSetValue(newValue, oldValue) {
+      console.log('didSetValue in MainController.orderCount');
+      console.log('newValue: ', newValue);
+      console.log('oldValue: ', oldValue);
+
+      const panelView = this.owner.sheet.attachView().getChild(MainController.MAIN_PANEL_KEY);
+      console.log('panelView: ', panelView);
+
+      if (newValue > 0 && oldValue === 0 && panelView) {
+        console.log('removing empty state and SHOWING ORDERS TABLE');
+        // remove empty state
+        panelView.removeChild(MainController.EMPTY_STATE_KEY);
+
+        // insert orders table
+        this.owner.orderListController.controller?.panel.insertView(panelView).set({
+          unitWidth: 1,
+          unitHeight: 1,
+        });
+      } else if (newValue === 0 && (oldValue > 0 || oldValue === void 0) && panelView) {
+        console.log('removing orders table and SHOWING EMPTY STATE');
+        // remove orders table
+        panelView.removeChild(MainController.MAIN_PANEL_KEY);
+
+        // insert empty state
+        this.owner.emptyState.insertView(panelView).set({
+          classList: ['empty-state-view']
+        });
+      }
+    }
+  })
+  readonly orderCount!: Property<this, number>;
 
   @TraitViewRef({
     extends: true,
@@ -108,18 +156,20 @@ export class MainController extends BoardController {
       const containerView = HtmlView.fromNode(containerEl).set({
         style: {
           width: "100%",
-          height: "auto",
+          height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-start",
+          justifyContent: "center",
           alignItems: "center",
           margin: "0px",
-          marginTop: "80px",
+          marginBottom: '80px',
         },
+        classList: ['empty-state-view']
       });
+      containerView.setKey(MainController.EMPTY_STATE_KEY);
 
       // iconOuterContainer for holding SVGs
-      containerView.appendChild("div").set({
+      const svgContainerView = containerView.appendChild("div").set({
         style: {
           width: "100%",
           height: "auto",
@@ -129,48 +179,65 @@ export class MainController extends BoardController {
           alignItems: "flex-start",
           margin: "0px",
         },
+        classList: ['empty-state-svg-container']
       });
 
-      /*
-        HAVING ISSUES HERE, TOO, BECAUSE OF NOT KNOWING HOW TO INSERT SVGs
-      */
-      // [3, 4, 999].forEach(function(num) {
-      //   const iconInnerContainer = iconOuterContainer.appendChild("div").set({
-      //     style: {
-      //       margin: '0px',
-      //       marginLeft: '16px',
-      //       marginRight: '16px',
-      //     },
-      //   });
-
-      //   let icon: View;
-      //   if (num > 100) {
-      //     icon = CircleIcon.create();
-      //   } else {
-      //     icon = PolygonIcon.create(num);
-      //   }
-
-      //   iconInnerContainer.appendChild(icon);
-      //   iconInnerContainer.insertChild(icon);
-      //   iconInnerContainer.
-      // });
-
-      containerView.appendChild("p").set({
+      // append triangle svg
+      svgContainerView.appendChild(HtmlIconView, 'triangle').set({
+        graphics: VectorIcon.create(24, 24, 'M12,2L22,22L2,22Z'),
         style: {
-          margin: "0px",
+          width: '40px',
+          height: '40px',
+          marginRight:'24px',
+        },
+        classList: ['empty-state-svg'],
+      });
+
+      // append square svg
+      svgContainerView.appendChild(HtmlIconView, 'square').set({
+        graphics: VectorIcon.create(24, 24, 'M2,2L22,2L22,22L2,22Z'),
+        style: {
+          width: '40px',
+          height: '40px',
+          marginRight:'24px',
+        },
+        classList: ['empty-state-svg'],
+      });
+
+      // append circle svg
+      svgContainerView.appendChild(HtmlIconView, 'circle').set({
+        graphics: CircleIcon.create(),
+        style: {
+          width: '40px',
+          height: '40px',
+        },
+        classList: ['empty-state-svg'],
+      });
+
+      // text view
+      const emptyStatePView = containerView.appendChild("p").set({
+        style: {
           fontSize: "20px",
           fontWeight: "400",
-          maxWidth: "400px",
-          color: "yellow",
+          color: "#F8D260",
+          marginTop: '24px',
+          marginRight: '80px',
+          marginBottom: "80px",
+          marginLeft: '80px',
         },
       });
-      containerView.node.innerText =
+      emptyStatePView.node.innerText =
         "Tap the (+) button below to add an order!";
 
       return containerView;
     },
   })
   readonly emptyState!: ViewRef<this, HtmlView>;
+
+  @ControllerRef({
+    controllerType: OrderListController,
+  })
+  readonly orderListController!: ControllerRef<this, OrderListController>;
 
   @ViewRef({
     viewType: ButtonStack,
@@ -182,8 +249,24 @@ export class MainController extends BoardController {
           right: "24px",
         },
       });
-      console.log("buttonStackView: ", buttonStackView);
+      buttonStackView.button.view?.style.backgroundColor.set('#F8D260');
+      buttonStackView.button.attachView().icon.attachView();
+      buttonStackView.button.view?.icon.push(VectorIcon.create(24, 24, 'M11,13L5,13L5,11L11,11L11,5L13,5L13,11L19,11L19,13L13,13L13,19L11,19Z'), false);
+      buttonStackView.button.view?.set({
+        style: {
+          width: '100%',
+          height: '100%',
+        },
+        classList: ['button-stack-view'],
+      });
+      buttonStackView.button.view?.icon.view?.set({
+        style: {
+          transform: Transform.parse("scale(1.5,1.5)"),
+        },
+        classList: ['svg-container-view'],
+      });
 
+      // icon button handler
       const that: ViewRef<MainController, ButtonStack> = this;
       const handleClick = function (orderType: OrderType) {
         return function () {
@@ -191,43 +274,54 @@ export class MainController extends BoardController {
         };
       };
 
-      // BUTTONSTACK ONLY OPENS ON LONG PRESS WHEN USING CURSOR; WHAT ABOUT DESKTOP USERS?
-      // BUTTONSTACK DOES NOT SHOW ICON AT FIRST
-      // BUTTONITEMS DO NOT SHOW ICONS
-
+      /* circle icon button */
       const circle: ButtonItem = buttonStackView.appendChild(
         ButtonItem,
         "circle"
       );
+      circle.button?.style.backgroundColor.set('#F8D260');
       const circleLabel = circle.insertChild(HtmlView, null, "label");
       circleLabel.node.innerText = "Order C";
       circle.addEventListener("click", handleClick(OrderType.OrderC));
-      // NO IDEA WHY CIRCLE ICON IS NOT APPEARING. THE PATH ELEMENT WITHIN THE SVG HAS NO WIDTH OR HEIGHT.
-      circle.button?.icon.push(CircleIcon.create(), false);
+      circle.button?.icon.push(
+        CircleIcon.create(),
+        false
+      );
       circle.button?.icon.view?.set({
         style: {
-          transform: "translateY(2px) rotate(30deg)",
+          width: '24px',
+          height: '24px'
         },
+        iconLayout: {width: 24, height: 24},
       });
 
+      /* square icon button */
       const square: ButtonItem = buttonStackView.appendChild(
         ButtonItem,
         "square"
       );
+      square.button?.style.backgroundColor.set('#F8D260');
       const squareLabel = square.insertChild(HtmlView, null, "label");
       squareLabel.node.innerText = "Order B";
       square.addEventListener("click", handleClick(OrderType.OrderB));
-      square.button?.icon.push(PolygonIcon.create(4), false);
+      square.button?.icon.push(
+        VectorIcon.create(24, 24, "M2,2L22,2L22,22L2,22Z"),
+        false
+      );
 
+      /* triangle icon button */
       const triangle: ButtonItem = buttonStackView.appendChild(
         ButtonItem,
         "triangle"
       );
-      // ButtonItem.label is getter only. It'd be nice if icon and label had a convenient method for setting.
+      triangle.button?.style.backgroundColor.set('#F8D260');
       const triangleLabel = triangle.insertChild(HtmlView, null, "label");
       triangleLabel.node.innerText = "Order A";
       triangle.addEventListener("click", handleClick(OrderType.OrderA));
-      triangle.button?.icon.push(PolygonIcon.create(3), false);
+      triangle.button?.icon.push(
+        VectorIcon.create(24, 24, "M12,2L22,22L2,22Z"),
+        false
+      );
 
       return buttonStackView;
     },
@@ -237,37 +331,13 @@ export class MainController extends BoardController {
   protected createOrder(orderType: OrderType): void {
     console.log(`creating new ${orderType}`);
 
-    // set(key: K | LikeType<K>, newValue: V | LikeType<V>): this;
     this.placeOrderDownlink.set(
       Date.now().valueOf().toString(),
       `{products:{${orderType.charAt(
         orderType.length - 1
       )}:1},status:orderPlaced,timestamp:${Date.now().valueOf()}}`
     );
-
-    // user-initiated message
-    // @event(node:"/customer/Customer0",lane:placeOrder)@update(key:"1692381493703")"{products:{A:1},status:orderPlaced,timestamp:1692381493703}"
-    // server-initiated message
-    // @event(node:"/customer/Customer0",lane:placeOrder){products:{E:2}}
-
-    // @event(
-    //   node:"customer/Customer0",
-    //   lane:orders
-    // )
-    // @update(
-    //   key:"/order/260d557c-4fc2-4e80-803f-90398cca5c61"
-    // ) {
-    //   orderId:"260d557c-4fc2-4e80-803f-90398cca5c61",
-    //   customerId:Customer0,
-    //   products: {
-    //     C:2
-    //   },
-    //   status:pickupCompleted,
-    //   timestamp:1692314725184
-    // }
   }
-
-  // protected createNewOrderMessage(orderType: OrderType): string {}
 
   @MapDownlink({
     laneUri: "orders",
