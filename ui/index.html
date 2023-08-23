@@ -46,7 +46,6 @@ if (navigator.standalone) {
 //  1) An 'aspect' trait named 'portal' - indicating the agent will have a board of widgets/cards
 //  2) A 'relation' trait named 'customersRelation' - indicating the agent will have navigation to a list of customer agents
 // We also set the host + node uri of the entity 
-console.log('swim: ', swim);
 const storeModel = new swim.Model();
 const storeEntityTrait = storeModel.appendTrait(swim.retaildemo.StoreEntityTrait, "entity");
 storeEntityTrait.hostUri.set("warp://localhost:9001");

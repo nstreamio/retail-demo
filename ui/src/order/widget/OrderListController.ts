@@ -6,7 +6,7 @@ import {TimeTableController} from "@swim/widget";
 import {ViewRef} from "@swim/view";
 import { MapDownlink } from "@swim/client";
 import { Value } from "@swim/structure";
-import { OrderController } from "./OrderController";
+import { OrderController, OrderStatus } from "./OrderController";
 import { TraitViewRef } from "@swim/controller";
 import { Trait } from "@swim/model";
 import {  ColLayout, TableLayout, TableView, TextCellView } from "@swim/table";
@@ -19,9 +19,9 @@ import { Status } from "@swim/domain";
 export class OrderListController extends TimeTableController {
 
   readonly listTitle: string;
-  readonly eventKey: string;
+  readonly eventKey: OrderStatus;
 
-  constructor(title: string, key: string) {
+  constructor(title: string, key: OrderStatus) {
     super();
     this.listTitle = title;
     this.eventKey = key;
@@ -70,14 +70,12 @@ export class OrderListController extends TimeTableController {
     consumed: true,
     keyForm: Uri.form(),
     didUpdate(nodeUri: Uri, value: Value): void {
-      console.log("nodeUri: ", nodeUri);
-
       let orderController = this.owner.getChild(nodeUri.pathName, OrderController);
       let moodStatus = OrderListController.orderStatusMood.get(this.owner.eventKey);
 
       // If there is a new order, and the order is the same status that his controller is managing then add it to the list
       if (orderController === null && this.owner.eventKey === value.get("status").stringValue("")) {
-        orderController = new OrderController();
+        orderController = new OrderController(nodeUri.pathName, this.owner.eventKey);
         orderController.title.setValue(nodeUri.pathName);
 
         const nameCell = (orderController.nameCell.attachView() as TextCellView);
@@ -112,7 +110,4 @@ export class OrderListController extends TimeTableController {
     ["orderProcessed", Status.warning()],
     ["readyForPickup", Status.normal()]
   ]);
-
-
-
 }

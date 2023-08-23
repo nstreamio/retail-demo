@@ -6,6 +6,7 @@ import {TraitViewRef} from "@swim/controller";
 import {PanelView, BoardView, BoardController} from "@swim/panel";
 import {EntityTrait} from "@swim/domain";
 import { OrderListController } from "..";
+import { OrderStatus } from "./OrderController";
 
 /** @public */
 export class OrderKanbanBoardController extends BoardController {
@@ -24,19 +25,19 @@ export class OrderKanbanBoardController extends BoardController {
     // Each panel takes up the full height of the sheet and 1/3 of the width
     // We insert each widget by inserting each controller's 'panel'
 
-    const orderPlaceListController = this.appendChild(new OrderListController("New Orders", "orderPlaced"), "orderPlaced");
+    const orderPlaceListController = this.appendChild(new OrderListController("New Orders", OrderStatus.orderPlaced), OrderStatus.orderPlaced);
     orderPlaceListController.panel.insertView(panelView).set({
       unitWidth: 1 / 3,
       unitHeight: 1,
     });
 
-    const orderProcessingListController = this.appendChild(new OrderListController("Processing", "orderProcessed"), "processingOrders");
+    const orderProcessingListController = this.appendChild(new OrderListController("Processing", OrderStatus.orderProcessed), OrderStatus.orderProcessed);
     orderProcessingListController.panel.insertView(panelView).set({
       unitWidth: 1 / 3,
       unitHeight: 1,
     });
 
-    const orderReadyListController = this.appendChild(new OrderListController("Ready Orders", "readyForPickup"), "readyOrders");
+    const orderReadyListController = this.appendChild(new OrderListController("Ready Orders", OrderStatus.readyForPickup), OrderStatus.readyForPickup);
     orderReadyListController.panel.insertView(panelView).set({
       unitWidth: 1 / 3,
       unitHeight: 1,
