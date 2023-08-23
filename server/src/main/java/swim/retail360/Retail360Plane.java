@@ -7,7 +7,9 @@ import swim.server.ServerLoader;
 
 public class Retail360Plane extends AbstractPlane {
 
-  public Retail360Plane() {}
+  public Retail360Plane() {
+
+  }
 
   public static void main(String[] args) {
     final Kernel kernel = ServerLoader.loadServer();

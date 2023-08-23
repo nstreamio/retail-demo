@@ -77,6 +77,13 @@ public class CustomerAgent extends AbstractAgent {
         this.command("/order/" + orderId, "placeOrder", v.updated("customerId", this.nodeUri().pathName()));
       });
 
+  // invoked only for simulated customers
+  @SwimLane("startSim")
+  public final CommandLane<Value> startSim = this.<Value>commandLane()
+      .onCommand(v -> {
+        openAgent("sim", CustomerSimAgent.class);
+      });
+
   private void joinStore() {
     this.command("/store/main", "addCustomer", Uri.form().mold(nodeUri()).toValue());
   }
@@ -85,7 +92,6 @@ public class CustomerAgent extends AbstractAgent {
   public void didStart() {
     info(nodeUri() + " didStart");
     joinStore();
-    openAgent("sim", CustomerSimAgent.class);
   }
 
 }

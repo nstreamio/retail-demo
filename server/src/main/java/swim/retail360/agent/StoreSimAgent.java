@@ -14,7 +14,7 @@ public class StoreSimAgent extends AbstractAgent {
   @Override
   public void didStart() {
     for (final String customerId : CUSTOMER_NAMES) {
-      this.command("/customer/" + customerId, "start", Value.absent());
+      this.command("/customer/" + customerId, "startSim", Value.absent());
     }
   }
 

@@ -1,6 +1,7 @@
 package swim.retail360.agent;
 
 import java.util.Random;
+import java.util.UUID;
 import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
 import swim.api.lane.ValueLane;
@@ -63,8 +64,9 @@ public class CustomerSimAgent extends AbstractAgent {
         products.slot(product, new Random().nextInt(MAX_PRODUCT_COUNT) + 1);
       }
     }
-
-    this.command(this.nodeUri(), Uri.parse("placeOrder"), Record.create(1).slot("products", products));
+    final String orderId = UUID.randomUUID().toString();
+    final Value payload = Record.create(1).slot("products", products).slot("customerId", this.nodeUri().pathName());
+    this.command("/order/" + orderId, "simOrder", payload);
   }
 
   @Override

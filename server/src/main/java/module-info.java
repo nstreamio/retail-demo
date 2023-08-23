@@ -1,4 +1,4 @@
-open module swim.retail360 {
+open module swim.retail {
   requires transitive swim.api;
   requires swim.server;
   requires swim.meta;

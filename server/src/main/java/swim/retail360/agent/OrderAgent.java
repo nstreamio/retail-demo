@@ -30,9 +30,18 @@ public class OrderAgent extends AbstractAgent {
   public final CommandLane<Value> placeOrder = this.<Value>commandLane()
       .onCommand(this::newOrder);
 
+  @SwimLane("simOrder")
+  public final CommandLane<Value> simOrder = this.<Value>commandLane()
+        .onCommand(this::simOrder);
+
   @SwimLane("updateOrder")
   public final CommandLane<Value> updateOrder = this.<Value>commandLane()
       .onCommand(this::progressOrder);
+
+  private void simOrder(final Value orderDetails) {
+    openAgent("sim", OrderSimAgent.class);
+    newOrder(orderDetails);
+  }
 
   private void newOrder(final Value orderDetails) {
     final long timestamp = System.currentTimeMillis();
@@ -93,7 +102,6 @@ public class OrderAgent extends AbstractAgent {
   @Override
   public void didStart() {
     joinStore();
-    openAgent("sim", OrderSimAgent.class);
   }
 
 }
