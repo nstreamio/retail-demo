@@ -1,15 +1,8 @@
-// import { SheetView } from "@swim/sheet";
-// import { BoardView } from "@swim/panel";
 import { BoardController } from "@swim/panel";
-// import { PanelView } from "@swim/panel";
 import { Property } from "@swim/component";
-// import { TraitViewRef } from "@swim/controller";
-// import { Trait } from "@swim/model";
 import { View, ViewRef } from "@swim/view";
-// import { ButtonStack } from "@swim/button";
 import { HtmlView } from "@swim/dom";
 import { ControllerRef } from "@swim/controller";
-// import { TextView } from "@swim/dom";
 import { MainController } from "./MainController";
 import { HtmlIconView, VectorIcon } from "@swim/graphics";
 
@@ -57,7 +50,6 @@ export class CustomerController extends BoardController {
     viewType: HtmlView,
     createView() {
       const nav = document.createElement("nav");
-      nav.classList.add("cams-nav");
       nav.style.backgroundColor = "#181818";
       return new HtmlView(nav).set({
         style: {

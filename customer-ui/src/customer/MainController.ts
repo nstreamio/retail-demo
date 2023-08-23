@@ -1,31 +1,21 @@
-// import { MapDownlink } from "@swim/client";
 import { Property } from "@swim/component";
 import { BoardController, BoardView } from "@swim/panel";
-// import { Value } from "@swim/structure";
-// import { Uri } from "@swim/uri";
 import { ControllerRef, TraitViewRef } from "@swim/controller";
 import { Trait } from "@swim/model";
-// import { OrderController } from "../order";
-// import { View } from "@swim/view";
 import { ViewRef } from "@swim/view";
 import { HtmlView } from "@swim/dom";
 import { PanelView } from "@swim/panel";
-// import { CircleIcon, PolygonIcon } from "@swim/graphics";
 import { OrderListController } from "./OrderListController";
 import { ButtonItem, ButtonStack } from "@swim/button";
 import {
   CircleIcon,
   HtmlIconView,
-  // CircleIcon,
-  // HtmlIconView,
-  // PolygonIcon,
   VectorIcon,
 } from "@swim/graphics";
-import { MapDownlink } from "@swim/client";
+import { MapDownlink, ValueDownlink } from "@swim/client";
 import { Uri } from "@swim/uri";
 import { Value } from "@swim/structure";
 import { Transform } from "@swim/math";
-// import { CircleIcon, PolygonIcon } from "@swim/graphics";
 
 enum OrderType {
   OrderA = "A",
@@ -49,21 +39,21 @@ export class MainController extends BoardController {
     ) ?? [""])[0];
     this.customerId.set(customerId);
 
-    // set up and open orders downlink
-    this.ordersDownlink.setHostUri("warp://localhost:9001");
-    this.ordersDownlink.setNodeUri(`/customer/${this.customerId.value}`);
-    this.ordersDownlink.open();
+    const hostUri = 'warp://localhost:9001';
+    const nodeUri = `/customer/${this.customerId.value}`;
 
     // set up and open orders downlink
-    this.placeOrderDownlink.setHostUri("warp://localhost:9001");
-    this.placeOrderDownlink.setNodeUri(`/customer/${this.customerId.value}`);
+    this.placeOrderDownlink.setHostUri(hostUri);
+    this.placeOrderDownlink.setNodeUri(nodeUri);
     this.placeOrderDownlink.open();
 
+    // set up and open status downlink
+    this.statusDownlink.setHostUri(hostUri);
+    this.statusDownlink.setNodeUri(nodeUri);
+    this.statusDownlink.open();
+
+    // attach controller but don't insert any of its views
     this.orderListController.attachController(new OrderListController(MainController.ORDER_LIST_CONTROLLER_KEY));
-    this.orderCount.bindInlet(this.orderListController.controller!.ordersDisplayed);
-    console.log('this.orderCount.inlet before: ', this.orderCount.inlet);
-    console.log('this.orderListController.controller!.ordersDisplayed: ', this.orderListController.controller!.ordersDisplayed);
-    console.log('this.orderCount.inlet after: ', this.orderCount.inlet);
   }
 
   initBoard() {
@@ -83,56 +73,43 @@ export class MainController extends BoardController {
 
   @Property({
     valueType: Number,
+    value: void 0,
     extends: true,
     binds: true,
-    didBindInlet(inlet) {
-        console.log('didBindInlet in MainController.orderCount');
-        console.log('inlet: ', inlet);
-    },
-    willUnmount() {
-      console.log('willUnmount!');
-    },
-    willSetValue() {
-      console.log('willSetValue!');
-    },
-    didSetValue(newValue, oldValue) {
-      console.log('didSetValue in MainController.orderCount');
-      console.log('newValue: ', newValue);
-      console.log('oldValue: ', oldValue);
-
+    didSetValue(newValue = 0, oldValue) {
       const panelView = this.owner.sheet.attachView().getChild(MainController.MAIN_PANEL_KEY);
-      console.log('panelView: ', panelView);
 
-      if (newValue > 0 && oldValue === 0 && panelView) {
-        console.log('removing empty state and SHOWING ORDERS TABLE');
+      if (newValue > 0 && (oldValue === void 0 || oldValue === 0) && panelView) {
         // remove empty state
         panelView.removeChild(MainController.EMPTY_STATE_KEY);
 
         // insert orders table
-        this.owner.orderListController.controller?.panel.insertView(panelView).set({
+        this.owner.orderListController.controller?.panel.insertView(
+          panelView,
+          void 0,
+          void 0,
+          MainController.ORDER_LIST_CONTROLLER_KEY
+        ).set({
           unitWidth: 1,
           unitHeight: 1,
         });
-      } else if (newValue === 0 && (oldValue > 0 || oldValue === void 0) && panelView) {
-        console.log('removing orders table and SHOWING EMPTY STATE');
+      } else if (newValue === 0 && (oldValue === void 0 || oldValue > 0) && panelView) {
         // remove orders table
-        panelView.removeChild(MainController.MAIN_PANEL_KEY);
+        panelView.removeChild(MainController.ORDER_LIST_CONTROLLER_KEY);
 
         // insert empty state
-        this.owner.emptyState.insertView(panelView).set({
+        this.owner.emptyState.insertView(panelView, void 0, void 0, MainController.EMPTY_STATE_KEY).set({
           classList: ['empty-state-view']
         });
       }
     }
   })
-  readonly orderCount!: Property<this, number>;
+  readonly inFlightCount!: Property<this, number | undefined>;
 
   @TraitViewRef({
     extends: true,
     createView(): BoardView {
       const mainElement = document.createElement("main");
-      mainElement.style.backgroundColor = "#212121";
-      mainElement.classList.add("cams-main");
       const boardView = new BoardView(mainElement).set({
         style: {
           width: "100%",
@@ -140,6 +117,7 @@ export class MainController extends BoardController {
           flexShrink: 1,
           flexBasis: "0px",
           margin: "0px",
+          backgroundColor: '#212121',
         },
       });
 
@@ -163,8 +141,7 @@ export class MainController extends BoardController {
           alignItems: "center",
           margin: "0px",
           marginBottom: '80px',
-        },
-        classList: ['empty-state-view']
+        }
       });
       containerView.setKey(MainController.EMPTY_STATE_KEY);
 
@@ -339,12 +316,19 @@ export class MainController extends BoardController {
     );
   }
 
-  @MapDownlink({
-    laneUri: "orders",
+  @ValueDownlink({
+    hostUri: 'warp://localhost:9001',
+    laneUri: 'status',
     consumed: true,
-    keyForm: Uri.form(),
+    didSet(value: Value): void {
+      console.log('didSet');
+      const orderCount = value.get('orderCount').numberValue() ?? 0;
+      const pickupCompleted = value.get('orderStates').get('pickupCompleted').numberValue() ?? 0;
+      const newInFlightCount = orderCount - pickupCompleted;
+      this.owner.inFlightCount.set(newInFlightCount);
+    },
   })
-  readonly ordersDownlink!: MapDownlink<this, Uri, Value>;
+  readonly statusDownlink!: ValueDownlink<this>;
 
   @MapDownlink({
     laneUri: "placeOrder",

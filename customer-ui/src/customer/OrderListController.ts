@@ -6,7 +6,6 @@ import { TimeTableController } from "@swim/widget";
 import { OrderController } from "../order";
 import { HtmlView } from "@swim/dom";
 import { ViewRef } from "@swim/view";
-// import { Status } from "@swim/domain";
 import { ColLayout, TableLayout, TableView, TextCellView } from "@swim/table";
 import { TraitViewRef } from "@swim/controller";
 import { PanelView } from "@swim/panel";
@@ -14,8 +13,6 @@ import { Trait } from "@swim/model";
 import { Feel, Look } from "@swim/theme";
 import { Length } from "@swim/math";
 import { Status } from "@swim/domain";
-
-// const EMPTY_STATE_KEY = "emptyState";
 
 export class OrderListController extends TimeTableController {
   readonly listTitle: string;
@@ -73,30 +70,6 @@ export class OrderListController extends TimeTableController {
         },
       });
 
-      /*
-        HAVING ISSUES HERE, TOO, BECAUSE OF NOT KNOWING HOW TO INSERT SVGs
-      */
-      // [3, 4, 999].forEach(function(num) {
-      //   const iconInnerContainer = iconOuterContainer.appendChild("div").set({
-      //     style: {
-      //       margin: '0px',
-      //       marginLeft: '16px',
-      //       marginRight: '16px',
-      //     },
-      //   });
-
-      //   let icon: View;
-      //   if (num > 100) {
-      //     icon = CircleIcon.create();
-      //   } else {
-      //     icon = PolygonIcon.create(num);
-      //   }
-
-      //   iconInnerContainer.appendChild(icon);
-      //   iconInnerContainer.insertChild(icon);
-      //   iconInnerContainer.
-      // });
-
       containerView.appendChild("p").set({
         style: {
           margin: "0px",
@@ -122,8 +95,6 @@ export class OrderListController extends TimeTableController {
         margin: "0px",
       });
       super.initView(panelView);
-      // we don't want a title for this TimeTableController
-      // panelView.headerTitle.set(this.owner.listTitle);
       this.owner.table.insertView(); // Insert the table when we insert this panel
     },
   })
@@ -162,23 +133,6 @@ export class OrderListController extends TimeTableController {
   override readonly table!: ViewRef<this, TableView> &
     TimeTableController["table"];
 
-  @Property({
-    valueType: Number,
-    value: 0,
-    didSetValue(newValue, oldValue) {
-      console.log('didSetValue in OrderListController');
-      console.log('newValue: ', newValue);
-      console.log('oldValue: ', oldValue);
-    },
-    willUnmount() {
-      console.log('will unmount OrderListController');
-    },
-    willUnbindInlet() {
-      console.log('will unbind inlet OrderListController');
-    }
-  })
-  readonly ordersDisplayed!: Property<this, number>;
-
   @MapDownlink({
     hostUri: "warp://localhost:9001",
     laneUri: "orders",
@@ -195,7 +149,6 @@ export class OrderListController extends TimeTableController {
       if (status === "pickupCompleted") {
         if (orderController) {
           this.owner.removeChild(nodeUri.pathName);
-          this.owner.ordersDisplayed.set(this.owner.ordersDisplayed.value - 1);
         }
 
       // If there is a new order, and the order is the same status that his controller is managing then add it to the list
@@ -240,7 +193,6 @@ export class OrderListController extends TimeTableController {
           void 0,
           nodeUri.pathName
         );
-        this.owner.ordersDisplayed.set(this.owner.ordersDisplayed.value + 1);
       }
     },
   })
