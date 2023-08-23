@@ -15,7 +15,7 @@ plugins {
 
 group = 'org.swimos'
 description = 'Customer 360 Retail Demo'
-ext.moduleName = 'swim.retail360'
+ext.moduleName = 'swim.retail'
 sourceCompatibility = 11
 version = project.property('swim.version')
 mainClassName = 'swim.retail360.Retail360Plane'
