@@ -7,13 +7,7 @@ import { RowView } from "@swim/table";
 import { Uri } from "@swim/uri";
 import { ViewRef } from "@swim/view";
 import {TimeSeriesController} from "@swim/widget";
-
-export enum OrderStatus {
-    orderPlaced = 'orderPlaced',
-    orderProcessed = 'orderProcessed',
-    readyForPickup = 'readyForPickup',
-    pickupCompleted = 'pickupCompleted',
-}
+import { OrderStatus } from "../../types";
 
 /** @public */
 export class OrderController extends TimeSeriesController {  

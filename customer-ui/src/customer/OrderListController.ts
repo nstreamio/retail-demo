@@ -13,6 +13,8 @@ import { Trait } from "@swim/model";
 import { Feel, Look } from "@swim/theme";
 import { Length } from "@swim/math";
 import { Status } from "@swim/domain";
+import { OrderType } from "../types";
+import { OrderCellView } from "./OrderCellView";
 
 export class OrderListController extends TimeTableController {
   readonly listTitle: string;
@@ -144,7 +146,15 @@ export class OrderListController extends TimeTableController {
         OrderController
       );
 
-      const status = value.get("status").stringValue();
+      const status = value.get("status").stringValue() ?? "unknown";
+      let orderType: OrderType = OrderType.Unknown;
+      if (value.get("products").get("A").numberValue() ?? 0) {
+        orderType = OrderType.OrderA;
+      } else if (value.get("products").get("B").numberValue() ?? 0) {
+        orderType = OrderType.OrderB;
+      } else if (value.get("products").get("C").numberValue() ?? 0) {
+        orderType = OrderType.OrderC;
+      }
 
       if (status === "pickupCompleted") {
         if (orderController) {
@@ -153,18 +163,18 @@ export class OrderListController extends TimeTableController {
 
       // If there is a new order, and the order is the same status that his controller is managing then add it to the list
       } else if (orderController) {
-        let moodStatus = OrderListController.orderStatusMood.get(
-          status || "unknown"
-        );
-
-        const nameCell = orderController.nameCell.attachView() as TextCellView;
-        nameCell.content.set(
-          OrderListController.orderStatusDescription.get(status || "unknown")
-        );
-        nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+        let moodStatus = OrderListController.orderStatusMood.get(status);
 
         const currentCell = orderController.currentCell.attachView() as TextCellView;
         currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+
+        const nameCell = orderController.nameCell.attachView() as TextCellView;
+        nameCell.content.set(
+          OrderListController.orderStatusDescription.get(status)
+        );
+        nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+
+        // If no OrderController is found, create and insert a new one
       } else if (orderController === null) {
         orderController = new OrderController();
         orderController.title.setValue(nodeUri.pathName);
@@ -173,19 +183,37 @@ export class OrderListController extends TimeTableController {
           status || "orderPlaced"
         );
 
+        const currentCell = orderController.currentCell.attachView() as TextCellView;
+        currentCell.content.set(new OrderCellView(orderType));
+        currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+
         const nameCell = orderController.nameCell.attachView() as TextCellView;
         nameCell.content.set(
-          OrderListController.orderStatusDescription.get(status || "unknown")
+          OrderListController.orderStatusDescription.get(status)
         );
         nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
-
-        const currentCell = orderController.currentCell.attachView() as TextCellView;
-        currentCell.content.set(nodeUri.pathName);
-        currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+        nameCell.set({
+          style: {
+            height: '40px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+          }
+        });
+        (nameCell.node.firstChild as HTMLElement).style.alignSelf = 'unset';
 
         // insert the name cell and current cell for each order into the table
         orderController.nameCell.insertView();
         orderController.currentCell.insertView();
+
+        // set row styles
+        orderController.row.view?.set({
+          style: {
+            height: '72px',
+          }
+        });
+        // set leaf styles
+        orderController.leaf.view?.set({ style: { height: '40px' } });
 
         // add the OrderController into the series
         this.owner.series.addController(

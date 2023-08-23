@@ -16,12 +16,7 @@ import { MapDownlink, ValueDownlink } from "@swim/client";
 import { Uri } from "@swim/uri";
 import { Value } from "@swim/structure";
 import { Transform } from "@swim/math";
-
-enum OrderType {
-  OrderA = "A",
-  OrderB = "B",
-  OrderC = "C",
-}
+import { OrderType } from "../types";
 
 export class MainController extends BoardController {
   static readonly MAIN_PANEL_KEY: string = "mainPanelView";
@@ -306,14 +301,17 @@ export class MainController extends BoardController {
   readonly fab!: ViewRef<this, ButtonStack>;
 
   protected createOrder(orderType: OrderType): void {
-    console.log(`creating new ${orderType}`);
+    const products = {
+      [orderType.charAt(orderType.length - 1)]: 1,
+    };
+    const status = 'orderPlaced';
+    const timestamp = Date.now().valueOf();
 
-    this.placeOrderDownlink.set(
-      Date.now().valueOf().toString(),
-      `{products:{${orderType.charAt(
-        orderType.length - 1
-      )}:1},status:orderPlaced,timestamp:${Date.now().valueOf()}}`
-    );
+    this.placeOrderDownlink.command({
+      products,
+      status,
+      timestamp
+    });
   }
 
   @ValueDownlink({
@@ -321,7 +319,6 @@ export class MainController extends BoardController {
     laneUri: 'status',
     consumed: true,
     didSet(value: Value): void {
-      console.log('didSet');
       const orderCount = value.get('orderCount').numberValue() ?? 0;
       const pickupCompleted = value.get('orderStates').get('pickupCompleted').numberValue() ?? 0;
       const newInFlightCount = orderCount - pickupCompleted;
