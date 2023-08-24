@@ -176,7 +176,7 @@ export class OrderListController extends TimeTableController {
 
         // If no OrderController is found, create and insert a new one
       } else if (orderController === null) {
-        orderController = new OrderController();
+        orderController = new OrderController(nodeUri.pathName);
         orderController.title.setValue(nodeUri.pathName);
 
         let moodStatus = OrderListController.orderStatusMood.get(

@@ -6,7 +6,7 @@ import { ViewRef } from "@swim/view";
 import { HtmlView } from "@swim/dom";
 import { PanelView } from "@swim/panel";
 import { OrderListController } from "./OrderListController";
-import { ButtonItem, ButtonStack } from "@swim/button";
+import { ButtonItem, ButtonStack, FloatingButton } from "@swim/button";
 import {
   CircleIcon,
   HtmlIconView,
@@ -16,17 +16,18 @@ import { MapDownlink, ValueDownlink } from "@swim/client";
 import { Uri } from "@swim/uri";
 import { Value } from "@swim/structure";
 import { Transform } from "@swim/math";
-import { OrderType } from "../types";
+import { OrderStatus, OrderType } from "../types";
+import { TimeSeriesController } from "@swim/widget";
 
 export class MainController extends BoardController {
   static readonly MAIN_PANEL_KEY: string = "mainPanelView";
-  static readonly EMPTY_STATE_KEY: string = "emptyState";
   static readonly ORDER_LIST_CONTROLLER_KEY: string = "orderListController";
 
   constructor() {
     super();
 
-    this.initBoard();
+    const boardView = this.sheet.attachView();
+    boardView.appendChild(PanelView, MainController.MAIN_PANEL_KEY);
 
     // set customerId
     const customerId = (/(?<=\/customer\/)[^\s!?\/.*#|]+(?=\/|$|\?)/gm.exec(
@@ -51,14 +52,6 @@ export class MainController extends BoardController {
     this.orderListController.attachController(new OrderListController(MainController.ORDER_LIST_CONTROLLER_KEY));
   }
 
-  initBoard() {
-    const boardView = this.sheet.attachView();
-    boardView.appendChild(PanelView, MainController.MAIN_PANEL_KEY);
-
-    // insert fab
-    this.fab.insertView(boardView);
-  }
-
   // repeated from CustomerController; not very DRY; there's probably a way to connect these values
   @Property({
     valueType: String,
@@ -76,7 +69,7 @@ export class MainController extends BoardController {
 
       if (newValue > 0 && (oldValue === void 0 || oldValue === 0) && panelView) {
         // remove empty state
-        panelView.removeChild(MainController.EMPTY_STATE_KEY);
+        this.owner.emptyState.removeView();
 
         // insert orders table
         this.owner.orderListController.controller?.panel.insertView(
@@ -93,13 +86,36 @@ export class MainController extends BoardController {
         panelView.removeChild(MainController.ORDER_LIST_CONTROLLER_KEY);
 
         // insert empty state
-        this.owner.emptyState.insertView(panelView, void 0, void 0, MainController.EMPTY_STATE_KEY).set({
+        this.owner.emptyState.insertView(panelView).set({
           classList: ['empty-state-view']
         });
       }
     }
   })
   readonly inFlightCount!: Property<this, number | undefined>;
+
+  @Property({
+    valueType: Boolean,
+    value: undefined,
+    binds: true,
+    extends: true,
+    didSetValue(value: Boolean, oldValue: Boolean | undefined = false): void {
+      const boardView = this.owner.sheet.attachView();
+
+      if (value) {
+        // remove placeOrderFab
+        this.owner.placeOrderFab.removeView();
+        // insert pickupOrdersFab
+        this.owner.pickupOrdersFab.insertView(boardView);
+      } else {
+        // remove pickupOrdersFab
+        this.owner.pickupOrdersFab.removeView();
+        // insert placeOrerFab
+        this.owner.placeOrderFab.insertView(boardView);
+      }
+    }
+  })
+  readonly pickupReady!: Property<this, Boolean | undefined>;
 
   @TraitViewRef({
     extends: true,
@@ -138,7 +154,6 @@ export class MainController extends BoardController {
           marginBottom: '80px',
         }
       });
-      containerView.setKey(MainController.EMPTY_STATE_KEY);
 
       // iconOuterContainer for holding SVGs
       const svgContainerView = containerView.appendChild("div").set({
@@ -162,7 +177,7 @@ export class MainController extends BoardController {
           height: '40px',
           marginRight:'24px',
         },
-        classList: ['empty-state-svg'],
+        classList: ['empty-state-svg', 'svg', 'yellow'],
       });
 
       // append square svg
@@ -173,7 +188,7 @@ export class MainController extends BoardController {
           height: '40px',
           marginRight:'24px',
         },
-        classList: ['empty-state-svg'],
+        classList: ['empty-state-svg', 'svg', 'yellow'],
       });
 
       // append circle svg
@@ -183,7 +198,7 @@ export class MainController extends BoardController {
           width: '40px',
           height: '40px',
         },
-        classList: ['empty-state-svg'],
+        classList: ['empty-state-svg', 'svg', 'yellow'],
       });
 
       // text view
@@ -205,11 +220,6 @@ export class MainController extends BoardController {
     },
   })
   readonly emptyState!: ViewRef<this, HtmlView>;
-
-  @ControllerRef({
-    controllerType: OrderListController,
-  })
-  readonly orderListController!: ControllerRef<this, OrderListController>;
 
   @ViewRef({
     viewType: ButtonStack,
@@ -298,7 +308,105 @@ export class MainController extends BoardController {
       return buttonStackView;
     },
   })
-  readonly fab!: ViewRef<this, ButtonStack>;
+  readonly placeOrderFab!: ViewRef<this, ButtonStack>;
+
+  @ViewRef({
+    viewType: FloatingButton,
+    createView() {
+      const fab: FloatingButton = super.createView().set({
+        style: {
+          position: "absolute",
+          bottom: "24px",
+          right: "24px",
+          width: '56px',
+          height: '56px',
+          overflow: 'unset',
+        },
+        classList: ['pickup-orders-fab-button'],
+      });
+      fab.style.backgroundColor.set('#66FFDD');
+      fab.icon.attachView();
+      fab.icon.push(VectorIcon.create(
+        24,
+        24,
+        'M5,8L5,19L19,19L19,8L16,8L16,16L12,14L8,16L8,8L5,8ZM5,21C4.45,21,3.98,20.8,3.59,20.41C3.2,20.02,3,19.55,3,19L3,6.53C3,6.29,3.04,6.07,3.11,5.85C3.19,5.63,3.3,5.43,3.45,5.25L4.7,3.73C4.88,3.49,5.11,3.31,5.39,3.19C5.66,3.06,5.95,3,6.25,3L17.75,3C18.05,3,18.34,3.06,18.61,3.19C18.89,3.31,19.12,3.49,19.3,3.73L20.55,5.25C20.7,5.43,20.81,5.63,20.89,5.85C20.96,6.07,21,6.29,21,6.53L21,19C21,19.55,20.8,20.02,20.41,20.41C20.02,20.8,19.55,21,19,21L5,21ZM5.4,6L18.6,6L17.75,5L6.25,5L5.4,6ZM10,8L10,12.75L12,11.75L14,12.75L14,8L10,8ZM5,8.04L19,8.04L5,8.04Z'
+      ), false);
+      fab.icon.view?.set({
+        style: {
+          transform: Transform.parse("scale(1.5,1.5)"),
+        },
+        classList: ['svg', 'black'],
+      });
+
+      const that: MainController = this.owner;
+      fab.addEventListener('click', function() {
+        that.pickUpAllOrders();
+      })
+
+      // helper text
+      const helperText = fab.insertChild('p', null).set({
+        style: {
+          position: 'absolute',
+          bottom: '34px',
+          right: '35px',
+          width: '200px',
+          color: '#66FFDD',
+          fontSize: '20px',
+          fontWeight: '400',
+          lineHeight: '27px',
+        },
+        classList: ['pickup-orders-helper-text']
+      });
+      helperText.node.innerText = (
+        `Tap the button below
+        to pick up orders!`
+      );
+
+      return fab;
+    }
+  })
+  readonly pickupOrdersFab!: ViewRef<this, FloatingButton>;
+
+  @ControllerRef({
+    controllerType: OrderListController,
+  })
+  readonly orderListController!: ControllerRef<this, OrderListController>;
+
+  @ValueDownlink({
+    hostUri: 'warp://localhost:9001',
+    laneUri: 'status',
+    consumed: true,
+    didSet(value: Value): void {
+      // propagate new value of inFlightCount
+      const orderCount = value.get('orderCount').numberValue() ?? 0;
+      const pickupCompleted = value.get('orderStates').get(OrderStatus.pickupCompleted).numberValue() ?? 0;
+      const newInFlightCount = orderCount - pickupCompleted;
+      this.owner.inFlightCount.set(newInFlightCount);
+
+      // propagate new value of pickupReady
+      const orderPlaced = value.get('orderStates').get(OrderStatus.orderPlaced).numberValue() ?? 0;
+      const orderProcessed = value.get('orderStates').get(OrderStatus.orderProcessed).numberValue() ?? 0;
+      const readyForPickup = value.get('orderStates').get(OrderStatus.readyForPickup).numberValue() ?? 0;
+      const newPickupReadyValue = orderPlaced === 0 && orderProcessed === 0 && readyForPickup > 0
+      this.owner.pickupReady.set(newPickupReadyValue);
+    },
+  })
+  readonly statusDownlink!: ValueDownlink<this>;
+
+  @MapDownlink({
+    laneUri: "placeOrder",
+    consumed: true,
+    keyForm: Uri.form(),
+  })
+  readonly placeOrderDownlink!: MapDownlink<this, Uri, Value>;
+
+  @MapDownlink({
+    hostUri: 'warp://localhost:9001',
+    laneUri: 'updateOrder',
+    consumed: true,
+    keyForm: Uri.form(),
+  })
+  readonly updateOrderDownlink!: MapDownlink<this, Uri, Value>;
 
   protected createOrder(orderType: OrderType): void {
     const products = {
@@ -312,25 +420,19 @@ export class MainController extends BoardController {
       status,
       timestamp
     });
+  };
+
+  protected pickUpAllOrders(): void {
+    Object.values(this.orderListController.controller?.series.controllers ?? {})
+      .forEach((controller: TimeSeriesController | undefined) => {
+        if (controller === void 0) {
+          return;
+        }
+
+        this.updateOrderDownlink.setNodeUri(`/order/${controller.key}`);
+        this.updateOrderDownlink.open();
+        this.updateOrderDownlink.command(`{status:${OrderStatus.pickupCompleted}}`);
+        this.updateOrderDownlink.close();
+      })
   }
-
-  @ValueDownlink({
-    hostUri: 'warp://localhost:9001',
-    laneUri: 'status',
-    consumed: true,
-    didSet(value: Value): void {
-      const orderCount = value.get('orderCount').numberValue() ?? 0;
-      const pickupCompleted = value.get('orderStates').get('pickupCompleted').numberValue() ?? 0;
-      const newInFlightCount = orderCount - pickupCompleted;
-      this.owner.inFlightCount.set(newInFlightCount);
-    },
-  })
-  readonly statusDownlink!: ValueDownlink<this>;
-
-  @MapDownlink({
-    laneUri: "placeOrder",
-    consumed: true,
-    keyForm: Uri.form(),
-  })
-  readonly placeOrderDownlink!: MapDownlink<this, Uri, Value>;
 }

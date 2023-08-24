@@ -34,7 +34,7 @@ export class OrderCellView extends HtmlView {
         marginRight: "18px",
         marginBottom: "-2px",
       },
-      classList: ["order-cell-svg"],
+      classList: ["svg", "yellow"],
     });
 
     // define and insert text element
