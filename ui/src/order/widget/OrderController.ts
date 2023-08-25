@@ -50,6 +50,22 @@ export class OrderController extends TimeSeriesController {
 
     @ViewRef({
         viewType: CellView,
+        viewKey: "customer",
+        get parentView(): View | null {
+        return this.owner.leaf.insertView();
+        },
+        createView(): CellView {
+        return TextCellView.create().set({
+            style: {
+                color: Look.accentColor,
+            }
+        });
+        },
+    })
+    readonly customerCell!: ViewRef<this, CellView>;
+
+    @ViewRef({
+        viewType: CellView,
         viewKey: "order",
         get parentView(): View | null {
         return this.owner.leaf.insertView();
@@ -99,13 +115,13 @@ export class OrderController extends TimeSeriesController {
 
         let moodStatus = OrderController.orderStatusMood.get(this.owner.eventKey);
 
-        const nameCellView = this.owner.nameCell.view as TextCellView | null;
-        if (nameCellView !== null) {
-            nameCellView.set({
+        const customerCellView = this.owner.customerCell.view as TextCellView | null;
+        if (customerCellView !== null) {
+            customerCellView.set({
                 content: '/' + value.get('customerId').stringValue(),
-                classList: ['name-cell-view'],
+                classList: ['customer-cell-view'],
             });
-            nameCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
+            customerCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
         }
 
         const orderCellView = this.owner.orderCell.view as TextCellView | null;

@@ -8,18 +8,13 @@ import { MapDownlink } from "@swim/client";
 import { Value } from "@swim/structure";
 import { TraitViewRef } from "@swim/controller";
 import { Trait } from "@swim/model";
-// import { CellView } from "@swim/table";
 import { ColView, HeaderView, TextColView } from "@swim/table";
 import { ColLayout, TableLayout, TableView } from "@swim/table";
 import { Uri } from "@swim/uri";
 import { Length } from "@swim/math";
-// import { Feel } from "@swim/theme";
 import { Look } from "@swim/theme";
-// import { Status } from "@swim/domain";
 import { OrderController } from "./OrderController";
 import { OrderStatus } from "../../types";
-// import { Status } from "@swim/domain";
-// import { OrderType } from "../../types";
 
 /** @public */
 export class OrderListController extends TimeTableController {
@@ -39,6 +34,7 @@ export class OrderListController extends TimeTableController {
       super.initView(panelView);
       panelView.headerTitle.set(this.owner.listTitle);
       this.owner.table.insertView();  // Insert the table when we insert this panel
+      this.owner.header.insertView();  // Insert the table's header when we insert this panel
     },
   })
   override readonly panel!: TraitViewRef<this, Trait, PanelView> & TimeTableController["panel"];
@@ -61,12 +57,9 @@ export class OrderListController extends TimeTableController {
     extends: true,
     createView(): HeaderView {
       const headerView = super.createView() as HeaderView;
-      this.owner.nameCol.insertView(headerView);
+      this.owner.customerCol.insertView(headerView);
       this.owner.orderCol.insertView(headerView);
       this.owner.timeInProcessingCol.insertView(headerView);
-      (this.owner.currentCol.insertView(headerView) as TextColView).set({
-        label: "Overall",
-      });
       return headerView;
     },
   })
@@ -76,15 +69,27 @@ export class OrderListController extends TimeTableController {
     extends: true,
     createLayout(): TableLayout {
       const cols = new Array<ColLayout>();
-      // cols.push(ColLayout.create("current", 2, 0, 0, false, false, Look.accentColor));
-      cols.push(ColLayout.create("name", 2, 0, 0, false, false, Look.accentColor));
-      // cols.push(ColLayout.create("customer", 2, 0, 0, false, false, Look.accentColor));
-      cols.push(ColLayout.create("order", 0, 0, '52px', false, false, Look.accentColor));
-      cols.push(ColLayout.create("timeInProcessing", 2, 0, 0, false, false, Look.accentColor));
+      cols.push(ColLayout.create("customer", 1, 1, 0, false, false, Look.accentColor));
+      cols.push(ColLayout.create("order", 1, 0, 0, false, false, Look.accentColor));
+      cols.push(ColLayout.create("timeInProcessing", 0, 0, '120px', false, false, Look.accentColor));
       return new TableLayout(null, null, null, Length.px(12), cols);
     },
   })
   override readonly table!: ViewRef<this, TableView> & TimeTableController["table"];
+
+  @ViewRef({
+    viewType: ColView,
+    viewKey: "customer",
+    get parentView(): View | null {
+      return this.owner.header.attachView();
+    },
+    createView(): ColView {
+      return TextColView.create().set({
+        label: "Customer",
+      });
+    },
+  })
+  readonly customerCol!: ViewRef<this, ColView>;
 
   @ViewRef({
     viewType: ColView,
@@ -99,20 +104,6 @@ export class OrderListController extends TimeTableController {
     },
   })
   readonly orderCol!: ViewRef<this, ColView>;
-
-  // @ViewRef({
-  //   viewType: ColView,
-  //   viewKey: "customer",
-  //   get parentView(): View | null {
-  //     return this.owner.header.attachView();
-  //   },
-  //   createView(): ColView {
-  //     return TextColView.create().set({
-  //       label: "Customer",
-  //     });
-  //   },
-  // })
-  // readonly customerCol!: ViewRef<this, ColView>;
 
   @ViewRef({
     viewType: ColView,
@@ -135,14 +126,9 @@ export class OrderListController extends TimeTableController {
     consumed: true,
     didUpdate(nodeUri: Uri, value: Value): void {
       let orderController = this.owner.getChild(nodeUri.pathName, OrderController);
-      // console.log('orderController: ', orderController);
       let orderStatus = value.get("status").stringValue("");
-      // console.log('orderStatus: ', orderStatus);
-      // let moodStatus = OrderListController.orderStatusMood.get(this.owner.eventKey);
-      // console.log('moodStatus: ', moodStatus);
       
       if (orderController === null && this.owner.eventKey === orderStatus) {
-        // console.log('in block of MapDownlink didUpdate where new orderController gets created');
         // create new OrderController (row in list)
         orderController = new OrderController(nodeUri.pathName, this.owner.eventKey);
         orderController.nodeUri.set(nodeUri);
@@ -157,7 +143,7 @@ export class OrderListController extends TimeTableController {
         });
 
         // insert cells into row
-        orderController.nameCell.insertView();
+        orderController.customerCell.insertView();
         orderController.orderCell.insertView();
         orderController.timeInProcessingCell.insertView();
 
@@ -236,10 +222,4 @@ export class OrderListController extends TimeTableController {
   //   }
   // })
   // readonly ordersDownlink!: MapDownlink<this, Uri, Value>;
-
-  // private static orderStatusMood: Map<String, Status> = new Map<String, Status>([
-  //   ["orderPlaced", Status.alert()],
-  //   ["orderProcessed", Status.warning()],
-  //   ["readyForPickup", Status.normal()]
-  // ]);
 }
