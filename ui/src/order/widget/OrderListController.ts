@@ -3,17 +3,23 @@
 
 import {PanelView} from "@swim/panel";
 import {TimeTableController} from "@swim/widget";
-import {ViewRef} from "@swim/view";
+import {View, ViewRef} from "@swim/view";
 import { MapDownlink } from "@swim/client";
 import { Value } from "@swim/structure";
-import { OrderController, OrderStatus } from "./OrderController";
 import { TraitViewRef } from "@swim/controller";
 import { Trait } from "@swim/model";
-import {  ColLayout, TableLayout, TableView, TextCellView } from "@swim/table";
+// import { CellView } from "@swim/table";
+import { ColView, HeaderView, TextColView } from "@swim/table";
+import { ColLayout, TableLayout, TableView } from "@swim/table";
 import { Uri } from "@swim/uri";
 import { Length } from "@swim/math";
-import { Feel, Look } from "@swim/theme";
-import { Status } from "@swim/domain";
+// import { Feel } from "@swim/theme";
+import { Look } from "@swim/theme";
+// import { Status } from "@swim/domain";
+import { OrderController } from "./OrderController";
+import { OrderStatus } from "../../types";
+// import { Status } from "@swim/domain";
+// import { OrderType } from "../../types";
 
 /** @public */
 export class OrderListController extends TimeTableController {
@@ -53,61 +59,187 @@ export class OrderListController extends TimeTableController {
 
   @ViewRef({
     extends: true,
+    createView(): HeaderView {
+      const headerView = super.createView() as HeaderView;
+      this.owner.nameCol.insertView(headerView);
+      this.owner.orderCol.insertView(headerView);
+      this.owner.timeInProcessingCol.insertView(headerView);
+      (this.owner.currentCol.insertView(headerView) as TextColView).set({
+        label: "Overall",
+      });
+      return headerView;
+    },
+  })
+  override readonly header!: ViewRef<this, HeaderView> & TimeTableController["header"];
+
+  @ViewRef({
+    extends: true,
     createLayout(): TableLayout {
       const cols = new Array<ColLayout>();
-      cols.push(ColLayout.create("current", 2, 0, 0, false, false, Look.accentColor));
+      // cols.push(ColLayout.create("current", 2, 0, 0, false, false, Look.accentColor));
       cols.push(ColLayout.create("name", 2, 0, 0, false, false, Look.accentColor));
+      // cols.push(ColLayout.create("customer", 2, 0, 0, false, false, Look.accentColor));
+      cols.push(ColLayout.create("order", 0, 0, '52px', false, false, Look.accentColor));
+      cols.push(ColLayout.create("timeInProcessing", 2, 0, 0, false, false, Look.accentColor));
       return new TableLayout(null, null, null, Length.px(12), cols);
     },
   })
   override readonly table!: ViewRef<this, TableView> & TimeTableController["table"];
 
+  @ViewRef({
+    viewType: ColView,
+    viewKey: "order",
+    get parentView(): View | null {
+      return this.owner.header.attachView();
+    },
+    createView(): ColView {
+      return TextColView.create().set({
+        label: "Order",
+      });
+    },
+  })
+  readonly orderCol!: ViewRef<this, ColView>;
 
-  // Open a downlink to the backend to get the map of orders, we can use this to  populate the order lists
-  // The nodeUri of the downlink is inferred from the parent (the customer)
+  // @ViewRef({
+  //   viewType: ColView,
+  //   viewKey: "customer",
+  //   get parentView(): View | null {
+  //     return this.owner.header.attachView();
+  //   },
+  //   createView(): ColView {
+  //     return TextColView.create().set({
+  //       label: "Customer",
+  //     });
+  //   },
+  // })
+  // readonly customerCol!: ViewRef<this, ColView>;
+
+  @ViewRef({
+    viewType: ColView,
+    viewKey: "timeInProcessing",
+    get parentView(): View | null {
+      return this.owner.header.attachView();
+    },
+    createView(): ColView {
+      return TextColView.create().set({
+        label: "Time In Processing",
+      });
+    },
+  })
+  readonly timeInProcessingCol!: ViewRef<this, ColView>;
+
+
   @MapDownlink({
     laneUri: "orders",
-    consumed: true,
     keyForm: Uri.form(),
+    consumed: true,
     didUpdate(nodeUri: Uri, value: Value): void {
       let orderController = this.owner.getChild(nodeUri.pathName, OrderController);
-      let moodStatus = OrderListController.orderStatusMood.get(this.owner.eventKey);
-
-      // If there is a new order, and the order is the same status that his controller is managing then add it to the list
-      if (orderController === null && this.owner.eventKey === value.get("status").stringValue("")) {
+      // console.log('orderController: ', orderController);
+      let orderStatus = value.get("status").stringValue("");
+      // console.log('orderStatus: ', orderStatus);
+      // let moodStatus = OrderListController.orderStatusMood.get(this.owner.eventKey);
+      // console.log('moodStatus: ', moodStatus);
+      
+      if (orderController === null && this.owner.eventKey === orderStatus) {
+        // console.log('in block of MapDownlink didUpdate where new orderController gets created');
+        // create new OrderController (row in list)
         orderController = new OrderController(nodeUri.pathName, this.owner.eventKey);
-        orderController.title.setValue(nodeUri.pathName);
+        orderController.nodeUri.set(nodeUri);
 
-        const nameCell = (orderController.nameCell.attachView() as TextCellView);
-        nameCell.content.set(nodeUri.pathName);
-        nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+        // attach the plot view; not implemented in the controller yet
+        orderController.plot.attachView();
 
-        const currentCell = (orderController.currentCell.attachView() as TextCellView);
-        currentCell.content.set(value.get("customerId").stringValue());
-        currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+        orderController.leaf.insertView().set({
+          style: {
+            cursor: 'pointer',
+          }
+        });
 
-        // We only want to insert the name cell and current cell for each order into the table
+        // insert cells into row
         orderController.nameCell.insertView();
-        orderController.currentCell.insertView();
+        orderController.orderCell.insertView();
+        orderController.timeInProcessingCell.insertView();
 
-        this.owner.series.addController(orderController, void 0, nodeUri.pathName);
-      }  
+        // call .stats() method on controller to populate cells
+        orderController.stats.set(value);
 
-      // If the order status changes to a status this controller is not managing, remove it from this list
-      if (orderController !== null && this.owner.eventKey !== value.get("status").stringValue("")) {
+        // add newly created controller this this.series ControllerSet
+        this.owner.series.addController(orderController, null, nodeUri.pathName);
+      }
+      
+      // remove orderController if its status does not fit this column anymore
+      if (orderController !== null && this.owner.eventKey !== orderStatus) {
         this.owner.removeChild(nodeUri.pathName);
       }
     },
-    didRemove(nodeUri: Uri) {
-      // When an order is removed in the backend, remove it from the list
-      this.owner.removeChild(nodeUri.pathName);
-    }
+      didRemove(nodeUri: Uri) {
+        // When an order is removed in the backend, remove it from the list
+        this.owner.removeChild(nodeUri.pathName);
+      }
   })
-  readonly ordersDownlink!: MapDownlink<this, Uri, Value>;
+  readonly orderDownlink!: MapDownlink<this, Uri, Value>;
 
-  private static orderStatusMood: Map<String, Status> = new Map<String, Status>([
-    ["orderPlaced", Status.alert()],
-    ["orderProcessed", Status.warning()],
-    ["readyForPickup", Status.normal()]
-  ]);
+
+  // Open a downlink to the backend to get the map of orders, we can use this to  populate the order lists
+  // The nodeUri of the downlink is inferred from the parent (the customer)
+  // @MapDownlink({
+  //   laneUri: "orders",
+  //   consumed: true,
+  //   keyForm: Uri.form(),
+  //   didUpdate(nodeUri: Uri, value: Value): void {
+  //     let orderController = this.owner.getChild(nodeUri.pathName, OrderController);
+  //     let moodStatus = OrderListController.orderStatusMood.get(this.owner.eventKey);
+
+  //     // If there is a new order, and the order is the same status that his controller is managing then add it to the list
+  //     if (orderController === null && this.owner.eventKey === value.get("status").stringValue("")) {
+  //       orderController = new OrderController(nodeUri.pathName, this.owner.eventKey);
+  //       orderController.title.setValue(nodeUri.pathName);
+
+  //       const nameCell = (orderController.nameCell.attachView() as TextCellView);
+  //       nameCell.content.set(nodeUri.pathName);
+  //       nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+
+  //       const currentCell = (orderController.currentCell.attachView() as TextCellView);
+  //       currentCell.content.set(value.get("customerId").stringValue());
+  //       currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+
+  //       let orderType: OrderType = OrderType.Unknown;
+  //       if (value.get("products").get("A").numberValue() ?? 0) {
+  //         orderType = OrderType.OrderA;
+  //       } else if (value.get("products").get("B").numberValue() ?? 0) {
+  //         orderType = OrderType.OrderB;
+  //       } else if (value.get("products").get("C").numberValue() ?? 0) {
+  //         orderType = OrderType.OrderC;
+  //       }
+  //       const orderCell = CellView.create();
+  //       orderCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+  //       orderCell.node.innerText = `Order ${orderType}`;
+
+  //       // We only want to insert the name cell and current cell for each order into the table
+  //       orderController.nameCell.insertView();
+  //       orderController.currentCell.insertView();
+  //       orderController.cells.insertView(void 0, orderCell, void 0, `order:${nodeUri.pathName}`);
+  //       console.log('this.owner.cols: ', this.owner.cols);
+
+  //       this.owner.series.addController(orderController, void 0, nodeUri.pathName);
+  //     }  
+
+  //     // If the order status changes to a status this controller is not managing, remove it from this list
+  //     if (orderController !== null && this.owner.eventKey !== value.get("status").stringValue("")) {
+  //       this.owner.removeChild(nodeUri.pathName);
+  //     }
+  //   },
+  //   didRemove(nodeUri: Uri) {
+  //     // When an order is removed in the backend, remove it from the list
+  //     this.owner.removeChild(nodeUri.pathName);
+  //   }
+  // })
+  // readonly ordersDownlink!: MapDownlink<this, Uri, Value>;
+
+  // private static orderStatusMood: Map<String, Status> = new Map<String, Status>([
+  //   ["orderPlaced", Status.alert()],
+  //   ["orderProcessed", Status.warning()],
+  //   ["readyForPickup", Status.normal()]
+  // ]);
 }

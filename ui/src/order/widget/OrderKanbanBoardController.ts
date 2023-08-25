@@ -6,7 +6,7 @@ import {TraitViewRef} from "@swim/controller";
 import {PanelView, BoardView, BoardController} from "@swim/panel";
 import {EntityTrait} from "@swim/domain";
 import { OrderListController } from "..";
-import { OrderStatus } from "./OrderController";
+import { OrderStatus } from "../../types";
 
 /** @public */
 export class OrderKanbanBoardController extends BoardController {

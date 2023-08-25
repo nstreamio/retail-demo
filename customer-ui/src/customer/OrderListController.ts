@@ -174,6 +174,12 @@ export class OrderListController extends TimeTableController {
         );
         nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
 
+        // nameCell.modifyMood(Feel.default, Status.alert().moodModifier);
+        // nameCell.modifyMood(Feel.default, Status.warning(0.5).moodModifier);
+        // Mood is a computed color. View
+        /* Status is a range, with two different colors at different ends. It's a normalized scale.
+           Apply a value within the range to get a color between the two ends of the color spectrum */
+
         // If no OrderController is found, create and insert a new one
       } else if (orderController === null) {
         orderController = new OrderController(nodeUri.pathName);
