@@ -33,6 +33,7 @@ export class OrderListController extends TimeTableController {
     initView(panelView: PanelView): void {
       super.initView(panelView);
       panelView.headerTitle.set(this.owner.listTitle);
+      this.owner.analyticsPanel.insertView(panelView);
       this.owner.table.insertView();  // Insert the table when we insert this panel
       this.owner.header.insertView();  // Insert the table's header when we insert this panel
     },
@@ -40,12 +41,44 @@ export class OrderListController extends TimeTableController {
   override readonly panel!: TraitViewRef<this, Trait, PanelView> & TimeTableController["panel"];
 
   @ViewRef({
+    viewType: PanelView,
+    extends: true,
+    createView(): PanelView {
+      const panelView = PanelView.create().set({
+        style: {
+          width: '100%',
+          height: 'auto',
+          marginTop: '30px',
+        }
+      });
+
+      const div = panelView.insertChild('div', null).set({
+        style: {
+          width: '100%',
+          height: '220px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center',
+          verticalAlign: 'center',
+          color: '#AAAAAA',
+        },
+        classList: ['placeholder-analytics-panel'],
+      });
+      div.node.innerText = 'ANALYTICS PANEL';
+
+      return panelView;
+    }
+  })
+  readonly analyticsPanel!: ViewRef<this, PanelView>;
+
+  @ViewRef({
     extends: true,
     initView(panelView: PanelView): void {
       super.initView(panelView);
       panelView.set({
         style: {
-          marginTop: 50,
+          marginTop: 24,
         },
         unitHeight: 1,
       });
@@ -71,7 +104,7 @@ export class OrderListController extends TimeTableController {
       const cols = new Array<ColLayout>();
       cols.push(ColLayout.create("customer", 1, 1, 0, false, false, Look.accentColor));
       cols.push(ColLayout.create("order", 1, 0, 0, false, false, Look.accentColor));
-      cols.push(ColLayout.create("timeInProcessing", 0, 0, '120px', false, false, Look.accentColor));
+      cols.push(ColLayout.create("timeInProcessing", 0, 0, '124px', false, false, Look.accentColor));
       return new TableLayout(null, null, null, Length.px(12), cols);
     },
   })

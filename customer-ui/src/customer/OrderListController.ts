@@ -5,16 +5,16 @@ import { Uri } from "@swim/uri";
 import { TimeTableController } from "@swim/widget";
 import { OrderController } from "../order";
 import { HtmlView } from "@swim/dom";
-import { ViewRef } from "@swim/view";
-import { ColLayout, TableLayout, TableView, TextCellView } from "@swim/table";
+import { View, ViewRef } from "@swim/view";
+import { ColLayout, ColView, HeaderView, TableLayout, TableView, TextCellView, TextColView } from "@swim/table";
 import { TraitViewRef } from "@swim/controller";
 import { PanelView } from "@swim/panel";
 import { Trait } from "@swim/model";
 import { Feel, Look } from "@swim/theme";
 import { Length } from "@swim/math";
 import { Status } from "@swim/domain";
-import { OrderType } from "../types";
-import { OrderCellView } from "./OrderCellView";
+import { OrderStatus, OrderType } from "../types";
+import { HtmlIconView, VectorIcon } from "@swim/graphics";
 
 export class OrderListController extends TimeTableController {
   readonly listTitle: string;
@@ -91,13 +91,16 @@ export class OrderListController extends TimeTableController {
 
   @TraitViewRef({
     extends: true,
-    initView(panelView: PanelView): void {
-      panelView.node.classList.add("order-list-controller__panel");
-      panelView.style.set({
+    initView(parentPanelView: PanelView): void {
+      parentPanelView.node.classList.add("order-list-controller__panel");
+      parentPanelView.style.set({
         margin: "0px",
       });
-      super.initView(panelView);
+
+      // init OrderListController's panel
+      super.initView(parentPanelView);
       this.owner.table.insertView(); // Insert the table when we insert this panel
+      this.owner.header.insertView(); // Insert the table's header when we insert this panel
     },
   })
   override readonly panel!: TraitViewRef<this, Trait, PanelView> &
@@ -121,19 +124,73 @@ export class OrderListController extends TimeTableController {
 
   @ViewRef({
     extends: true,
+    createView(): HeaderView {
+      const headerView = super.createView() as HeaderView;
+      this.owner.shapeCol.insertView(headerView);
+      this.owner.orderCol.insertView(headerView);
+      this.owner.statusCol.insertView(headerView);
+      return headerView;
+    }
+  })
+  override readonly header!: ViewRef<this, HeaderView> & TimeTableController["header"];
+
+  @ViewRef({
+    extends: true,
     createLayout(): TableLayout {
       const cols = new Array<ColLayout>();
-      cols.push(
-        ColLayout.create("current", 2, 0, 0, false, false, Look.accentColor)
-      );
-      cols.push(
-        ColLayout.create("name", 2, 0, 0, false, false, Look.accentColor)
-      );
-      return new TableLayout(null, null, null, Length.px(12), cols);
+      cols.push(ColLayout.create("shape", 1, 0, 0, false, false, Look.accentColor));
+      cols.push(ColLayout.create("order", 2, 0, 0, false, false, Look.accentColor));
+      cols.push(ColLayout.create("status", 4, 0, 0, false, false, Look.accentColor));
+      return new TableLayout(null, null, null, Length.px(8), cols);
     },
   })
   override readonly table!: ViewRef<this, TableView> &
     TimeTableController["table"];
+
+  @ViewRef({
+    viewType: ColView,
+    viewKey: "shape",
+    extends: true,
+    get parentView(): View | null {
+      return this.owner.header.attachView();
+    },
+    createView(): ColView {
+      return TextColView.create().set({
+        label: "Shape",
+      });
+    }
+  })
+  readonly shapeCol!: ViewRef<this, ColView>;
+
+  @ViewRef({
+    viewType: ColView,
+    viewKey: "order",
+    extends: true,
+    get parentView(): View | null {
+      return this.owner.header.attachView();
+    },
+    createView(): ColView {
+      return TextColView.create().set({
+        label: "Order",
+      });
+    }
+  })
+  readonly orderCol!: ViewRef<this, ColView>;
+
+  @ViewRef({
+    viewType: ColView,
+    viewKey: "status",
+    extends: true,
+    get parentView(): View | null {
+      return this.owner.header.attachView();
+    },
+    createView(): ColView {
+      return TextColView.create().set({
+        label: "Status",
+      });
+    }
+  })
+  readonly statusCol!: ViewRef<this, ColView>;
 
   @MapDownlink({
     hostUri: "warp://localhost:9001",
@@ -146,7 +203,7 @@ export class OrderListController extends TimeTableController {
         OrderController
       );
 
-      const status = value.get("status").stringValue() ?? "unknown";
+      const status: OrderStatus = (value.get("status").stringValue() ?? "unknown") as OrderStatus;
       let orderType: OrderType = OrderType.Unknown;
       if (value.get("products").get("A").numberValue() ?? 0) {
         orderType = OrderType.OrderA;
@@ -155,6 +212,7 @@ export class OrderListController extends TimeTableController {
       } else if (value.get("products").get("C").numberValue() ?? 0) {
         orderType = OrderType.OrderC;
       }
+      console.log('orderType: ', orderType);
 
       if (status === "pickupCompleted") {
         if (orderController) {
@@ -165,52 +223,81 @@ export class OrderListController extends TimeTableController {
       } else if (orderController) {
         let moodStatus = OrderListController.orderStatusMood.get(status);
 
-        const currentCell = orderController.currentCell.attachView() as TextCellView;
-        currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+        const shapeCell = orderController.shapeCell.attachView() as TextCellView;
+        ['red', 'yellow', 'lime', 'teal'].forEach(color => {
+          shapeCell.content.view?.node.classList.remove(color);
+        });
+        shapeCell.content.view?.node.classList.add(OrderListController.getColorFromStatus(status));
+        console.log('shapeCell.content.view?.classList after: ', shapeCell.content.view?.classList.toString());
+        console.log('shapeCell.content.view?.node.classList after: ', shapeCell.content.view?.node.classList.toString());
 
-        const nameCell = orderController.nameCell.attachView() as TextCellView;
-        nameCell.content.set(
+        const orderCell = orderController.orderCell.attachView() as TextCellView;
+        orderCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+
+        const statusCell = orderController.statusCell.attachView() as TextCellView;
+        statusCell.content.set(
           OrderListController.orderStatusDescription.get(status)
         );
-        nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
+        statusCell.modifyMood(Feel.default, moodStatus!.moodModifier);
 
-        // nameCell.modifyMood(Feel.default, Status.alert().moodModifier);
-        // nameCell.modifyMood(Feel.default, Status.warning(0.5).moodModifier);
-        // Mood is a computed color. View
-        /* Status is a range, with two different colors at different ends. It's a normalized scale.
-           Apply a value within the range to get a color between the two ends of the color spectrum */
+        // EXAMPLE_CELL.modifyMood(Feel.default, Status.alert().moodModifier);
+        // EXAMPLE_CELL.modifyMood(Feel.default, Status.warning(0.5).moodModifier);
 
         // If no OrderController is found, create and insert a new one
       } else if (orderController === null) {
-        orderController = new OrderController(nodeUri.pathName);
+        orderController = new OrderController(nodeUri.pathName, orderType);
         orderController.title.setValue(nodeUri.pathName);
 
         let moodStatus = OrderListController.orderStatusMood.get(
           status || "orderPlaced"
         );
 
-        const currentCell = orderController.currentCell.attachView() as TextCellView;
-        currentCell.content.set(new OrderCellView(orderType));
-        currentCell.modifyMood(Feel.default, moodStatus!.moodModifier);
-
-        const nameCell = orderController.nameCell.attachView() as TextCellView;
-        nameCell.content.set(
-          OrderListController.orderStatusDescription.get(status)
-        );
-        nameCell.modifyMood(Feel.default, moodStatus!.moodModifier);
-        nameCell.set({
+        // set shapeCell of row
+        const shapeCell = orderController.shapeCell.attachView() as TextCellView;
+        shapeCell.set({
           style: {
             height: '40px',
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'flex-end',
           }
-        });
-        (nameCell.node.firstChild as HTMLElement).style.alignSelf = 'unset';
+        })
+        .modifyMood(Feel.default, moodStatus!.moodModifier);
+        shapeCell.content.insertView(void 0, this.owner.getOrderShapeSvgView(orderType, status));
+        (shapeCell.node.firstChild as HTMLElement).style.alignSelf = 'unset';
+
+        // set orderCell of row
+        const orderCell = orderController.orderCell.attachView() as TextCellView;
+        orderCell.set({
+          style: {
+            height: '40px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+          }
+        })
+        .modifyMood(Feel.default, moodStatus!.moodModifier);
+        orderCell.content.set(`Order ${orderType}`);
+        (orderCell.node.firstChild as HTMLElement).style.alignSelf = 'unset';
+
+        // set statusCell of row
+        const statusCell = orderController.statusCell.attachView() as TextCellView;
+        statusCell.set({
+          style: {
+            height: '40px',
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+          }
+        })
+        .modifyMood(Feel.default, moodStatus!.moodModifier);
+        statusCell.content.set(OrderListController.orderStatusDescription.get(status));
+        (statusCell.node.firstChild as HTMLElement).style.alignSelf = 'unset';
 
         // insert the name cell and current cell for each order into the table
-        orderController.nameCell.insertView();
-        orderController.currentCell.insertView();
+        orderController.shapeCell.insertView();
+        orderController.orderCell.insertView();
+        orderController.statusCell.insertView();
 
         // set row styles
         orderController.row.view?.set({
@@ -231,6 +318,50 @@ export class OrderListController extends TimeTableController {
     },
   })
   readonly ordersDownlink!: MapDownlink<this, Uri, Value>;
+
+  private getOrderShapeSvgView(orderType: OrderType, status: OrderStatus): HtmlView {
+    // define container HtmlView
+    const htmlView = HtmlView.create();
+    let path: string;
+    if (orderType === OrderType.OrderA) {
+      path = "M12,2L22,22L2,22Z";
+    } else if (orderType === OrderType.OrderB) {
+      path = "M2,2L22,2L22,22L2,22Z";
+    } else {
+      // TODO: figure out how to insert circle icons
+      path = "";
+    };
+    let colorClass: string = OrderListController.getColorFromStatus(status);
+    
+
+    // define and insert svg
+    const htmlIconView = HtmlIconView.create().setIntrinsic({
+      graphics: VectorIcon.create(
+        24,
+        24,
+        path
+      ),
+      style: {
+        width: "40px",
+        height: "40px",
+        marginRight: "18px",
+        marginBottom: "-2px",
+      },
+    });
+    htmlView.node.classList.add('svg', colorClass);
+    htmlView.insertChild(htmlIconView, null);
+
+    return htmlView;
+  }
+
+  private static getColorFromStatus(status: OrderStatus): string {
+    if (status === OrderStatus.orderPlaced) {
+      return "red";
+    } else if (status === OrderStatus.orderProcessed) {
+      return "yellow";
+    }
+    return "teal";
+  }
 
   private static orderStatusMood: Map<string, Status> = new Map<string, Status>(
     [
