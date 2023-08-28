@@ -6,6 +6,7 @@ import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
 import swim.api.lane.ValueLane;
 import swim.concurrent.TimerRef;
+import swim.retail360.model.Product;
 import swim.structure.Record;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -16,9 +17,8 @@ public class CustomerSimAgent extends AbstractAgent {
   private static final double CHANCE_TO_PLACE_ORDER = 0.3;
   private static final int MAXIMUM_ORDER_COUNT = 2;
   private static final int MAX_PRODUCT_COUNT = 4;
-  private static final double CHANCE_TO_INCLUDE_ADDITIONAL_PRODUCT_TYPE = 0.08;
 
-  private static final String[] PRODUCT_NAMES = {"A", "B", "C", "D", "E"};
+  private static final Product[] PRODUCT_NAMES = Product.values();
 
   private TimerRef timer;
 
@@ -47,23 +47,11 @@ public class CustomerSimAgent extends AbstractAgent {
   }
 
   private void placeRandomOrder() {
-
     // Pick at least one random product to add
     final int productIndex = new Random().nextInt(PRODUCT_NAMES.length);
     Record products = Record.create(1)
-        .slot(PRODUCT_NAMES[productIndex],  new Random().nextInt(MAX_PRODUCT_COUNT) + 1);
+        .slot(PRODUCT_NAMES[productIndex].name(),  1);
 
-    // Maybe add some other products
-    for (final String product: PRODUCT_NAMES) {
-
-      if (product.equals(PRODUCT_NAMES[productIndex])) {
-        continue; // Already added
-      }
-
-      if (Math.random() < CHANCE_TO_INCLUDE_ADDITIONAL_PRODUCT_TYPE) {
-        products.slot(product, new Random().nextInt(MAX_PRODUCT_COUNT) + 1);
-      }
-    }
     final String orderId = UUID.randomUUID().toString();
     final Value payload = Record.create(1).slot("products", products).slot("customerId", this.nodeUri().pathName());
     this.command("/order/" + orderId, "simOrder", payload);
