@@ -14,7 +14,7 @@ import { Feel, Look } from "@swim/theme";
 import { Length } from "@swim/math";
 import { Status } from "@swim/domain";
 import { OrderStatus, OrderType } from "../types";
-import { HtmlIconView, VectorIcon } from "@swim/graphics";
+import { HtmlIconView, PolygonIcon, VectorIcon } from "@swim/graphics";
 
 export class OrderListController extends TimeTableController {
   readonly listTitle: string;
@@ -325,18 +325,16 @@ export class OrderListController extends TimeTableController {
     let path: string;
     if (orderType === OrderType.OrderA) {
       path = "M12,2L22,22L2,22Z";
-    } else if (orderType === OrderType.OrderB) {
-      path = "M2,2L22,2L22,22L2,22Z";
     } else {
-      // TODO: figure out how to insert circle icons
-      path = "";
-    };
+      // path for OrderB (square)
+      path = "M2,2L22,2L22,22L2,22Z";
+    }
     let colorClass: string = OrderListController.getColorFromStatus(status);
     
 
     // define and insert svg
     const htmlIconView = HtmlIconView.create().setIntrinsic({
-      graphics: VectorIcon.create(
+      graphics: orderType === OrderType.OrderC ? PolygonIcon.create(999) : VectorIcon.create(
         24,
         24,
         path

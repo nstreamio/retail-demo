@@ -263,7 +263,7 @@ export class MainController extends BoardController {
       );
       circle.button?.style.backgroundColor.set('#F8D260');
       const circleLabel = circle.insertChild(HtmlView, null, "label");
-      circleLabel.node.innerText = "Order C";
+      circleLabel.node.innerText = "Order C: $30.00";
       circle.addEventListener("click", handleClick(OrderType.OrderC));
       circle.button?.icon.push(
         CircleIcon.create(),
@@ -284,7 +284,7 @@ export class MainController extends BoardController {
       );
       square.button?.style.backgroundColor.set('#F8D260');
       const squareLabel = square.insertChild(HtmlView, null, "label");
-      squareLabel.node.innerText = "Order B";
+      squareLabel.node.innerText = "Order B: $20.00";
       square.addEventListener("click", handleClick(OrderType.OrderB));
       square.button?.icon.push(
         VectorIcon.create(24, 24, "M2,2L22,2L22,22L2,22Z"),
@@ -298,7 +298,7 @@ export class MainController extends BoardController {
       );
       triangle.button?.style.backgroundColor.set('#F8D260');
       const triangleLabel = triangle.insertChild(HtmlView, null, "label");
-      triangleLabel.node.innerText = "Order A";
+      triangleLabel.node.innerText = "Order A: $10.00";
       triangle.addEventListener("click", handleClick(OrderType.OrderA));
       triangle.button?.icon.push(
         VectorIcon.create(24, 24, "M12,2L22,22L2,22Z"),
