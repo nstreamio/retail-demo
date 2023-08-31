@@ -12,10 +12,10 @@ import {Status} from "@swim/domain";
 import { OrderStatus, OrderType } from "../../types";
 import { ViewRef } from "@swim/view";
 import { PieView, SliceView } from "@swim/pie";
-import { Feel, Look, Mood } from "@swim/theme";
+import { Feel, Look } from "@swim/theme";
 import { HtmlView } from "@swim/dom";
-
-type StoreStatus = Record<OrderStatus, Record<OrderType, { count: number, value: number}> & { totalValue: number }> & { totalValue: number };
+import { StoreStatus } from "../../types";
+import { OrderListController } from "./OrderListController";
 
 /** @public */
 export class OrderStatusPieController extends TimePieController {
@@ -34,7 +34,6 @@ export class OrderStatusPieController extends TimePieController {
   @TraitViewRef({
     extends: true,
     initView(panelView: PanelView): void {
-      console.log('panel initView');
       super.initView(panelView);
       panelView.set({
         headerTitle: this.owner.headerTitle,
@@ -69,7 +68,7 @@ export class OrderStatusPieController extends TimePieController {
           margin: 0,
           transform: 'translate(-50%, -50%)',
           font: 'sans-serif',
-          fontSize: '18px',
+          fontSize: '16px',
           fontWeight: '500',
           textAlign: 'center',
           color: '#CCCCCC'
@@ -158,7 +157,7 @@ export class OrderStatusPieController extends TimePieController {
     laneUri: 'status',
     consumed: true,
     didSet(value: Value): void {
-      const storeStatus = this.owner.parseStoreStatus(value);
+      const storeStatus = OrderListController.parseStoreStatus(value);
       // if (this.owner.orderStatus === OrderStatus.orderProcessed) {
       //   console.log('storeStatus: ', storeStatus);
       // }
@@ -167,7 +166,7 @@ export class OrderStatusPieController extends TimePieController {
       this.owner.updateSlice(storeStatus, this.owner.bSlice, OrderType.OrderB);
       this.owner.updateSlice(storeStatus, this.owner.cSlice, OrderType.OrderC);
 
-      const totalValue = storeStatus[this.owner.orderStatus].totalValue;
+      const totalValue = storeStatus[this.owner.orderStatus].total.value;
       this.owner.totalMonetaryValue.view!.node.innerText = totalValue ? `$${totalValue}` : this.owner.getEmptyStateText();
     }
   })
@@ -181,7 +180,7 @@ export class OrderStatusPieController extends TimePieController {
     } else {
       return 'No orders ready for pickup';
     }
-  }
+  };
 
   private updateSlice(storeStatus: StoreStatus, slice: ViewRef<this, SliceView>, type: OrderType) {
     const value = storeStatus[this.orderStatus][type].value;
@@ -191,29 +190,9 @@ export class OrderStatusPieController extends TimePieController {
     } else {
       slice.insertView(this.pie.attachView()).set({
         value,
-        label: value / storeStatus[this.orderStatus].totalValue > 0.2 ? label : '',
+        label: value / storeStatus[this.orderStatus].total.value > 0.2 ? label : '',
       });
     }
-  }
-
-  private parseStoreStatus(v: Value): StoreStatus {
-    return [OrderStatus.orderPlaced, OrderStatus.orderProcessed, OrderStatus.readyForPickup].reduce((acc, s) => {
-      [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
-        let count = v.get(s).get(t).numberValue(0);
-        let value = count * OrderStatusPieController.valuePerOrderType[t];
-        acc[s][t] = { count, value };
-        acc[s].totalValue += value;
-        acc.totalValue += value;
-      });
-      return acc;
-    }, { orderPlaced: { totalValue: 0 }, orderProcessed: { totalValue: 0 }, readyForPickup: { totalValue: 0 }, totalValue: 0 } as StoreStatus);
-  };
-
-  private static valuePerOrderType: Record<OrderType, number> = {
-    [OrderType.OrderA]: 10,
-    [OrderType.OrderB]: 20,
-    [OrderType.OrderC]: 30,
-    [OrderType.Unknown]: 0,
   };
 
   static readonly alertStatus: Mapping<number, Status> = Status.improving(0, 2.5, 3.5, 4.5, 5);

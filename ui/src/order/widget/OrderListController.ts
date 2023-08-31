@@ -1,10 +1,10 @@
 // Copyright 2015-2022 Swim.inc
 // All rights reserved.
 
-import {PanelView} from "@swim/panel";
-import {TimeTableController} from "@swim/widget";
+import { PanelView } from "@swim/panel";
+import { TimeTableController} from "@swim/widget";
 import {View, ViewRef} from "@swim/view";
-import { MapDownlink } from "@swim/client";
+import { MapDownlink, ValueDownlink } from "@swim/client";
 import { Value } from "@swim/structure";
 import { TraitViewRef } from "@swim/controller";
 import { Trait } from "@swim/model";
@@ -14,7 +14,10 @@ import { Uri } from "@swim/uri";
 import { Length } from "@swim/math";
 import { Look } from "@swim/theme";
 import { OrderController } from "./OrderController";
-import { OrderStatus } from "../../types";
+import { OrderStatus, OrderType, StoreStatus } from "../../types";
+import { Color } from "@swim/style";
+import { OrderTypeChartController } from "./OrderTypeChartController";
+import { CumulativeOrdersSectionController } from "./CumulativeOrdersSectionController";
 
 /** @public */
 export class OrderListController extends TimeTableController {
@@ -23,6 +26,7 @@ export class OrderListController extends TimeTableController {
 
   constructor(key: OrderStatus) {
     super();
+    this.setKey(`orderListController-${key}`);
     this.eventKey = key;
   }
 
@@ -30,26 +34,72 @@ export class OrderListController extends TimeTableController {
     extends: true,
     initView(panelView: PanelView): void {
       super.initView(panelView);
-      // panelView.headerTitle.set(this.owner.listTitle);
+
+      // chart stuff first
+      const chartPanel = this.owner.chartPanel.attachView().set({
+        unitWidth: 1,
+        unitHeight: 1 / 6,
+        minFrameHeight: 200,
+        minFrameWidth: 0,
+        style: {
+          margin: 0,
+        }
+      });
+      chartPanel.classList.add('olc-chart-panel');
+      const chartView = this.owner.chart.insertView();
+      // add some classes
+      this.owner.chartCanvas.view?.classList.add('olc-chart-canvas');
+      // add an OrderTypeChartController for each OrderType to this.series
+      const orderTypeChartControllerA = this.owner.series.addController(
+        new OrderTypeChartController(this.owner.eventKey, OrderType.OrderA),
+        null,
+        OrderType.OrderA
+      );
+      orderTypeChartControllerA.plot.insertView(chartView, void 0, void 0, OrderType.OrderA);
+      const orderTypeChartControllerB = this.owner.series.addController(
+        new OrderTypeChartController(this.owner.eventKey, OrderType.OrderB),
+        null,
+        OrderType.OrderB
+      );
+      orderTypeChartControllerB.plot.insertView(chartView, void 0, void 0, OrderType.OrderB);
+      const orderTypeChartControllerC = this.owner.series.addController(
+        new OrderTypeChartController(this.owner.eventKey, OrderType.OrderC),
+        null,
+        OrderType.OrderC
+      );
+      orderTypeChartControllerC.plot.insertView(chartView, void 0, void 0, OrderType.OrderC);
+
+      // then table stuff
+      const tablePanel = this.owner.tablePanel.insertView().set({
+        unitWidth: 1,
+        unitHeight: (this.owner.eventKey === OrderStatus.readyForPickup ? 3 : 5) / 6,
+        minFrameHeight: 0,
+        minFrameWidth: 0,
+        style: {
+          margin: 0,
+        }
+      });
+      tablePanel.classList.add('olc-table-panel');
       this.owner.table.insertView();  // Insert the table when we insert this panel
       this.owner.header.insertView();  // Insert the table's header when we insert this panel
+
+      // conditionally insert CumulativeOrdersSectionController
+      if (this.owner.eventKey === OrderStatus.readyForPickup) {
+        const cumulativeOrdersSectionController = this.owner.appendChild(new CumulativeOrdersSectionController());
+        cumulativeOrdersSectionController.panel.insertView(this.owner.panel.attachView()).set({
+          unitWidth: 1,
+          unitHeight: 2 / 6,
+          style: {
+            margin: 0,
+          },
+        });
+      }
+
+      // open downlink
+      this.owner.mainStatusDownlink.open();
     },
   })
   override readonly panel!: TraitViewRef<this, Trait, PanelView> & TimeTableController["panel"];
-
-  @ViewRef({
-    extends: true,
-    initView(panelView: PanelView): void {
-      super.initView(panelView);
-      panelView.set({
-        style: {
-          marginTop: 24,
-        },
-        unitHeight: 1,
-      });
-    },
-  })
-  override readonly tablePanel!: ViewRef<this, PanelView> & TimeTableController["tablePanel"];
 
   @ViewRef({
     extends: true,
@@ -117,7 +167,6 @@ export class OrderListController extends TimeTableController {
   })
   readonly timeInProcessingCol!: ViewRef<this, ColView>;
 
-
   @MapDownlink({
     laneUri: "orders",
     keyForm: Uri.form(),
@@ -128,12 +177,9 @@ export class OrderListController extends TimeTableController {
       
       if (orderController === null && this.owner.eventKey === orderStatus) {
         // create new OrderController (row in list)
-        orderController = new OrderController(nodeUri.pathName, this.owner.eventKey);
-        orderController.nodeUri.set(nodeUri);
+        orderController = new OrderController(nodeUri.toString(), this.owner.eventKey);
 
-        // attach the plot view; not implemented in the controller yet
-        orderController.plot.attachView();
-
+        // insert leaf of OrderController (row)
         orderController.leaf.insertView().set({
           style: {
             cursor: 'pointer',
@@ -163,4 +209,57 @@ export class OrderListController extends TimeTableController {
       }
   })
   readonly orderDownlink!: MapDownlink<this, Uri, Value>;
+
+  @ValueDownlink({
+    hostUri: 'warp://localhost:9001',
+    nodeUri: 'store/main',
+    laneUri: 'status',
+    consumed: true,
+    didSet(value: Value): void {
+      const storeStatus = OrderListController.parseStoreStatus(value);
+      // if (this.owner.eventKey === OrderStatus.orderProcessed) {
+      //   console.log('storeStatus in OrderListController: ', storeStatus);
+      // }
+     
+      // get orderTypeChartController out of this.owner.children or this.series.controllers
+      [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
+        const orderTypeChartController = this.owner.getChild(t, OrderTypeChartController);
+        if (orderTypeChartController !== null) {
+          // call .stats() on typeChartController
+          orderTypeChartController.stats(storeStatus);
+        } else {
+          console.log('orderTypeChartController is null for some reason!');
+        }
+      })
+    }
+  })
+  readonly mainStatusDownlink!: ValueDownlink<this>;
+
+  static parseStoreStatus(v: Value): StoreStatus {
+    return [OrderStatus.orderPlaced, OrderStatus.orderProcessed, OrderStatus.readyForPickup, OrderStatus.pickupCompleted].reduce((acc, s) => {
+      [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
+        let count = v.get(s).get(t).numberValue(0);
+        let value = count * OrderListController.valuePerOrderType[t];
+        if (!acc[s]) { acc[s] = { total: { count: 0, value: 0 } } as StoreStatus[OrderStatus]; }
+        acc[s][t] = { count, value };
+        acc[s].total.count += count;
+        acc[s].total.value += value;
+      });
+      return acc;
+    }, {} as StoreStatus);
+  };
+
+  private static valuePerOrderType: Record<OrderType, number> = {
+    [OrderType.OrderA]: 10,
+    [OrderType.OrderB]: 20,
+    [OrderType.OrderC]: 30,
+    [OrderType.Unknown]: 0,
+  };
+
+  private static plotStrokes: Record<OrderType, Color> = {
+    [OrderType.OrderA]: Color.parse('#00EE11'),
+    [OrderType.OrderB]: Color.parse('#DD2200'),
+    [OrderType.OrderC]: Color.parse('#0000FF'),
+    [OrderType.Unknown]: Color.parse('#FFFFFF'),
+  }
 }

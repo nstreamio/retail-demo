@@ -2,7 +2,7 @@
 // All rights reserved.
 
 import {Property} from "@swim/component";
-import {Value} from "@swim/structure";
+import {Form, Value} from "@swim/structure";
 import {MapDownlink} from "@swim/client";
 import {Feel, Look} from "@swim/theme";
 import type {View} from "@swim/view";
@@ -18,13 +18,11 @@ import { Status } from "@swim/domain";
 export class OrderController extends TimeSeriesController {
     readonly eventKey: OrderStatus;
 
-    constructor(orderId: string, orderStatus: OrderStatus) {
+    constructor(nodeUri: string, orderStatus: OrderStatus) {
         super();
-        this.setKey(orderId);
+        this.setKey(nodeUri);
         this.eventKey = orderStatus;
-
-        this.updateOrderDownlink.setHostUri('warp://localhost:9001');
-        this.updateOrderDownlink.setNodeUri(`/order/${orderId}`);
+        this.updateOrderDownlink.setNodeUri(nodeUri);
         this.updateOrderDownlink.open();
     }
 
@@ -52,14 +50,14 @@ export class OrderController extends TimeSeriesController {
         viewType: CellView,
         viewKey: "customer",
         get parentView(): View | null {
-        return this.owner.leaf.insertView();
+            return this.owner.leaf.insertView();
         },
         createView(): CellView {
-        return TextCellView.create().set({
-            style: {
-                color: Look.accentColor,
-            }
-        });
+            return TextCellView.create().set({
+                style: {
+                    color: Look.accentColor,
+                }
+            });
         },
     })
     readonly customerCell!: ViewRef<this, CellView>;
@@ -68,14 +66,14 @@ export class OrderController extends TimeSeriesController {
         viewType: CellView,
         viewKey: "order",
         get parentView(): View | null {
-        return this.owner.leaf.insertView();
+            return this.owner.leaf.insertView();
         },
         createView(): CellView {
-        return TextCellView.create().set({
-            style: {
-                color: Look.accentColor,
-            }
-        });
+            return TextCellView.create().set({
+                style: {
+                    color: Look.accentColor,
+                }
+            });
         },
     })
     readonly orderCell!: ViewRef<this, CellView>;
@@ -84,14 +82,14 @@ export class OrderController extends TimeSeriesController {
         viewType: CellView,
         viewKey: "timeInProcessing",
         get parentView(): View | null {
-        return this.owner.leaf.insertView();
+            return this.owner.leaf.insertView();
         },
         createView(): CellView {
-        return TextCellView.create().set({
-            style: {
-                color: Look.accentColor,
-            }
-        });
+            return TextCellView.create().set({
+                style: {
+                    color: Look.accentColor,
+                }
+            });
         },
     })
     readonly timeInProcessingCell!: ViewRef<this, CellView>;
@@ -101,20 +99,9 @@ export class OrderController extends TimeSeriesController {
         value: Value.absent(),
         didSetValue(value: Value): void {
 
-        //   const sliceView = this.owner.slice.view;
-        //   if (sliceView !== null) {
-        //     const impactStatus = OrderController.impactStatus(alertCount);
-        //     sliceView.modifyMood(Feel.default, impactStatus.moodModifier);
-        //   }
-
-        //   const leafView = this.owner.leaf.view;
-        //   if (leafView !== null) {
-        //     const impactStatus = OrderController.impactStatus(alertCount);
-        //     leafView.modifyMood(Feel.default, impactStatus.moodModifier);
-        //   }
-
         let moodStatus = OrderController.orderStatusMood.get(this.owner.eventKey);
 
+        // update content and mood of customerCell
         const customerCellView = this.owner.customerCell.view as TextCellView | null;
         if (customerCellView !== null) {
             customerCellView.set({
@@ -124,6 +111,7 @@ export class OrderController extends TimeSeriesController {
             customerCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
         }
 
+        // update content and mood of orderCell
         const orderCellView = this.owner.orderCell.view as TextCellView | null;
         if (orderCellView !== null) {
             let orderType: OrderType = OrderType.Unknown;
@@ -141,6 +129,7 @@ export class OrderController extends TimeSeriesController {
             orderCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
         }
 
+        // update content and mood of timeInProcessingCell
         const timeInProcessingCellView = this.owner.timeInProcessingCell.view as TextCellView | null;
         if (timeInProcessingCellView !== null) {
             timeInProcessingCellView.content.set(new Date(value.get('timestamp').numberValue() ?? 0).toString());
@@ -153,49 +142,6 @@ export class OrderController extends TimeSeriesController {
     })
     readonly stats!: Property<this, Value>;
 
-    //   @MapDownlink({
-    //     laneUri: "alertHistory",
-    //     consumed: true,
-    //     keyForm: Form.forNumber(),
-    //     updateKpi(kpiName: string | undefined, key: number, value: Value): void {
-    //       const t = new DateTime(key * 1000, TimeZone.local());
-    //       const userCount = value.get("User_Count").numberValue(0);
-    //       const kpi = value.get(this.owner.kpiName.value);
-    //       const alertCount = kpi.get("Alert_User_Count").numberValue(0);
-    //       const alertRatio = userCount !== 0 ? alertCount / userCount : 0;
-    //       const alertStatus = OrderController.alertStatus(alertRatio);
-
-    //       const plotView = this.owner.plot.attachView();
-    //       const dataPointKey = "" + t.time;
-    //       let dataPointView = plotView.getChild(dataPointKey, DataPointView) as DataPointView<DateTime, number>;
-    //       if (dataPointView === null) {
-    //         dataPointView = new DataPointView<DateTime, number>().set({
-    //           x: t,
-    //           y: alertCount,
-    //           color: Look.accentColor,
-    //         });
-    //         dataPointView.modifyMood(Feel.default, alertStatus.moodModifier);
-    //         plotView.dataPoints.insertView(null, dataPointView, null, "" + t.time);
-    //       } else {
-    //         const timing = dataPointView.getLookOr(Look.timing, true);
-    //         dataPointView.y.set(alertCount, timing);
-    //         dataPointView.modifyMood(Feel.default, alertStatus.moodModifier, timing);
-    //       }
-    //     },
-    //     didUpdate(key: number, value: Value): void {
-    //       //console.log("OrderController.alertHistoryDownlink.didUpdate " + key + ":", value.toLike());
-    //       this.updateKpi(this.owner.kpiName.value, key, value);
-    //     },
-    //     didRemove(key: number): void {
-    //       //console.log("OrderController.alertHistoryDownlink.didRemove " + key);
-    //       const t = new DateTime(key * 1000, TimeZone.local());
-    //       this.owner.plot.attachView().removeChild("" + t.time);
-    //     },
-    //   })
-    //   readonly alertHistoryDownlink!: MapDownlink<this, number, Value> & {
-    //     updateKpi(kpiName: string | undefined, key: number, value: Value): void,
-    //   };
-
     protected updateOrder(orderId: string): void {
         const idx = OrderController.orderStatusProgression.indexOf(this.eventKey);
         const newStatus = OrderController.orderStatusProgression[idx + 1];
@@ -203,7 +149,48 @@ export class OrderController extends TimeSeriesController {
         this.updateOrderDownlink.command(`{status:${newStatus}}`);
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     @MapDownlink({
+        hostUri: 'warp://localhost:9001',
         laneUri: "updateOrder",
         consumed: true,
         keyForm: Uri.form(),
