@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Swim Retail Demo</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+</head>
+<body swim-theme style="display: flex;">
+<script src="libs/swim-core.min.js"></script>
+<script src="libs/swim-host.min.js"></script>
+<script src="libs/swim-ui.min.js"></script>
+<script src="libs/swim-ux.min.js"></script>
+<script src="libs/swim-vis.min.js"></script>
+<script src="libs/swim-maps.min.js"></script>
+<script src="libs/swim-gui.min.js"></script>
+<script src="libs/retail-demo.min.js"></script>
+<script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+
+// Initialize and mount the top level agent (Entry point into the swim framework)
+//  For this demo it will be the 'store' agent, consisting of 2 traits:
+//  1) An 'aspect' trait named 'portal' - indicating the agent will have a board of widgets/cards
+//  2) A 'relation' trait named 'customersRelation' - indicating the agent will have navigation to a list of customer agents
+// We also set the host + node uri of the entity 
+const storeModel = new swim.Model();
+const storeEntityTrait = storeModel.appendTrait(swim.retaildemo.StoreEntityTrait, "entity");
+storeEntityTrait.hostUri.set("warp://localhost:9001");
+storeEntityTrait.nodeUri.set("/store/main");
+storeModel.appendTrait(swim.SelectableTrait, "selectable");
+storeModel.mount();
+
+storeEntityTrait.portal.insertModel();
+storeEntityTrait.customersRelation.insertModel();
+
+
+const entityFolioController = new swim.EntityFolioController();
+entityFolioController.hostUri.set("warp://localhost:9001");
+
+entityFolioController.folio.attachView().style.set({
+  flexGrow: 1,
+});
+
+entityFolioController.appBar.insertController();
+entityFolioController.navBar.insertController();
+
+entityFolioController.rootEntity.setTrait(storeEntityTrait);
+
+entityFolioController.folio.insertView(swim.HtmlView.fromNode(document.body));
+entityFolioController.mount();
+
+    </script>
+</body>
+</html>
