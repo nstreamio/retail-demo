@@ -46,11 +46,6 @@ export class OrderTypeChartController extends TimeSeriesController {
   stats(storeStatus: StoreStatus): void {
     const timestamp = this.fakeTimestamp.getNextTimestamp();
     const t = new DateTime(timestamp * 1000, TimeZone.local());
-    // const userCount = value.get("User_Count").numberValue(0);
-    // const kpi = value.get(this.kpiName.value);
-    // const alertCount = kpi.get("Alert_User_Count").numberValue(0);
-    // const alertRatio = userCount !== 0 ? alertCount / userCount : 0;
-    // const alertStatus = ClusterHistoryController.alertStatus(alertRatio);
     const dataPointKey = "" + t.time;
     
     const plotView = this.plot.attachView();
@@ -87,16 +82,5 @@ export class OrderTypeChartController extends TimeSeriesController {
       //   timing
       // );
     }
-
-    // if (this.orderStatus === OrderStatus.orderPlaced) {
-    //   console.log(`this OrderTypeChartController, orderType ${this.orderType}: ${this}`);
-    // }
-
-    // orderTypeChartController should have three custom plots which it creates and inserts automatically
-    // orderTypeChartController.stats should update all three plots by adding a new datapoint
-    // for now, let's just get one plot to appear on orderTypeChartController at a time.
-    // we will use the value for each orderType for the appropriate orderStatus (y-axis)
-    // we will use integers increasing from 0 as a placeholder for timestamps (x-axis)
-    // I must ask Ajay for a map lane so i can get this same data along with a timestamp.
   }
 }

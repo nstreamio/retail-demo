@@ -240,9 +240,6 @@ export class OrderListController extends TimeTableController {
         );
         statusCell.modifyMood(Feel.default, moodStatus!.moodModifier);
 
-        // EXAMPLE_CELL.modifyMood(Feel.default, Status.alert().moodModifier);
-        // EXAMPLE_CELL.modifyMood(Feel.default, Status.warning(0.5).moodModifier);
-
         // If no OrderController is found, create and insert a new one
       } else if (orderController === null) {
         orderController = new OrderController(nodeUri.pathName, orderType);

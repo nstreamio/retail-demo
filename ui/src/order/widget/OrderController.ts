@@ -148,46 +148,6 @@ export class OrderController extends TimeSeriesController {
 
         this.updateOrderDownlink.command(`{status:${newStatus}}`);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
     @MapDownlink({
         hostUri: 'warp://localhost:9001',

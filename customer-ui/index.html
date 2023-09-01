@@ -71,48 +71,11 @@ const bodyView = swim.HtmlView.fromNode(document.body).set({
   },
 });
 
-/*
-  THE CUSTOM WAY, USING A SIMPLE SHEETCONTROLLER
-  THIS APPEARS AT FIRST ATTEMPT TO BE A BETTER ALBEIT RAW APPROACH FOR OUR USE CASE.
-  IT DOES NOT USE ANY EXISTING SCAFFOLDING AS A BASIS FOR THIS UI SINCE NONE OF THEM REALLY APPEAR SUITABLE.
-*/
 // create base controller (AppController ? )
 const customerController = new swim.retaildemo.CustomerController();
 
 // call insertView on base controller, passing the htmlView as the parent
 customerController.sheet.insertView(bodyView);
-
-/*
-  THE ENTITYFOLIOCONTROLLER WAY
-  THIS DOES NOT SUIT OUR USE CASE SINCE THE DESIGNS DO NOT CALL FOR FOLIO-LIKE UI SCAFFOLDING
-*/
-// const customerModel = new swim.Model();
-// const customerEntityTrait = customerModel.appendTrait(swim.retaildemo.CustomerEntityTrait, "entity");
-// const customerId = (/(?<=\/customer\/)[^\s!?\/.*#|]+(?=\/|$|\?)/gm.exec(
-//   window.location.href
-// ) ?? [""])[0];
-// customerEntityTrait.hostUri.set('warp://localhost:9001');
-// customerEntityTrait.nodeUri.set(`customer/${customerId}`);
-// customerModel.appendTrait(swim.SelectableTrait, "selectable");
-// customerModel.mount();
-
-// customerEntityTrait.portal.insertModel();
-
-// const entityFolioController = new swim.EntityFolioController();
-// entityFolioController.hostUri.set('warp://localhost:9001');
-
-// entityFolioController.folio.attachView().style.set({
-//   flexGrow: 1,
-// });
-
-// entityFolioController.appBar.insertController();
-// entityFolioController.navBar.insertController();
-
-// entityFolioController.rootEntity.setTrait(customerEntityTrait);
-
-// entityFolioController.folio.insertView(swim.HtmlView.fromNode(document.body));
-// entityFolioController.mount();
-
     </script>
 </body>
 </html>
