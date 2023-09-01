@@ -1,5 +1,5 @@
-export {OrderController } from "./OrderController";
-
-export {OrderListController} from "./OrderListController";
-
-export {OrderKanbanBoardController} from "./OrderKanbanBoardController";
+export * from './CumulativeOrdersPanelController';
+export * from './OrderController';
+export * from './OrderKanbanBoardController';
+export * from './OrderListController';
+export * from './OrderStatusPieController';

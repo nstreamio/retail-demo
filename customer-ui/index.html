@@ -1,13 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Swim Retail Demo</title>
+    <title>Customer | Swim Retail Demo</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
       html, body {
         -webkit-tap-highlight-color: transparent;
+      }
+      * {
+        font-family: 'Open Sans', sans-serif;
+      }
+      .svg.red path{
+        fill: #F6511D;
+      }
+      .svg.yellow path{
+        fill: #F8D260;
+      }
+      .svg.lime path{
+        fill: #D3F48D;
+      }
+      .svg.teal path{
+        fill: #66FFDD;
+      }
+      .svg.black path{
+        fill: #000000;
       }
     </style>
 </head>
@@ -19,7 +40,7 @@
 <script src="libs/swim-vis.min.js"></script>
 <script src="libs/swim-maps.min.js"></script>
 <script src="libs/swim-gui.min.js"></script>
-<script src="libs/retail-demo.min.js"></script>
+<script src="libs/retail-demo-customer.min.js"></script>
 <script>
 
 if (navigator.standalone) {
@@ -32,6 +53,7 @@ if (navigator.standalone) {
 document.body.style.position = "fixed";
 document.body.style.margin = "0";
 document.body.style.overflow = "hidden";
+document.body.style.backgroundColor = "#212121";
 if (navigator.standalone) {
   document.body.style.width = "100vw";
   document.body.style.height = "100vh";
@@ -41,37 +63,19 @@ if (navigator.standalone) {
 }
 
 
-// Initialize and mount the top level agent (Entry point into the swim framework)
-//  For this demo it will be the 'store' agent, consisting of 2 traits:
-//  1) An 'aspect' trait named 'portal' - indicating the agent will have a board of widgets/cards
-//  2) A 'relation' trait named 'customersRelation' - indicating the agent will have navigation to a list of customer agents
-// We also set the host + node uri of the entity 
-const storeModel = new swim.Model();
-const storeEntityTrait = storeModel.appendTrait(swim.retaildemo.StoreEntityTrait, "entity");
-storeEntityTrait.hostUri.set("warp://localhost:9001");
-storeEntityTrait.nodeUri.set("/store/main");
-storeModel.appendTrait(swim.SelectableTrait, "selectable");
-storeModel.mount();
-
-storeEntityTrait.portal.insertModel();
-storeEntityTrait.customersRelation.insertModel();
-
-
-const entityFolioController = new swim.EntityFolioController();
-entityFolioController.hostUri.set("warp://localhost:9001");
-
-entityFolioController.folio.attachView().style.set({
-  flexGrow: 1,
+// create htmlView from document.body
+const bodyView = swim.HtmlView.fromNode(document.body).set({
+  style: {
+    boxSizing: 'border-box',
+    margin: '0',
+  },
 });
 
-entityFolioController.appBar.insertController();
-entityFolioController.navBar.insertController();
+// create base controller (AppController ? )
+const customerController = new swim.retaildemo.CustomerController();
 
-entityFolioController.rootEntity.setTrait(storeEntityTrait);
-
-entityFolioController.folio.insertView(swim.HtmlView.fromNode(document.body));
-entityFolioController.mount();
-
+// call insertView on base controller, passing the htmlView as the parent
+customerController.sheet.insertView(bodyView);
     </script>
 </body>
 </html>

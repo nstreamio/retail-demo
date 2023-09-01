@@ -5,3 +5,5 @@
 .vscode
 build
 out
+node_modules/
+server/bin/
