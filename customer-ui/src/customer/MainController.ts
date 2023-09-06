@@ -8,7 +8,6 @@ import { PanelView } from "@swim/panel";
 import { OrderListController } from "./OrderListController";
 import { ButtonItem, ButtonStack, ButtonStackObserver, FloatingButton } from "@swim/button";
 import {
-  CircleIcon,
   HtmlIconView,
   PolygonIcon,
   VectorIcon,
@@ -195,7 +194,7 @@ export class MainController extends BoardController {
 
       // append circle svg
       svgContainerView.appendChild(HtmlIconView, 'circle').set({
-        graphics: CircleIcon.create(),
+        graphics: PolygonIcon.create(999),
         style: {
           width: '40px',
           height: '40px',
