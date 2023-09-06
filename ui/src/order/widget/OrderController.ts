@@ -2,7 +2,7 @@
 // All rights reserved.
 
 import {Property} from "@swim/component";
-import {Form, Value} from "@swim/structure";
+import {Value} from "@swim/structure";
 import {MapDownlink} from "@swim/client";
 import {Feel, Look} from "@swim/theme";
 import type {View} from "@swim/view";

@@ -69,7 +69,7 @@
     "@swim/maps": "4.0.0-dev.20220527.3"
   },
   "scripts": {
-    "mkdir-ui": "mkdir -p dist/libs",
+    "mkdir-ui": "mkdir -p dist/libs && mkdir -p dist/assets",
     "copy-core": "cp node_modules/@swim/core/dist/*.min.js* dist/libs",
     "copy-gui": "cp node_modules/@swim/gui/dist/*.min.js* dist/libs",
     "copy-host": "cp node_modules/@swim/host/dist/*.min.js* dist/libs",
@@ -80,7 +80,7 @@
     "copy-libs": "npm run copy-core && npm run copy-host && npm run copy-ui && npm run copy-ux && npm run copy-vis && npm run copy-maps && npm run copy-gui",
     "compile": "tsc -b",
     "bundle": "cd src/ && rollup -c",
-    "copy-app": "cp index.html dist/ && cp build/javascript/*.min.js* dist/libs",
+    "copy-app": "cp index.html dist/ && cp build/javascript/*.min.js* dist/libs && cp assets/* dist/assets",
     "build": "npm run compile && npm run bundle && npm run copy-app",
     "postinstall": "npm run mkdir-ui && npm run copy-libs"
   }
