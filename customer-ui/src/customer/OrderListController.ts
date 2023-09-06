@@ -6,7 +6,7 @@ import { TimeTableController } from "@swim/widget";
 import { OrderController } from "../order";
 import { HtmlView } from "@swim/dom";
 import { View, ViewRef } from "@swim/view";
-import { ColLayout, ColView, HeaderView, TableLayout, TableView, TextCellView, TextColView } from "@swim/table";
+import { ColLayout, ColView, HeaderView, LeafView, TableLayout, TableView, TextCellView, TextColView } from "@swim/table";
 import { TraitViewRef } from "@swim/controller";
 import { PanelView } from "@swim/panel";
 import { Trait } from "@swim/model";
@@ -15,6 +15,7 @@ import { Length } from "@swim/math";
 import { Status } from "@swim/domain";
 import { OrderStatus, OrderType } from "../types";
 import { HtmlIconView, PolygonIcon, VectorIcon } from "@swim/graphics";
+import { Observes } from "@swim/util";
 
 export class OrderListController extends TimeTableController {
   readonly listTitle: string;
@@ -212,7 +213,6 @@ export class OrderListController extends TimeTableController {
       } else if (value.get("products").get("C").numberValue() ?? 0) {
         orderType = OrderType.OrderC;
       }
-      console.log('orderType: ', orderType);
 
       if (status === "pickupCompleted") {
         if (orderController) {
@@ -224,12 +224,10 @@ export class OrderListController extends TimeTableController {
         let moodStatus = OrderListController.orderStatusMood.get(status);
 
         const shapeCell = orderController.shapeCell.attachView() as TextCellView;
-        ['red', 'yellow', 'lime', 'teal'].forEach(color => {
+        ['orange', 'yellow', 'lime', 'teal'].forEach(color => {
           shapeCell.content.view?.node.classList.remove(color);
         });
         shapeCell.content.view?.node.classList.add(OrderListController.getColorFromStatus(status));
-        console.log('shapeCell.content.view?.classList after: ', shapeCell.content.view?.classList.toString());
-        console.log('shapeCell.content.view?.node.classList after: ', shapeCell.content.view?.node.classList.toString());
 
         const orderCell = orderController.orderCell.attachView() as TextCellView;
         orderCell.modifyMood(Feel.default, moodStatus!.moodModifier);
@@ -296,15 +294,6 @@ export class OrderListController extends TimeTableController {
         orderController.orderCell.insertView();
         orderController.statusCell.insertView();
 
-        // set row styles
-        orderController.row.view?.set({
-          style: {
-            height: '72px',
-          }
-        });
-        // set leaf styles
-        orderController.leaf.view?.set({ style: { height: '40px' } });
-
         // add the OrderController into the series
         this.owner.series.addController(
           orderController,
@@ -351,29 +340,29 @@ export class OrderListController extends TimeTableController {
 
   private static getColorFromStatus(status: OrderStatus): string {
     if (status === OrderStatus.orderPlaced) {
-      return "red";
+      return "orange";
     } else if (status === OrderStatus.orderProcessed) {
       return "yellow";
     }
     return "teal";
   }
 
-  private static orderStatusMood: Map<string, Status> = new Map<string, Status>(
+  private static orderStatusMood: Map<OrderStatus, Status> = new Map<OrderStatus, Status>(
     [
-      ["orderPlaced", Status.alert()],
-      ["orderProcessed", Status.warning()],
-      ["readyForPickup", Status.normal()],
-      ["unknown", Status.unknown()],
+      [OrderStatus.orderPlaced, Status.improving(0, 1, 2, 3, 4)(1.4)],
+      [OrderStatus.orderProcessed, Status.improving(0, 1, 2, 3, 4)(2)],
+      [OrderStatus.readyForPickup, Status.improving(0, 1, 2, 3, 4)(3)],
+      [OrderStatus.pickupCompleted, Status.unknown()],
     ]
   );
 
-  private static orderStatusDescription: Map<string, string> = new Map<
-    string,
+  private static orderStatusDescription: Map<OrderStatus, string> = new Map<
+    OrderStatus,
     string
   >([
-    ["orderPlaced", "Received by store"],
-    ["orderProcessed", "Store is processing order"],
-    ["readyForPickup", "Order is ready for pickup!"],
-    ["unknown", "Unknown status"],
+    [OrderStatus.orderPlaced, "Received by store"],
+    [OrderStatus.orderProcessed, "Store is processing order"],
+    [OrderStatus.readyForPickup, "Order is ready for pickup!"],
+    [OrderStatus.pickupCompleted, "Unknown status"],
   ]);
 }

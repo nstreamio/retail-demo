@@ -6,10 +6,11 @@ import { ViewRef } from "@swim/view";
 import { HtmlView } from "@swim/dom";
 import { PanelView } from "@swim/panel";
 import { OrderListController } from "./OrderListController";
-import { ButtonItem, ButtonStack, FloatingButton } from "@swim/button";
+import { ButtonItem, ButtonStack, ButtonStackObserver, FloatingButton } from "@swim/button";
 import {
   CircleIcon,
   HtmlIconView,
+  PolygonIcon,
   VectorIcon,
 } from "@swim/graphics";
 import { MapDownlink, ValueDownlink } from "@swim/client";
@@ -18,6 +19,7 @@ import { Value } from "@swim/structure";
 import { Transform } from "@swim/math";
 import { OrderStatus, OrderType } from "../types";
 import { TimeSeriesController } from "@swim/widget";
+import { Observes } from "@swim/util";
 
 export class MainController extends BoardController {
   static readonly MAIN_PANEL_KEY: string = "mainPanelView";
@@ -262,20 +264,35 @@ export class MainController extends BoardController {
         "circle"
       );
       circle.button?.style.backgroundColor.set('#F8D260');
-      const circleLabel = circle.insertChild(HtmlView, null, "label");
+      const circleLabel = circle.insertChild(HtmlView, null, "label").set({
+        style: {
+          height: '24px',
+          lineHeight: '24px',
+          paddingTop: '2px',
+          paddingBottom: '2px',
+          paddingLeft: '4px',
+          paddingRight: '4px',
+          backgroundColor: 'rgba(33, 33, 33, 0.8)',
+          borderRadius: '4px',
+          boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.8)',
+        },
+        classList: ['button-label', 'circle-label'],
+      });
       circleLabel.node.innerText = "Order C: $30.00";
-      circle.addEventListener("click", handleClick(OrderType.OrderC));
-      circle.button?.icon.push(
-        CircleIcon.create(),
+      const circleButton = circle.button;
+      circleButton?.icon.push(
+        PolygonIcon.create(999),
         false
-      );
-      circle.button?.icon.view?.set({
+      ).set({
         style: {
           width: '24px',
-          height: '24px'
+          height: '24px',
+          left: '8px',
+          top: '8px',
         },
         iconLayout: {width: 24, height: 24},
       });
+      circle.addEventListener("click", handleClick(OrderType.OrderC));
 
       /* square icon button */
       const square: ButtonItem = buttonStackView.appendChild(
@@ -283,7 +300,20 @@ export class MainController extends BoardController {
         "square"
       );
       square.button?.style.backgroundColor.set('#F8D260');
-      const squareLabel = square.insertChild(HtmlView, null, "label");
+      const squareLabel = square.insertChild(HtmlView, null, "label").set({
+        style: {
+          height: '24px',
+          lineHeight: '24px',
+          paddingTop: '2px',
+          paddingBottom: '2px',
+          paddingLeft: '4px',
+          paddingRight: '4px',
+          backgroundColor: 'rgba(33, 33, 33, 0.8)',
+          borderRadius: '4px',
+          boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.8)',
+        },
+        classList: ['button-label', 'circle-label'],
+      });
       squareLabel.node.innerText = "Order B: $20.00";
       square.addEventListener("click", handleClick(OrderType.OrderB));
       square.button?.icon.push(
@@ -297,7 +327,20 @@ export class MainController extends BoardController {
         "triangle"
       );
       triangle.button?.style.backgroundColor.set('#F8D260');
-      const triangleLabel = triangle.insertChild(HtmlView, null, "label");
+      const triangleLabel = triangle.insertChild(HtmlView, null, "label").set({
+        style: {
+          height: '24px',
+          lineHeight: '24px',
+          paddingTop: '4px',
+          paddingBottom: '4px',
+          paddingLeft: '6px',
+          paddingRight: '6px',
+          backgroundColor: 'rgba(33, 33, 33, 0.8)',
+          borderRadius: '4px',
+          boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.8)',
+        },
+        classList: ['button-label', 'circle-label'],
+      });
       triangleLabel.node.innerText = "Order A: $10.00";
       triangle.addEventListener("click", handleClick(OrderType.OrderA));
       triangle.button?.icon.push(
@@ -307,8 +350,13 @@ export class MainController extends BoardController {
 
       return buttonStackView;
     },
+    initView(buttonStackView: ButtonStack): void {
+      buttonStackView.node.addEventListener('click', () => {
+        buttonStackView.presence.toggle();
+      });
+    },
   })
-  readonly placeOrderFab!: ViewRef<this, ButtonStack>;
+  readonly placeOrderFab!: ViewRef<this, ButtonStack> & Observes<ButtonStackObserver>;
 
   @ViewRef({
     viewType: FloatingButton,
