@@ -18,6 +18,9 @@ import { OrderStatus, OrderType, StoreStatus } from "../../types";
 import { Color } from "@swim/style";
 import { OrderTypeChartController } from "./OrderTypeChartController";
 import { CumulativeOrdersSectionController } from "./CumulativeOrdersSectionController";
+import { ChartView } from "@swim/chart";
+import { DateTime } from "@swim/time";
+import { Observes } from "@swim/util";
 
 /** @public */
 export class OrderListController extends TimeTableController {
@@ -36,17 +39,9 @@ export class OrderListController extends TimeTableController {
       super.initView(panelView);
 
       // chart stuff first
-      const chartPanel = this.owner.chartPanel.attachView().set({
-        unitWidth: 1,
-        unitHeight: 1 / 6,
-        minFrameHeight: 200,
-        minFrameWidth: 0,
-        style: {
-          margin: 0,
-        }
-      });
-      chartPanel.classList.add('olc-chart-panel');
-      const chartView = this.owner.chart.insertView();
+      this.owner.chartPanel.attachView();
+      this.owner.chart.insertView();
+      const graphView = this.owner.graph.insertView();
       // add some classes
       this.owner.chartCanvas.view?.classList.add('olc-chart-canvas');
       // add an OrderTypeChartController for each OrderType to this.series
@@ -55,19 +50,21 @@ export class OrderListController extends TimeTableController {
         null,
         OrderType.OrderA
       );
-      orderTypeChartControllerA.plot.insertView(chartView, void 0, void 0, OrderType.OrderA);
+      orderTypeChartControllerA.plot.insertView(graphView, void 0, void 0, OrderType.OrderA);
+
       const orderTypeChartControllerB = this.owner.series.addController(
         new OrderTypeChartController(this.owner.eventKey, OrderType.OrderB),
         null,
         OrderType.OrderB
       );
-      orderTypeChartControllerB.plot.insertView(chartView, void 0, void 0, OrderType.OrderB);
+      orderTypeChartControllerB.plot.insertView(graphView, void 0, void 0, OrderType.OrderB);
+
       const orderTypeChartControllerC = this.owner.series.addController(
         new OrderTypeChartController(this.owner.eventKey, OrderType.OrderC),
         null,
         OrderType.OrderC
       );
-      orderTypeChartControllerC.plot.insertView(chartView, void 0, void 0, OrderType.OrderC);
+      orderTypeChartControllerC.plot.insertView(graphView, void 0, void 0, OrderType.OrderC);
 
       // then table stuff
       const tablePanel = this.owner.tablePanel.insertView().set({
@@ -100,6 +97,38 @@ export class OrderListController extends TimeTableController {
     },
   })
   override readonly panel!: TraitViewRef<this, Trait, PanelView> & TimeTableController["panel"];
+
+  @ViewRef({
+    viewType: PanelView,
+    extends: true,
+    initView(chartPanelView): void {
+      chartPanelView.set({
+        unitWidth: 1,
+        unitHeight: 1 / 6,
+        minFrameHeight: 200,
+        minFrameWidth: 0,
+        style: {
+          margin: 0,
+        },
+        classList: ['olc-chart-panel'],
+      });
+    }
+  })
+  override readonly chartPanel!: ViewRef<this, PanelView>;
+
+  @ViewRef({
+    viewType: ChartView,
+    extends: true,
+    initView(chartView: ChartView<DateTime, number>): void {
+      chartView.setIntrinsic({
+        gutterTop: 0,
+        gutterRight: 12,
+        gutterBottom: 12,
+        gutterLeft: 18,
+      });
+    }
+  })
+  override readonly chart!: ViewRef<this, ChartView<DateTime, number>> & Observes<ChartView<DateTime, number>>;
 
   @ViewRef({
     extends: true,
@@ -190,6 +219,12 @@ export class OrderListController extends TimeTableController {
         orderController.customerCell.insertView();
         orderController.orderCell.insertView();
         orderController.timeInProcessingCell.insertView();
+
+        const customerId = value.get('customerId').stringValue();
+        if (customerId === 'Customer0') {
+          console.log('found Customer0 in OrderListController');
+          orderController.pinned.setValue(true);
+        }
 
         // call .stats() method on controller to populate cells
         orderController.stats.set(value);

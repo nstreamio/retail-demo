@@ -86,7 +86,7 @@ export class OrderStatusPieController extends TimePieController {
     extends: true,
     initView(sliceView: SliceView): void {
       sliceView.set({
-        sliceColor: Look.accentColor,
+        sliceColor: OrderStatusPieController.sliceColors.get(OrderType.OrderA),
         font: "14px sans-serif",
         textColor: Look.backgroundColor,
         innerRadius: 30,
@@ -95,6 +95,7 @@ export class OrderStatusPieController extends TimePieController {
         legend: "A",
       });
       sliceView.modifyMood(Feel.default, Status.Normal!.moodModifier);
+      sliceView.legend.attachView().modifyMood(Feel.default, [[Feel.selected, 2]]);
     }
   })
   readonly aSlice!: ViewRef<this, SliceView>;
@@ -105,7 +106,7 @@ export class OrderStatusPieController extends TimePieController {
     extends: true,
     initView(sliceView: SliceView): void {
       sliceView.set({
-        sliceColor: Look.accentColor,
+        sliceColor: OrderStatusPieController.sliceColors.get(OrderType.OrderB),
         font: "14px sans-serif",
         textColor: Look.backgroundColor,
         innerRadius: 30,
@@ -113,8 +114,8 @@ export class OrderStatusPieController extends TimePieController {
         value: 1 / 3,
         legend: "B",
       });
-      // sliceView.modifyMood(Feel.default, OrderStatusPieController.alertStatus(5).moodModifier);
       sliceView.modifyMood(Feel.default, Status.Warning!.moodModifier);
+      sliceView.legend.attachView().modifyMood(Feel.default, [[Feel.selected, 2]]);
     }
   })
   readonly bSlice!: ViewRef<this, SliceView>;
@@ -125,7 +126,7 @@ export class OrderStatusPieController extends TimePieController {
     extends: true,
     initView(sliceView: SliceView): void {
       sliceView.set({
-        sliceColor: Look.focusColor,
+        sliceColor: OrderStatusPieController.sliceColors.get(OrderType.OrderC),
         font: "14px sans-serif",
         textColor: Look.backgroundColor,
         innerRadius: 30,
@@ -133,8 +134,8 @@ export class OrderStatusPieController extends TimePieController {
         value: 1 / 3,
         legend: "C",
       });
-      // sliceView.modifyMood(Feel.default, OrderStatusPieController.alertStatus(5).moodModifier);
       sliceView.modifyMood(Feel.default, Status.Unknown!.moodModifier);
+      sliceView.legend.attachView().modifyMood(Feel.default, [[Feel.selected, 2]]);
     }
   })
   readonly cSlice!: ViewRef<this, SliceView>;
@@ -196,4 +197,12 @@ export class OrderStatusPieController extends TimePieController {
   };
 
   static readonly alertStatus: Mapping<number, Status> = Status.improving(0, 2.5, 3.5, 4.5, 5);
+
+  static readonly sliceColors: Map<OrderType, string> = new Map<OrderType, string>(
+    [
+      [OrderType.OrderA, '#5CA0E7'],
+      [OrderType.OrderB, '#A40E4C'],
+      [OrderType.OrderC, '#5A945E'],
+    ]
+  )
 }

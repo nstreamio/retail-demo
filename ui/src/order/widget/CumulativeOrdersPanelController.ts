@@ -53,7 +53,7 @@ export class CumulativeOrdersPanelController extends PanelController {
           textAlign: 'center',
           margin: 0,
           marginBottom: '16px',
-          color: '#5ba2ed',
+          color: '#CCCCCC',
         }
       })
     }

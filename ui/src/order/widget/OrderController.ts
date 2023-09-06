@@ -7,7 +7,7 @@ import {MapDownlink} from "@swim/client";
 import {Feel, Look} from "@swim/theme";
 import type {View} from "@swim/view";
 import {ViewRef} from "@swim/view";
-import {CellView, RowView} from "@swim/table";
+import {CellView, LeafView, RowView} from "@swim/table";
 import {TextCellView} from "@swim/table";
 import { Uri } from "@swim/uri";
 import {TimeSeriesController} from "@swim/widget";
@@ -45,6 +45,23 @@ export class OrderController extends TimeSeriesController {
         }
     })
     override readonly row!: ViewRef<this, RowView>;
+
+    @ViewRef({
+        viewType: LeafView,
+        extends: true,
+        initView(leafView: LeafView): void {
+            leafView.node.addEventListener('mouseenter', () => {
+                console.log('mouseenter');
+                this.owner.leaf.attachView().highlight.set(true);
+            });
+            leafView.node.addEventListener('mouseleave', () => {
+                console.log('mouseleave');
+                this.owner.leaf.attachView().highlight.set(false);
+            });
+            return;
+        }
+    })
+    override readonly leaf!: ViewRef<this, LeafView>;
 
     @ViewRef({
         viewType: CellView,
@@ -165,9 +182,12 @@ export class OrderController extends TimeSeriesController {
     ];
 
 
-    private static orderStatusMood: Map<String, Status> = new Map<String, Status>([
-        ["orderPlaced", Status.alert()],
-        ["orderProcessed", Status.warning()],
-        ["readyForPickup", Status.normal()]
-    ]);
+    private static orderStatusMood: Map<OrderStatus, Status> = new Map<OrderStatus, Status>(
+        [
+          [OrderStatus.orderPlaced, Status.improving(0, 1, 2, 3, 4)(1.4)],
+          [OrderStatus.orderProcessed, Status.improving(0, 1, 2, 3, 4)(2)],
+          [OrderStatus.readyForPickup, Status.improving(0, 1, 2, 3, 4)(3)],
+          [OrderStatus.pickupCompleted, Status.unknown()],
+        ]
+    );
 }
