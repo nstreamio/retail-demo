@@ -30,6 +30,10 @@ public class StoreAgent extends AbstractAgent {
     final Map<String, Map<String, Integer>> statusOrders = new HashMap<>();
     for (Value orderId: orders.keySet()) {
       final Value orderStatus = this.orders.get(orderId);
+      if (!orderStatus.isDefined()) {
+        this.orders.remove(orderId);
+        continue;
+      }
       final String status = orderStatus.get("status").stringValue("");
       if (!status.equals("")) {
         final Map<String, Integer> statusOrder = statusOrders.getOrDefault(status, new HashMap<>());

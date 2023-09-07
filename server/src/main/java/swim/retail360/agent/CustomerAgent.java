@@ -31,43 +31,25 @@ public class CustomerAgent extends AbstractAgent {
           .open());
 
   private void updateStatus() {
-    final int orderCount = this.orders.size();
-    long mostRecentEvent = 0;
-    final Map<String, Integer> orderStatusCount = new HashMap<>();
-    final Map<String, Integer> orderProductCount = new HashMap<>();
-
-    for (final Value orderState: this.orders.values()) {
-
-      // Calculate the most recent timestamp across all orders
-      if (orderState.get("timestamp").isDefined()) {
-        final long orderTimestamp = orderState.get("timestamp").longValue();
-        if (orderTimestamp > mostRecentEvent) {
-          mostRecentEvent = orderTimestamp;
-        }
+    final Map<String, Map<String, Integer>> statusOrders = new HashMap<>();
+    for (Value orderId: orders.keySet()) {
+      final Value orderStatus = this.orders.get(orderId);
+      if (!orderStatus.isDefined()) {
+        this.orders.remove(orderId);
+        continue;
       }
-
-      // Count the states across all orders
-      final String eventType = orderState.get("status").stringValue(null);
-      if (eventType != null) {
-        orderStatusCount.put(eventType, orderStatusCount.getOrDefault(eventType, 0) + 1);
+      final String status = orderStatus.get("status").stringValue("");
+      if (!status.equals("")) {
+        final Map<String, Integer> statusOrder = statusOrders.getOrDefault(status, new HashMap<>());
+        orderStatus.get("products").forEach(item ->
+              statusOrder.put(
+                    item.key().stringValue(),
+                    statusOrder.getOrDefault(item.key().stringValue(), 0) + item.intValue(0))
+        );
+        statusOrders.put(status, statusOrder);
       }
-
-      // Count the products across all orders
-      orderState.get("products").forEach(item ->
-          orderProductCount.put(
-              item.key().stringValue(),
-              orderProductCount.getOrDefault(item.key().stringValue(), 0) + item.intValue(0))
-      );
     }
-
-    this.status.set(
-        Record.create(5)
-            .slot("customerId", this.nodeUri().pathName())
-            .slot("orderCount", orderCount)
-            .slot("timestamp", mostRecentEvent)
-            .slot("orderStates", Form.forMap(Form.forString(), Form.forInteger()).mold(orderStatusCount).toValue())
-            .slot("products", Form.forMap(Form.forString(), Form.forInteger()).mold(orderProductCount).toValue())
-    );
+    this.status.set(Form.forMap(Form.forString(), Form.forMap(Form.forString(), Form.forInteger())).mold(statusOrders).toValue());
   }
 
   @SwimLane("placeOrder")
