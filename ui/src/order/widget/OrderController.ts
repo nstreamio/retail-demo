@@ -51,11 +51,11 @@ export class OrderController extends TimeSeriesController {
         extends: true,
         initView(leafView: LeafView): void {
             leafView.node.addEventListener('mouseenter', () => {
-                console.log('mouseenter');
+                // console.log('mouseenter');
                 this.owner.leaf.attachView().highlight.set(true);
             });
             leafView.node.addEventListener('mouseleave', () => {
-                console.log('mouseleave');
+                // console.log('mouseleave');
                 this.owner.leaf.attachView().highlight.set(false);
             });
             return;
@@ -163,6 +163,9 @@ export class OrderController extends TimeSeriesController {
         const idx = OrderController.orderStatusProgression.indexOf(this.eventKey);
         const newStatus = OrderController.orderStatusProgression[idx + 1];
 
+        if (!this.updateOrderDownlink.opened) {
+            this.updateOrderDownlink.open();
+        }
         this.updateOrderDownlink.command(`{status:${newStatus}}`);
     }
     
