@@ -5,6 +5,7 @@ import { OrderStatus, OrderType } from "../../types";
 import { ValueDownlink } from "@swim/client";
 import { StoreStatus } from "../../types";
 import { Value } from "@swim/structure";
+import { OrderListController } from "./OrderListController";
 
 export class CumulativeOrdersPanelController extends PanelController {
   readonly orderType: OrderType;
@@ -14,7 +15,10 @@ export class CumulativeOrdersPanelController extends PanelController {
     super();
     this.orderType = orderType;
     this.isCumulative = isCumulative;
-    this.mainStatusDownlink.open();
+    window.setTimeout(() => {
+      this.statusDownlink.setNodeUri(this.nodeUri.value?.stringValue ?? '');
+      this.statusDownlink.open();
+    }, 300);
     this.initView();
   }
 
@@ -107,11 +111,10 @@ export class CumulativeOrdersPanelController extends PanelController {
 
   @ValueDownlink({
     hostUri: 'warp://localhost:9001',
-    nodeUri: 'store/main',
     laneUri: 'status',
     consumed: true,
     didSet(value: Value): void {
-      const storeStatus = this.owner.parseStoreStatus(value);
+      const storeStatus = OrderListController.parseStoreStatus(value);
 
       if (this.owner.orderType !== OrderType.Unknown) {
         const readyCount = storeStatus[OrderStatus.readyForPickup][this.owner.orderType].count;
@@ -130,26 +133,5 @@ export class CumulativeOrdersPanelController extends PanelController {
       }
     }
   })
-  readonly mainStatusDownlink!: ValueDownlink<this>;
-
-  private parseStoreStatus(v: Value): StoreStatus {
-    return [OrderStatus.orderPlaced, OrderStatus.orderProcessed, OrderStatus.readyForPickup, OrderStatus.pickupCompleted].reduce((acc, s) => {
-      [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
-        let count = v.get(s).get(t).numberValue(0);
-        let value = count * CumulativeOrdersPanelController.valuePerOrderType[t];
-        if (!acc[s]) { acc[s] = { total: { count: 0, value: 0 } } as StoreStatus[OrderStatus]; }
-        acc[s][t] = { count, value };
-        acc[s].total.count += count;
-        acc[s].total.value += value;
-      });
-      return acc;
-    }, {} as StoreStatus);
-  };
-
-  private static valuePerOrderType: Record<OrderType, number> = {
-    [OrderType.OrderA]: 10,
-    [OrderType.OrderB]: 20,
-    [OrderType.OrderC]: 30,
-    [OrderType.Unknown]: 0,
-  };
+  readonly statusDownlink!: ValueDownlink<this>;
 }

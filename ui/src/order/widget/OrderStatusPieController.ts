@@ -28,7 +28,11 @@ export class OrderStatusPieController extends TimePieController {
     this.orderStatus = orderStatus;
     this.headerTitle = headerTitle;
 
-    this.mainStatusDownlink.open();
+    // open downlink
+    window.setTimeout(() => {
+      this.statusDownlink.setNodeUri(this.nodeUri.value?.stringValue ?? '');
+      this.statusDownlink.open();
+    }, 300);
   }
 
   @TraitViewRef({
@@ -154,7 +158,6 @@ export class OrderStatusPieController extends TimePieController {
 
   @ValueDownlink({
     hostUri: 'warp://localhost:9001',
-    nodeUri: 'store/main',
     laneUri: 'status',
     consumed: true,
     didSet(value: Value): void {
@@ -171,7 +174,7 @@ export class OrderStatusPieController extends TimePieController {
       this.owner.totalMonetaryValue.view!.node.innerText = totalValue ? `$${totalValue}` : this.owner.getEmptyStateText();
     }
   })
-  readonly mainStatusDownlink!: ValueDownlink<this>;
+  readonly statusDownlink!: ValueDownlink<this>;
 
   private getEmptyStateText(): string {
     if (this.orderStatus === OrderStatus.orderPlaced) {

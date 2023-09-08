@@ -93,7 +93,10 @@ export class OrderListController extends TimeTableController {
       }
 
       // open downlink
-      this.owner.mainStatusDownlink.open();
+      window.setTimeout(() => {
+        this.owner.statusDownlink.setNodeUri(this.owner.nodeUri.value?.stringValue ?? '');
+        this.owner.statusDownlink.open();
+      }, 300);
     },
   })
   override readonly panel!: TraitViewRef<this, Trait, PanelView> & TimeTableController["panel"];
@@ -220,12 +223,6 @@ export class OrderListController extends TimeTableController {
         orderController.orderCell.insertView();
         orderController.timeInProcessingCell.insertView();
 
-        const customerId = value.get('customerId').stringValue();
-        if (customerId === 'Customer0') {
-          console.log('found Customer0 in OrderListController');
-          orderController.pinned.setValue(true);
-        }
-
         // call .stats() method on controller to populate cells
         orderController.stats.set(value);
 
@@ -247,7 +244,6 @@ export class OrderListController extends TimeTableController {
 
   @ValueDownlink({
     hostUri: 'warp://localhost:9001',
-    nodeUri: 'store/main',
     laneUri: 'status',
     consumed: true,
     didSet(value: Value): void {
@@ -268,7 +264,7 @@ export class OrderListController extends TimeTableController {
       })
     }
   })
-  readonly mainStatusDownlink!: ValueDownlink<this>;
+  readonly statusDownlink!: ValueDownlink<this>;
 
   static parseStoreStatus(v: Value): StoreStatus {
     return [OrderStatus.orderPlaced, OrderStatus.orderProcessed, OrderStatus.readyForPickup, OrderStatus.pickupCompleted].reduce((acc, s) => {
