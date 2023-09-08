@@ -193,6 +193,21 @@ export class OrderListController extends TimeTableController {
   })
   readonly statusCol!: ViewRef<this, ColView>;
 
+  // lane: placeOrder BEFORE
+  // @event(node:"/customer/cam",lane:placeOrder){products:{C:1},status:orderPlaced,timestamp:1694152466604}
+  // lane: placeOrder AFTER
+  // @event(node:"/customer/cam",lane:placeOrder){products:{C:1},status:orderPlaced,timestamp:1694153205335}
+
+  // lane: status BEFORE
+  // @event(node:"/customer/cam",lane:status){customerId:cam,orderCount:5,timestamp:1694152466609,orderStates:{orderPlaced:5},products:{A:3,B:1,C:1}}
+  // lane: status AFTER
+  // @event(node:"/customer/cam",lane:status){orderPlaced:{A:3,B:1,C:1}}
+
+  // lane: orders BEFORE
+  // @event(node:"/customer/cam",lane:orders)@update(key:"/order/58700262-7835-4686-a8f1-6789dc3c5396"){orderId:"58700262-7835-4686-a8f1-6789dc3c5396",customerId:cam,products:{C:1},status:orderPlaced,timestamp:1694152466609}
+  // lane: orders AFTER
+  // @event(node:"/customer/cam",lane:orders)@update(key:"/order/657b812b-cc39-4f5f-a175-c244deca6875"){orderId:"657b812b-cc39-4f5f-a175-c244deca6875",customerId:cam,products:{C:1},status:orderPlaced,timestamp:1694153205338}
+
   @MapDownlink({
     hostUri: "warp://localhost:9001",
     laneUri: "orders",
@@ -203,8 +218,10 @@ export class OrderListController extends TimeTableController {
         nodeUri.pathName,
         OrderController
       );
+      console.log('!!orderController: ', !!orderController);
 
       const status: OrderStatus = (value.get("status").stringValue() ?? "unknown") as OrderStatus;
+      console.log('status: ', status);
       let orderType: OrderType = OrderType.Unknown;
       if (value.get("products").get("A").numberValue() ?? 0) {
         orderType = OrderType.OrderA;
@@ -213,14 +230,18 @@ export class OrderListController extends TimeTableController {
       } else if (value.get("products").get("C").numberValue() ?? 0) {
         orderType = OrderType.OrderC;
       }
+      console.log('orderType: ', orderType);
 
       if (status === "pickupCompleted") {
+        console.log('status was pickupCompleted');
         if (orderController) {
+          console.log('removing child 1');
           this.owner.removeChild(nodeUri.pathName);
         }
 
       // If there is a new order, and the order is the same status that his controller is managing then add it to the list
       } else if (orderController) {
+        console.log('existing orderController found');
         let moodStatus = OrderListController.orderStatusMood.get(status);
 
         const shapeCell = orderController.shapeCell.attachView() as TextCellView;
@@ -240,6 +261,7 @@ export class OrderListController extends TimeTableController {
 
         // If no OrderController is found, create and insert a new one
       } else if (orderController === null) {
+        console.log('no existing orderController found');
         orderController = new OrderController(nodeUri.pathName, orderType);
         orderController.title.setValue(nodeUri.pathName);
 
@@ -295,6 +317,7 @@ export class OrderListController extends TimeTableController {
         orderController.statusCell.insertView();
 
         // add the OrderController into the series
+        console.log('adding the new orderController to the series');
         this.owner.series.addController(
           orderController,
           void 0,

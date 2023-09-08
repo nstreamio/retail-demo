@@ -16,7 +16,7 @@ import { MapDownlink, ValueDownlink } from "@swim/client";
 import { Uri } from "@swim/uri";
 import { Value } from "@swim/structure";
 import { Transform } from "@swim/math";
-import { OrderStatus, OrderType } from "../types";
+import { OrderStatus, OrderType, StoreStatus } from "../types";
 import { TimeSeriesController } from "@swim/widget";
 import { Observes } from "@swim/util";
 
@@ -419,22 +419,24 @@ export class MainController extends BoardController {
   })
   readonly orderListController!: ControllerRef<this, OrderListController>;
 
+  // lane: status AFTER
+  // @event(node:"/customer/cam",lane:status){orderPlaced:{A:5,B:2,C:1}}
   @ValueDownlink({
     hostUri: 'warp://localhost:9001',
     laneUri: 'status',
     consumed: true,
     didSet(value: Value): void {
+      const status = MainController.parseStoreStatus(value);
       // propagate new value of inFlightCount
-      const orderCount = value.get('orderCount').numberValue() ?? 0;
-      const pickupCompleted = value.get('orderStates').get(OrderStatus.pickupCompleted).numberValue() ?? 0;
-      const newInFlightCount = orderCount - pickupCompleted;
+      const newInFlightCount = [
+        OrderStatus.orderPlaced,
+        OrderStatus.orderProcessed,
+        OrderStatus.readyForPickup
+      ].reduce((acc, nextStatus: OrderStatus) => acc + status[nextStatus].total.count, 0);
       this.owner.inFlightCount.set(newInFlightCount);
 
       // propagate new value of pickupReady
-      const orderPlaced = value.get('orderStates').get(OrderStatus.orderPlaced).numberValue() ?? 0;
-      const orderProcessed = value.get('orderStates').get(OrderStatus.orderProcessed).numberValue() ?? 0;
-      const readyForPickup = value.get('orderStates').get(OrderStatus.readyForPickup).numberValue() ?? 0;
-      const newPickupReadyValue = orderPlaced === 0 && orderProcessed === 0 && readyForPickup > 0
+      const newPickupReadyValue = !status.orderPlaced.total.count && !status.orderProcessed.total.count && !!status.readyForPickup.total.count;
       this.owner.pickupReady.set(newPickupReadyValue);
     },
   })
@@ -482,4 +484,25 @@ export class MainController extends BoardController {
         this.updateOrderDownlink.close();
       })
   }
+
+  static parseStoreStatus(v: Value): StoreStatus {
+    return [OrderStatus.orderPlaced, OrderStatus.orderProcessed, OrderStatus.readyForPickup, OrderStatus.pickupCompleted].reduce((acc, s) => {
+      [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
+        let count = v.get(s).get(t).numberValue(0);
+        let value = count * MainController.valuePerOrderType[t];
+        if (!acc[s]) { acc[s] = { total: { count: 0, value: 0 } } as StoreStatus[OrderStatus]; }
+        acc[s][t] = { count, value };
+        acc[s].total.count += count;
+        acc[s].total.value += value;
+      });
+      return acc;
+    }, {} as StoreStatus);
+  };
+
+  private static valuePerOrderType: Record<OrderType, number> = {
+    [OrderType.OrderA]: 10,
+    [OrderType.OrderB]: 20,
+    [OrderType.OrderC]: 30,
+    [OrderType.Unknown]: 0,
+  };
 }
