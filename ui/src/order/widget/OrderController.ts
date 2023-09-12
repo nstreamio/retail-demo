@@ -66,14 +66,6 @@ export class OrderController extends TimeSeriesController {
                     console.warn('No OrderKanbanBoardController found for some reason!');
                 }
             });
-            leafView.node.addEventListener('mouseleave', () => {
-                const kbController = this.owner.getAncestor(OrderKanbanBoardController);
-                if (kbController) {
-                    kbController.focusedCustomerId.setValue('');
-                } else {
-                    console.warn('No OrderKanbanBoardController found for some reason!');
-                }
-            });
             return;
         }
     })

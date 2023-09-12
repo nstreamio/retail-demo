@@ -153,6 +153,16 @@ export class OrderListController extends TimeTableController {
       this.owner.timeInProcessingCol.insertView(headerView);
       return headerView;
     },
+    initView(headerView: HeaderView): void {
+      headerView.node.addEventListener('mouseenter', () => {
+        const kbController = this.owner.getAncestor(OrderKanbanBoardController);
+        if (kbController) {
+            kbController.focusedCustomerId.setValue('');
+        } else {
+            console.warn('No OrderKanbanBoardController found for some reason!');
+        }
+      });
+    }
   })
   override readonly header!: ViewRef<this, HeaderView> & TimeTableController["header"];
 
@@ -165,6 +175,16 @@ export class OrderListController extends TimeTableController {
       cols.push(ColLayout.create("timeInProcessing", 0, 0, '124px', false, false, Look.accentColor));
       return new TableLayout(null, null, null, Length.px(12), cols);
     },
+    initView(tableView: TableView): void {
+      tableView.node.addEventListener('mouseleave', () => {
+        const kbController = this.owner.getAncestor(OrderKanbanBoardController);
+        if (kbController) {
+            kbController.focusedCustomerId.setValue('');
+        } else {
+            console.warn('No OrderKanbanBoardController found for some reason!');
+        }
+      });
+    }
   })
   override readonly table!: ViewRef<this, TableView> & TimeTableController["table"];
 
