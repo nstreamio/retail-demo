@@ -8,6 +8,7 @@ import {EntityTrait} from "@swim/domain";
 import { OrderListController } from "..";
 import { OrderStatus } from "../../types";
 import { OrderStatusPieController } from "./OrderStatusPieController";
+import { Property } from "@swim/component";
 
 /** @public */
 export class OrderKanbanBoardController extends BoardController {
@@ -44,7 +45,7 @@ export class OrderKanbanBoardController extends BoardController {
       }
     });
 
-    const orderPlacedListController = orderPlacedPanelController.appendChild(new OrderListController(OrderStatus.orderPlaced), `List${OrderStatus.orderPlaced}`);
+    const orderPlacedListController = orderPlacedPanelController.appendChild(new OrderListController(OrderStatus.orderPlaced, this), `List${OrderStatus.orderPlaced}`);
     orderPlacedListController.panel.insertView(orderPlacedPanelView).set({
       unitWidth: 1,
       unitHeight: 2 / 3,
@@ -71,7 +72,7 @@ export class OrderKanbanBoardController extends BoardController {
       }
     });
 
-    const orderProcessedListController = orderProcessedPanelController.appendChild(new OrderListController(OrderStatus.orderProcessed), `List${OrderStatus.orderProcessed}`);
+    const orderProcessedListController = orderProcessedPanelController.appendChild(new OrderListController(OrderStatus.orderProcessed, this), `List${OrderStatus.orderProcessed}`);
     orderProcessedListController.panel.insertView(orderProcessedPanelView).set({
       unitWidth: 1,
       unitHeight: 2 / 3,
@@ -98,7 +99,7 @@ export class OrderKanbanBoardController extends BoardController {
       }
     });
 
-    const orderReadyListController = orderReadyPanelController.appendChild(new OrderListController(OrderStatus.readyForPickup), `List${OrderStatus.readyForPickup}`);
+    const orderReadyListController = orderReadyPanelController.appendChild(new OrderListController(OrderStatus.readyForPickup, this), `List${OrderStatus.readyForPickup}`);
     orderReadyListController.panel.insertView(orderReadyPanelView).set({
       unitWidth: 1,
       unitHeight: 2 / 3,
@@ -107,6 +108,12 @@ export class OrderKanbanBoardController extends BoardController {
       }
     });
   }
+
+  @Property({
+    valueType: String,
+    value: '',
+  })
+  readonly focusedCustomerId!: Property<this, String>;
 
   @TraitViewRef({
     extends: true,

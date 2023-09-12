@@ -1,7 +1,7 @@
 // Copyright 2015-2022 Swim.inc
 // All rights reserved.
 
-import {Property} from "@swim/component";
+import {Fastener, Property} from "@swim/component";
 import {Value} from "@swim/structure";
 import {MapDownlink} from "@swim/client";
 import {Feel, Look} from "@swim/theme";
@@ -13,17 +13,20 @@ import { Uri } from "@swim/uri";
 import {TimeSeriesController} from "@swim/widget";
 import { OrderStatus, OrderType } from "../../types";
 import { Status } from "@swim/domain";
+import { OrderListController } from "./OrderListController";
+import { OrderKanbanBoardController } from "./OrderKanbanBoardController";
 
 /** @public */
 export class OrderController extends TimeSeriesController {
     readonly eventKey: OrderStatus;
 
-    constructor(nodeUri: string, orderStatus: OrderStatus) {
+    constructor(nodeUri: string, orderStatus: OrderStatus, olc: OrderListController) {
         super();
         this.setKey(nodeUri);
         this.eventKey = orderStatus;
         this.updateOrderDownlink.setNodeUri(nodeUri);
         this.updateOrderDownlink.open();
+        this.focusedCustomerId.bindInlet(olc.focusedCustomerId);
     }
 
     @ViewRef({
@@ -51,12 +54,25 @@ export class OrderController extends TimeSeriesController {
         extends: true,
         initView(leafView: LeafView): void {
             leafView.node.addEventListener('mouseenter', () => {
-                // console.log('mouseenter');
-                this.owner.leaf.attachView().highlight.set(true);
+                if (this.owner.focusedCustomerId.value === this.owner.customerId.value) {
+                    return;
+                }
+
+                const kbController = this.owner.getAncestor(OrderKanbanBoardController);
+                const futureValue = this.owner.customerId.value;
+                if (kbController) {
+                    kbController.focusedCustomerId.setValue(futureValue);
+                } else {
+                    console.warn('No OrderKanbanBoardController found for some reason!');
+                }
             });
             leafView.node.addEventListener('mouseleave', () => {
-                // console.log('mouseleave');
-                this.owner.leaf.attachView().highlight.set(false);
+                const kbController = this.owner.getAncestor(OrderKanbanBoardController);
+                if (kbController) {
+                    kbController.focusedCustomerId.setValue('');
+                } else {
+                    console.warn('No OrderKanbanBoardController found for some reason!');
+                }
             });
             return;
         }
@@ -121,10 +137,15 @@ export class OrderController extends TimeSeriesController {
         // update content and mood of customerCell
         const customerCellView = this.owner.customerCell.view as TextCellView | null;
         if (customerCellView !== null) {
+            const customerId = value.get('customerId').stringValue('');
+            this.owner.customerId.setValue(customerId);
             customerCellView.set({
-                content: '/' + value.get('customerId').stringValue(),
+                content: `/${customerId}`,
                 classList: ['customer-cell-view'],
             });
+            if (customerId === this.owner.focusedCustomerId.value) {
+                this.owner.leaf.attachView().set({ style: { backgroundColor: '#555555' }});
+            }
             customerCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
         }
 
@@ -158,6 +179,38 @@ export class OrderController extends TimeSeriesController {
         },
     })
     readonly stats!: Property<this, Value>;
+
+    @Property({
+        valueType: String,
+        value: false,
+    })
+    readonly hovered!: Property<this, boolean>;
+
+    @Property({
+        valueType: String,
+        value: '',
+    })
+    readonly customerId!: Property<this, String>;
+
+    @Property({
+        valueType: String,
+        value: '',
+        didSetValue(newValue: string, oldValue: string): void {
+            if (this.owner.nodeUri.value?.stringValue !== '/store/main') {
+                // only highlight leaves on main store view
+                return;
+            }
+            const leaf = this.owner.leaf.attachView();
+            const customerId = this.owner.customerId.value;
+
+            if (newValue && newValue === customerId) {
+                leaf.set({style: {backgroundColor: '#555555'}})
+            } else if (newValue !== customerId) {
+                leaf.set({style: {backgroundColor: 'transparent'}})
+            }
+        }
+    })
+    readonly focusedCustomerId!: Property<this, String>;
 
     protected updateOrder(orderId: string): void {
         const idx = OrderController.orderStatusProgression.indexOf(this.eventKey);

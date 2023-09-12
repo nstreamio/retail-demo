@@ -21,16 +21,21 @@ import { CumulativeOrdersSectionController } from "./CumulativeOrdersSectionCont
 import { ChartView } from "@swim/chart";
 import { DateTime } from "@swim/time";
 import { Observes } from "@swim/util";
+import { Property } from "@swim/component";
+import { OrderKanbanBoardController } from "./OrderKanbanBoardController";
 
 /** @public */
 export class OrderListController extends TimeTableController {
 
   readonly eventKey: OrderStatus;
 
-  constructor(key: OrderStatus) {
+  constructor(key: OrderStatus, kbController: OrderKanbanBoardController) {
     super();
     this.setKey(`orderListController-${key}`);
     this.eventKey = key;
+    if (kbController) {
+      this.focusedCustomerId.bindInlet(kbController.focusedCustomerId);
+    }
   }
 
   @TraitViewRef({
@@ -100,6 +105,12 @@ export class OrderListController extends TimeTableController {
     },
   })
   override readonly panel!: TraitViewRef<this, Trait, PanelView> & TimeTableController["panel"];
+
+  @Property({
+    valueType: String,
+    value: '',
+  })
+  readonly focusedCustomerId!: Property<this, String>;
 
   @ViewRef({
     viewType: PanelView,
@@ -209,7 +220,7 @@ export class OrderListController extends TimeTableController {
       
       if (orderController === null && this.owner.eventKey === orderStatus) {
         // create new OrderController (row in list)
-        orderController = new OrderController(nodeUri.toString(), this.owner.eventKey);
+        orderController = new OrderController(nodeUri.toString(), this.owner.eventKey, this.owner);
 
         // insert leaf of OrderController (row)
         orderController.leaf.insertView().set({
@@ -248,9 +259,6 @@ export class OrderListController extends TimeTableController {
     consumed: true,
     didSet(value: Value): void {
       const storeStatus = OrderListController.parseStoreStatus(value);
-      // if (this.owner.eventKey === OrderStatus.orderProcessed) {
-      //   console.log('storeStatus in OrderListController: ', storeStatus);
-      // }
      
       // get orderTypeChartController out of this.owner.children or this.series.controllers
       [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
