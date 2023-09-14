@@ -1,7 +1,7 @@
 // Copyright 2015-2022 Swim.inc
 // All rights reserved.
 
-import {Fastener, Property} from "@swim/component";
+import {Property} from "@swim/component";
 import {Value} from "@swim/structure";
 import {MapDownlink} from "@swim/client";
 import {Feel, Look} from "@swim/theme";
@@ -14,7 +14,7 @@ import {TimeSeriesController} from "@swim/widget";
 import { OrderStatus, OrderType } from "../../types";
 import { Status } from "@swim/domain";
 import { OrderListController } from "./OrderListController";
-import { OrderKanbanBoardController } from "./OrderKanbanBoardController";
+import { KanbanBoardController } from "./KanbanBoardController";
 
 /** @public */
 export class OrderController extends TimeSeriesController {
@@ -58,12 +58,12 @@ export class OrderController extends TimeSeriesController {
                     return;
                 }
 
-                const kbController = this.owner.getAncestor(OrderKanbanBoardController);
+                const kbController = this.owner.getAncestor(KanbanBoardController);
                 const futureValue = this.owner.customerId.value;
                 if (kbController) {
                     kbController.focusedCustomerId.setValue(futureValue);
                 } else {
-                    console.warn('No OrderKanbanBoardController found for some reason!');
+                    console.warn('No KanbanBoardController found for some reason!');
                 }
             });
             return;
@@ -101,7 +101,7 @@ export class OrderController extends TimeSeriesController {
             });
         },
     })
-    readonly orderCell!: ViewRef<this, CellView>;
+    readonly orderTypeCell!: ViewRef<this, CellView>;
 
     @ViewRef({
         viewType: CellView,
@@ -135,15 +135,20 @@ export class OrderController extends TimeSeriesController {
                 content: `/${customerId}`,
                 classList: ['customer-cell-view'],
             });
-            if (customerId === this.owner.focusedCustomerId.value) {
+
+            // test different strings depending on local or production environments
+            const viewingCustomerModel = (/\/customer\//).test(window.location.protocol.includes('file') ? window.location.hash : window.location.pathname);
+            const isFocusedCustomer = customerId === this.owner.focusedCustomerId.value;
+            if (isFocusedCustomer && !viewingCustomerModel) {
                 this.owner.leaf.attachView().set({ style: { backgroundColor: '#555555' }});
             }
+
             customerCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
         }
 
-        // update content and mood of orderCell
-        const orderCellView = this.owner.orderCell.view as TextCellView | null;
-        if (orderCellView !== null) {
+        // update content and mood of orderTypeCell
+        const orderTypeCellView = this.owner.orderTypeCell.view as TextCellView | null;
+        if (orderTypeCellView !== null) {
             let orderType: OrderType = OrderType.Unknown;
             if (value.get("products").get("A").numberValue() ?? 0) {
             orderType = OrderType.OrderA;
@@ -152,11 +157,11 @@ export class OrderController extends TimeSeriesController {
             } else if (value.get("products").get("C").numberValue() ?? 0) {
             orderType = OrderType.OrderC;
             }
-            orderCellView.content.set(`Order ${orderType}`);
-            orderCellView.set({
+            orderTypeCellView.content.set(orderType);
+            orderTypeCellView.set({
                 classList: ['order-cell-view'],
             });
-            orderCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
+            orderTypeCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
         }
 
         // update content and mood of timeInProcessingCell
@@ -196,6 +201,7 @@ export class OrderController extends TimeSeriesController {
             const customerId = this.owner.customerId.value;
 
             if (newValue && newValue === customerId) {
+                console.log('this.owner.nodeUri: ', this.owner.nodeUri);
                 leaf.set({style: {backgroundColor: '#555555'}})
             } else if (newValue !== customerId) {
                 leaf.set({style: {backgroundColor: 'transparent'}})

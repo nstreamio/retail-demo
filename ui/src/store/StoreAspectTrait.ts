@@ -6,7 +6,7 @@ import type {Graphics} from "@swim/graphics";
 import {VectorIcon} from "@swim/graphics";
 import type {SheetController} from "@swim/sheet";
 import {AspectTrait} from "@swim/domain";
-import { OrderKanbanBoardController } from "../order";
+import { KanbanBoardController } from "../order";
 
 /** @public */
 export class StoreAspectTrait extends AspectTrait {
@@ -20,7 +20,7 @@ export class StoreAspectTrait extends AspectTrait {
   // Define the board controller to be used that will control all the widgets/cards the store will have
   // We will use the 'OrderKanbanBoard' which is 3 panels showing order status
   override createTabController(): SheetController | null {
-    return new OrderKanbanBoardController();
+    return new KanbanBoardController();
   }
 
   // The icon to show the 'portal' (at the top - alternative to atlas)

@@ -22,14 +22,14 @@ import { ChartView } from "@swim/chart";
 import { DateTime } from "@swim/time";
 import { Observes } from "@swim/util";
 import { Property } from "@swim/component";
-import { OrderKanbanBoardController } from "./OrderKanbanBoardController";
+import { KanbanBoardController } from "./KanbanBoardController";
 
 /** @public */
 export class OrderListController extends TimeTableController {
 
   readonly eventKey: OrderStatus;
 
-  constructor(key: OrderStatus, kbController: OrderKanbanBoardController) {
+  constructor(key: OrderStatus, kbController: KanbanBoardController) {
     super();
     this.setKey(`orderListController-${key}`);
     this.eventKey = key;
@@ -112,6 +112,12 @@ export class OrderListController extends TimeTableController {
   })
   readonly focusedCustomerId!: Property<this, String>;
 
+  @Property({
+    valueType: String,
+    value: ''
+  })
+  readonly focusedOrderType!: Property<this, String>;
+
   @ViewRef({
     viewType: PanelView,
     extends: true,
@@ -149,17 +155,17 @@ export class OrderListController extends TimeTableController {
     createView(): HeaderView {
       const headerView = super.createView() as HeaderView;
       this.owner.customerCol.insertView(headerView);
-      this.owner.orderCol.insertView(headerView);
+      this.owner.orderTypeCol.insertView(headerView);
       this.owner.timeInProcessingCol.insertView(headerView);
       return headerView;
     },
     initView(headerView: HeaderView): void {
       headerView.node.addEventListener('mouseenter', () => {
-        const kbController = this.owner.getAncestor(OrderKanbanBoardController);
+        const kbController = this.owner.getAncestor(KanbanBoardController);
         if (kbController) {
             kbController.focusedCustomerId.setValue('');
         } else {
-            console.warn('No OrderKanbanBoardController found for some reason!');
+            console.warn('No KanbanBoardController found for some reason!');
         }
       });
     }
@@ -177,11 +183,11 @@ export class OrderListController extends TimeTableController {
     },
     initView(tableView: TableView): void {
       tableView.node.addEventListener('mouseleave', () => {
-        const kbController = this.owner.getAncestor(OrderKanbanBoardController);
+        const kbController = this.owner.getAncestor(KanbanBoardController);
         if (kbController) {
             kbController.focusedCustomerId.setValue('');
         } else {
-            console.warn('No OrderKanbanBoardController found for some reason!');
+            console.warn('No KanbanBoardController found for some reason!');
         }
       });
     }
@@ -210,11 +216,11 @@ export class OrderListController extends TimeTableController {
     },
     createView(): ColView {
       return TextColView.create().set({
-        label: "Order",
+        label: "Order Type",
       });
     },
   })
-  readonly orderCol!: ViewRef<this, ColView>;
+  readonly orderTypeCol!: ViewRef<this, ColView>;
 
   @ViewRef({
     viewType: ColView,
@@ -251,7 +257,7 @@ export class OrderListController extends TimeTableController {
 
         // insert cells into row
         orderController.customerCell.insertView();
-        orderController.orderCell.insertView();
+        orderController.orderTypeCell.insertView();
         orderController.timeInProcessingCell.insertView();
 
         // call .stats() method on controller to populate cells

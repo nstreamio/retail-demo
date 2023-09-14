@@ -5,8 +5,8 @@ import { DateTime, TimeZone } from "@swim/time";
 import { DataPointView, LinePlotView, SeriesPlotView } from "@swim/chart";
 import { Look } from "@swim/theme";
 import { View, ViewRef } from "@swim/view";
-import { Observes } from "@swim/util";
 import { OrderStatusPieController } from "./OrderStatusPieController";
+import { KanbanColumnController } from "./KanbanColumnController";
 
 export class OrderTypeChartController extends TimeSeriesController {
   readonly orderStatus: OrderStatus;
@@ -16,10 +16,6 @@ export class OrderTypeChartController extends TimeSeriesController {
     super();
     this.orderStatus = orderStatus;
     this.orderType = orderType;
-
-    if (this.orderStatus === OrderStatus.orderPlaced) {
-      // console.log('constructor of OrderTypeChartController');
-    }
   }
 
   @ViewRef({
@@ -32,9 +28,19 @@ export class OrderTypeChartController extends TimeSeriesController {
     createView(): SeriesPlotView<DateTime, number> {
       return LinePlotView.create() as LinePlotView<DateTime, number>;
     },
-    initView(seriesPlotView: SeriesPlotView<DateTime, number>): void {
+    initView(seriesPlotView: SeriesPlotView<DateTime, number> & { hitWidth: Property<number> }): void {
       super.initView(seriesPlotView);
       seriesPlotView.setKey(this.owner.orderType);
+      seriesPlotView.hitMode.setValue('plot');
+      seriesPlotView.hitWidth.setValue(15);
+      seriesPlotView.addEventListener('pointerenter', () => {
+        const kbColumn = this.owner.getAncestor(KanbanColumnController);
+        kbColumn?.focusedOrderType.setValue(this.owner.orderType);
+      });
+      seriesPlotView.addEventListener('pointerleave', () => {
+        const kbColumn = this.owner.getAncestor(KanbanColumnController);
+        kbColumn?.focusedOrderType.setValue('');
+      });
     }
   })
   override readonly plot!: ViewRef<this, SeriesPlotView<DateTime, number>> & TimeSeriesController['plot'];
@@ -62,35 +68,17 @@ export class OrderTypeChartController extends TimeSeriesController {
       dataPointKey,
       DataPointView
     ) as DataPointView<DateTime, number>;
-    if (this.orderStatus === OrderStatus.orderPlaced) {
-      // console.log('plotView: ', plotView);
-      // console.log('plotView.parent: ', plotView.parent);
-      // console.log(`New data point for ${this.orderType.toUpperCase()}. TIME is ${timestamp}. VALUE is ${value}.`);
-    }
     if (dataPointView === null) {
       dataPointView = new DataPointView<DateTime, number>().set({
         x: t,
         y: value,
-        color: OrderStatusPieController.sliceColors.get(this.orderType),
+        color: OrderStatusPieController.sliceColors[this.orderStatus][this.orderType],
       });
       // dataPointView.modifyMood(Feel.default, alertStatus.moodModifier);
       plotView.dataPoints.insertView(null, dataPointView, null, "" + t.time);
-      if (this.orderStatus === OrderStatus.orderPlaced) {
-        // console.log(`Inserted new DataPointView in controller. Controller now has ${plotView.dataPoints.viewCount} datapoints`);
-      }
-
     } else {
       const timing = dataPointView.getLookOr(Look.timing, true);
       dataPointView.y.set(value, timing);
-
-      if (this.orderStatus === OrderStatus.orderPlaced) {
-        // console.log(`Updated existing DataPointView in controller. Controller now has ${plotView.dataPoints.viewCount} datapoints`);
-      }
-      // dataPointView.modifyMood(
-      //   Feel.default,
-      //   alertStatus.moodModifier,
-      //   timing
-      // );
     }
   }
 }

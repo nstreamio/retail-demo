@@ -9,9 +9,10 @@ import { OrderListController } from "..";
 import { OrderStatus } from "../../types";
 import { OrderStatusPieController } from "./OrderStatusPieController";
 import { Property } from "@swim/component";
+import { KanbanColumnController } from "./KanbanColumnController";
 
 /** @public */
-export class OrderKanbanBoardController extends BoardController {
+export class KanbanBoardController extends BoardController {
   constructor() {
     super();
     this.initBoard();
@@ -27,8 +28,8 @@ export class OrderKanbanBoardController extends BoardController {
     // Each panel takes up the full height of the sheet and 1/3 of the width
     // We insert each widget by inserting each controller's 'panel'
 
-    const orderPlacedPanelController = this.appendChild(new PanelController(), `Panel${OrderStatus.orderPlaced}`)
-    const orderPlacedPanelView = orderPlacedPanelController.panel.insertView(rootPanelView).set({
+    const orderPlacedColumnController = this.appendChild(new KanbanColumnController(), `KbColumn${OrderStatus.orderPlaced}`)
+    const orderPlacedPanelView = orderPlacedColumnController.panel.insertView(rootPanelView).set({
       unitWidth: 1 / 3,
       unitHeight: 1,
       style: {
@@ -36,7 +37,8 @@ export class OrderKanbanBoardController extends BoardController {
       },
     });
 
-    const orderPlacedPieController = orderPlacedPanelController.appendChild(new OrderStatusPieController(OrderStatus.orderPlaced, "New Orders"), `Pie${OrderStatus.orderPlaced}`);
+    const orderPlacedPieController = orderPlacedColumnController.appendChild(new OrderStatusPieController(OrderStatus.orderPlaced, "New Orders"), `Pie${OrderStatus.orderPlaced}`);
+    orderPlacedPieController.focusedOrderType.bindInlet(orderPlacedColumnController.focusedOrderType);
     orderPlacedPieController.panel.insertView(orderPlacedPanelView).set({
       unitWidth: 1,
       unitHeight: 1 / 3,
@@ -45,7 +47,8 @@ export class OrderKanbanBoardController extends BoardController {
       }
     });
 
-    const orderPlacedListController = orderPlacedPanelController.appendChild(new OrderListController(OrderStatus.orderPlaced, this), `List${OrderStatus.orderPlaced}`);
+    const orderPlacedListController = orderPlacedColumnController.appendChild(new OrderListController(OrderStatus.orderPlaced, this), `List${OrderStatus.orderPlaced}`);
+    orderPlacedListController.focusedOrderType.bindInlet(orderPlacedColumnController.focusedOrderType);
     orderPlacedListController.panel.insertView(orderPlacedPanelView).set({
       unitWidth: 1,
       unitHeight: 2 / 3,
@@ -54,8 +57,8 @@ export class OrderKanbanBoardController extends BoardController {
       }
     });
 
-    const orderProcessedPanelController = this.appendChild(new PanelController(), `Panel${OrderStatus.orderProcessed}`)
-    const orderProcessedPanelView = orderProcessedPanelController.panel.insertView(rootPanelView).set({
+    const orderProcessedColumnController = this.appendChild(new KanbanColumnController(), `KbColumn${OrderStatus.orderProcessed}`)
+    const orderProcessedPanelView = orderProcessedColumnController.panel.insertView(rootPanelView).set({
       unitWidth: 1 / 3,
       unitHeight: 1,
       style: {
@@ -63,7 +66,8 @@ export class OrderKanbanBoardController extends BoardController {
       },
     });
 
-    const orderProcessedPieController = orderProcessedPanelController.appendChild(new OrderStatusPieController(OrderStatus.orderProcessed, "Processing"), `Pie${OrderStatus.orderProcessed}`);
+    const orderProcessedPieController = orderProcessedColumnController.appendChild(new OrderStatusPieController(OrderStatus.orderProcessed, "Processing"), `Pie${OrderStatus.orderProcessed}`);
+    orderProcessedPieController.focusedOrderType.bindInlet(orderProcessedColumnController.focusedOrderType);
     orderProcessedPieController.panel.insertView(orderProcessedPanelView).set({
       unitWidth: 1,
       unitHeight: 1 / 3,
@@ -72,7 +76,8 @@ export class OrderKanbanBoardController extends BoardController {
       }
     });
 
-    const orderProcessedListController = orderProcessedPanelController.appendChild(new OrderListController(OrderStatus.orderProcessed, this), `List${OrderStatus.orderProcessed}`);
+    const orderProcessedListController = orderProcessedColumnController.appendChild(new OrderListController(OrderStatus.orderProcessed, this), `List${OrderStatus.orderProcessed}`);
+    orderProcessedListController.focusedOrderType.bindInlet(orderProcessedColumnController.focusedOrderType);
     orderProcessedListController.panel.insertView(orderProcessedPanelView).set({
       unitWidth: 1,
       unitHeight: 2 / 3,
@@ -81,8 +86,8 @@ export class OrderKanbanBoardController extends BoardController {
       }
     });
 
-    const orderReadyPanelController = this.appendChild(new PanelController(), `Panel${OrderStatus.readyForPickup}`)
-    const orderReadyPanelView = orderReadyPanelController.panel.insertView(rootPanelView).set({
+    const orderReadyColumnController = this.appendChild(new KanbanColumnController(), `KbColumn${OrderStatus.readyForPickup}`)
+    const orderReadyPanelView = orderReadyColumnController.panel.insertView(rootPanelView).set({
       unitWidth: 1 / 3,
       unitHeight: 1,
       style: {
@@ -90,7 +95,8 @@ export class OrderKanbanBoardController extends BoardController {
       },
     });
 
-    const orderReadyPieController = orderReadyPanelController.appendChild(new OrderStatusPieController(OrderStatus.readyForPickup, "Ready Orders"), `Pie${OrderStatus.readyForPickup}`);
+    const orderReadyPieController = orderReadyColumnController.appendChild(new OrderStatusPieController(OrderStatus.readyForPickup, "Ready Orders"), `Pie${OrderStatus.readyForPickup}`);
+    orderReadyPieController.focusedOrderType.bindInlet(orderReadyColumnController.focusedOrderType);
     orderReadyPieController.panel.insertView(orderReadyPanelView).set({
       unitWidth: 1,
       unitHeight: 1 / 3,
@@ -99,7 +105,8 @@ export class OrderKanbanBoardController extends BoardController {
       }
     });
 
-    const orderReadyListController = orderReadyPanelController.appendChild(new OrderListController(OrderStatus.readyForPickup, this), `List${OrderStatus.readyForPickup}`);
+    const orderReadyListController = orderReadyColumnController.appendChild(new OrderListController(OrderStatus.readyForPickup, this), `List${OrderStatus.readyForPickup}`);
+    orderReadyListController.focusedOrderType.bindInlet(orderReadyColumnController.focusedOrderType);
     orderReadyListController.panel.insertView(orderReadyPanelView).set({
       unitWidth: 1,
       unitHeight: 2 / 3,

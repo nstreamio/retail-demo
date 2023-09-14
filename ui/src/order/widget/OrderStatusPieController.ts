@@ -1,7 +1,7 @@
 // Copyright 2015-2022 Swim.inc
 // All rights reserved.
 
-import type {Mapping} from "@swim/util";
+import {Timing, type Mapping, Easing} from "@swim/util";
 import type {Value} from "@swim/structure";
 import {ValueDownlink} from "@swim/client";
 import type {Trait} from "@swim/model";
@@ -16,6 +16,7 @@ import { Feel, Look } from "@swim/theme";
 import { HtmlView } from "@swim/dom";
 import { StoreStatus } from "../../types";
 import { OrderListController } from "./OrderListController";
+import { Property } from "@swim/component";
 
 /** @public */
 export class OrderStatusPieController extends TimePieController {
@@ -86,17 +87,17 @@ export class OrderStatusPieController extends TimePieController {
 
   @ViewRef({
     viewType: SliceView,
-    viewKey: OrderStatus.orderPlaced,
+    viewKey: OrderType.OrderA,
     extends: true,
     initView(sliceView: SliceView): void {
       sliceView.set({
-        sliceColor: OrderStatusPieController.sliceColors.get(OrderType.OrderA),
+        sliceColor: OrderStatusPieController.sliceColors[this.owner.orderStatus][OrderType.OrderA],
         font: "14px sans-serif",
         textColor: Look.backgroundColor,
         innerRadius: 30,
         outerRadius: 80,
         value: 1 / 3,
-        legend: "A",
+        legend: "A Orders",
       });
       sliceView.modifyMood(Feel.default, Status.Normal!.moodModifier);
       sliceView.legend.attachView().modifyMood(Feel.default, [[Feel.selected, 2]]);
@@ -106,17 +107,17 @@ export class OrderStatusPieController extends TimePieController {
 
   @ViewRef({
     viewType: SliceView,
-    viewKey: OrderStatus.orderProcessed,
+    viewKey: OrderType.OrderB,
     extends: true,
     initView(sliceView: SliceView): void {
       sliceView.set({
-        sliceColor: OrderStatusPieController.sliceColors.get(OrderType.OrderB),
+        sliceColor: OrderStatusPieController.sliceColors[this.owner.orderStatus][OrderType.OrderB],
         font: "14px sans-serif",
         textColor: Look.backgroundColor,
         innerRadius: 30,
         outerRadius: 80,
         value: 1 / 3,
-        legend: "B",
+        legend: "B Orders",
       });
       sliceView.modifyMood(Feel.default, Status.Warning!.moodModifier);
       sliceView.legend.attachView().modifyMood(Feel.default, [[Feel.selected, 2]]);
@@ -126,17 +127,17 @@ export class OrderStatusPieController extends TimePieController {
 
   @ViewRef({
     viewType: SliceView,
-    viewKey: OrderStatus.readyForPickup,
+    viewKey: OrderType.OrderC,
     extends: true,
     initView(sliceView: SliceView): void {
       sliceView.set({
-        sliceColor: OrderStatusPieController.sliceColors.get(OrderType.OrderC),
+        sliceColor: OrderStatusPieController.sliceColors[this.owner.orderStatus][OrderType.OrderC],
         font: "14px sans-serif",
         textColor: Look.backgroundColor,
         innerRadius: 30,
         outerRadius: 80,
         value: 1 / 3,
-        legend: "C",
+        legend: "C Orders",
       });
       sliceView.modifyMood(Feel.default, Status.Unknown!.moodModifier);
       sliceView.legend.attachView().modifyMood(Feel.default, [[Feel.selected, 2]]);
@@ -156,15 +157,31 @@ export class OrderStatusPieController extends TimePieController {
   })
   override readonly pie!: ViewRef<this, PieView>;
 
+  @Property({
+    valueType: String,
+    value: '',
+    didSetValue(newValue: string): void {
+      if (this.owner.orderStatus === OrderStatus.orderPlaced) {
+        this.owner.aSlice.attachView().set({
+          outerRadius: newValue === OrderType.OrderA ? 90 : 80
+        }, Timing(Easing('linear'), 0, 200));
+        this.owner.bSlice.attachView().set({
+          outerRadius: newValue === OrderType.OrderB ? 90 : 80
+        }, Timing(Easing('linear'), 0, 200));
+        this.owner.cSlice.attachView().set({
+          outerRadius: newValue === OrderType.OrderC ? 90 : 80
+        }, Timing(Easing('linear'), 0, 200));
+      }
+    }
+  })
+  readonly focusedOrderType!: Property<this, String>;
+
   @ValueDownlink({
     hostUri: 'warp://localhost:9001',
     laneUri: 'status',
     consumed: true,
     didSet(value: Value): void {
       const storeStatus = OrderListController.parseStoreStatus(value);
-      // if (this.owner.orderStatus === OrderStatus.orderProcessed) {
-      //   console.log('storeStatus: ', storeStatus);
-      // }
       
       this.owner.updateSlice(storeStatus, this.owner.aSlice, OrderType.OrderA);
       this.owner.updateSlice(storeStatus, this.owner.bSlice, OrderType.OrderB);
@@ -201,11 +218,30 @@ export class OrderStatusPieController extends TimePieController {
 
   static readonly alertStatus: Mapping<number, Status> = Status.improving(0, 2.5, 3.5, 4.5, 5);
 
-  static readonly sliceColors: Map<OrderType, string> = new Map<OrderType, string>(
-    [
-      [OrderType.OrderA, '#5CA0E7'],
-      [OrderType.OrderB, '#A40E4C'],
-      [OrderType.OrderC, '#5A945E'],
-    ]
-  )
+  static readonly sliceColors: Record<OrderStatus, Record<OrderType, string>> = {
+    [OrderStatus.orderPlaced]: {
+      [OrderType.OrderA]: '#F59D56',
+      [OrderType.OrderB]: '#F7913E',
+      [OrderType.OrderC]: '#ED7A1C',
+      [OrderType.Unknown]: '#FFFFFF',
+    },
+    [OrderStatus.orderProcessed]: {
+      [OrderType.OrderA]: '#F5EE8C',
+      [OrderType.OrderB]: '#F9F070',
+      [OrderType.OrderC]: '#F5E942',
+      [OrderType.Unknown]: '#FFFFFF',
+    },
+    [OrderStatus.readyForPickup]: {
+      [OrderType.OrderA]: '#8CFAE1',
+      [OrderType.OrderB]: '#57FAD6',
+      [OrderType.OrderC]: '#02FAC3',
+      [OrderType.Unknown]: '#FFFFFF',
+    },
+    [OrderStatus.pickupCompleted]: {
+      [OrderType.OrderA]: '#FFFFFF',
+      [OrderType.OrderB]: '#FFFFFF',
+      [OrderType.OrderC]: '#FFFFFF',
+      [OrderType.Unknown]: '#FFFFFF',
+    },
+  };
 }

@@ -1,5 +1,5 @@
 export * from './CumulativeOrdersPanelController';
 export * from './OrderController';
-export * from './OrderKanbanBoardController';
+export * from './KanbanBoardController';
 export * from './OrderListController';
 export * from './OrderStatusPieController';
