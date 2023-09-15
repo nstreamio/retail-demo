@@ -56,23 +56,6 @@ export class OrderController extends TimeSeriesController {
 
   @ViewRef({
     viewType: TextCellView,
-    viewKey: "shape",
-    extends: true,
-    get parentView(): View | null {
-      return this.owner.leaf.insertView();
-    },
-    createView(): TextCellView {
-      return TextCellView.create().set({
-        style: {
-          color: Look.accentColor,
-        }
-      });
-    }
-  })
-  readonly shapeCell!: ViewRef<this, TextCellView>;
-
-  @ViewRef({
-    viewType: TextCellView,
     viewKey: "order",
     extends: true,
     get parentView(): View | null {
@@ -86,7 +69,7 @@ export class OrderController extends TimeSeriesController {
       });
     }
   })
-  readonly orderCell!: ViewRef<this, TextCellView>;
+  readonly orderTypeCell!: ViewRef<this, TextCellView>;
 
   @ViewRef({
     viewType: TextCellView,

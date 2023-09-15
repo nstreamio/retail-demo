@@ -156,58 +156,12 @@ export class MainController extends BoardController {
         }
       });
 
-      // iconOuterContainer for holding SVGs
-      const svgContainerView = containerView.appendChild("div").set({
-        style: {
-          width: "100%",
-          height: "auto",
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          margin: "0px",
-        },
-        classList: ['empty-state-svg-container']
-      });
-
-      // append triangle svg
-      svgContainerView.appendChild(HtmlIconView, 'triangle').set({
-        graphics: VectorIcon.create(24, 24, 'M12,2L22,22L2,22Z'),
-        style: {
-          width: '40px',
-          height: '40px',
-          marginRight:'24px',
-        },
-        classList: ['empty-state-svg', 'svg', 'yellow'],
-      });
-
-      // append square svg
-      svgContainerView.appendChild(HtmlIconView, 'square').set({
-        graphics: VectorIcon.create(24, 24, 'M2,2L22,2L22,22L2,22Z'),
-        style: {
-          width: '40px',
-          height: '40px',
-          marginRight:'24px',
-        },
-        classList: ['empty-state-svg', 'svg', 'yellow'],
-      });
-
-      // append circle svg
-      svgContainerView.appendChild(HtmlIconView, 'circle').set({
-        graphics: PolygonIcon.create(999),
-        style: {
-          width: '40px',
-          height: '40px',
-        },
-        classList: ['empty-state-svg', 'svg', 'yellow'],
-      });
-
       // text view
       const emptyStatePView = containerView.appendChild("p").set({
         style: {
           fontSize: "20px",
           fontWeight: "400",
-          color: "#F8D260",
+          color: MainController.orderStatusColors[OrderStatus.orderPlaced],
           marginTop: '24px',
           marginRight: '80px',
           marginBottom: "80px",
@@ -232,7 +186,7 @@ export class MainController extends BoardController {
           right: "24px",
         },
       });
-      buttonStackView.button.view?.style.backgroundColor.set('#F8D260');
+      buttonStackView.button.view?.style.backgroundColor.set(MainController.orderStatusColors[OrderStatus.orderPlaced]);
       buttonStackView.button.attachView().icon.attachView();
       buttonStackView.button.view?.icon.push(VectorIcon.create(24, 24, 'M11,13L5,13L5,11L11,11L11,5L13,5L13,11L19,11L19,13L13,13L13,19L11,19Z'), false);
       buttonStackView.button.view?.set({
@@ -257,14 +211,33 @@ export class MainController extends BoardController {
         };
       };
 
-      /* circle icon button */
-      const circle: ButtonItem = buttonStackView.appendChild(
+      /* c icon button */
+      const c: ButtonItem = buttonStackView.appendChild(
         ButtonItem,
-        "circle"
+        "c"
       );
-      circle.button?.style.backgroundColor.set('#F8D260');
-      const circleLabel = circle.insertChild(HtmlView, null, "label").set({
+      const cButton = c.button;
+      if (cButton) {
+        cButton.set({
+          style: {
+            backgroundColor: MainController.orderStatusColors[OrderStatus.orderPlaced],
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontSize: '22px',
+            color: '#000000',
+          }
+        });
+        const text = cButton.appendChild('div').set({
+          style: {
+            transform: 'translate(-1px,-1px)',
+          }
+        });
+        text.node.innerText = 'C';
+      }
+      const cLabel = c.insertChild(HtmlView, null, "label").set({
         style: {
+          marginTop: '6px',
           height: '24px',
           lineHeight: '24px',
           paddingTop: '2px',
@@ -275,32 +248,37 @@ export class MainController extends BoardController {
           borderRadius: '4px',
           boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.8)',
         },
-        classList: ['button-label', 'circle-label'],
+        classList: ['button-label', 'c-label'],
       });
-      circleLabel.node.innerText = "Order C: $30.00";
-      const circleButton = circle.button;
-      circleButton?.icon.push(
-        PolygonIcon.create(999),
-        false
-      ).set({
-        style: {
-          width: '24px',
-          height: '24px',
-          left: '8px',
-          top: '8px',
-        },
-        iconLayout: {width: 24, height: 24},
-      });
-      circle.addEventListener("click", handleClick(OrderType.OrderC));
+      cLabel.node.innerText = "$30.00";
+      c.addEventListener("click", handleClick(OrderType.OrderC));
 
-      /* square icon button */
-      const square: ButtonItem = buttonStackView.appendChild(
+      /* b icon button */
+      const b: ButtonItem = buttonStackView.appendChild(
         ButtonItem,
-        "square"
+        "b"
       );
-      square.button?.style.backgroundColor.set('#F8D260');
-      const squareLabel = square.insertChild(HtmlView, null, "label").set({
+      if (b.button) {
+        b.button.set({
+          style: {
+            backgroundColor: MainController.orderStatusColors[OrderStatus.orderPlaced],
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontSize: '22px',
+            color: '#000000',
+          }
+        });
+        const text = b.button.appendChild('div').set({
+          style: {
+            transform: 'translate(-1px,-1px)',
+          }
+        });
+        text.node.innerText = 'B';
+      }
+      const bLabel = b.insertChild(HtmlView, null, "label").set({
         style: {
+          marginTop: '6px',
           height: '24px',
           lineHeight: '24px',
           paddingTop: '2px',
@@ -311,23 +289,37 @@ export class MainController extends BoardController {
           borderRadius: '4px',
           boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.8)',
         },
-        classList: ['button-label', 'circle-label'],
+        classList: ['button-label', 'c-label'],
       });
-      squareLabel.node.innerText = "Order B: $20.00";
-      square.addEventListener("click", handleClick(OrderType.OrderB));
-      square.button?.icon.push(
-        VectorIcon.create(24, 24, "M2,2L22,2L22,22L2,22Z"),
-        false
-      );
+      bLabel.node.innerText = "$20.00";
+      b.addEventListener("click", handleClick(OrderType.OrderB));
 
-      /* triangle icon button */
-      const triangle: ButtonItem = buttonStackView.appendChild(
+      /* a icon button */
+      const a: ButtonItem = buttonStackView.appendChild(
         ButtonItem,
-        "triangle"
+        "a"
       );
-      triangle.button?.style.backgroundColor.set('#F8D260');
-      const triangleLabel = triangle.insertChild(HtmlView, null, "label").set({
+      if (a.button) {
+        a.button.set({
+          style: {
+            backgroundColor: MainController.orderStatusColors[OrderStatus.orderPlaced],
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontSize: '22px',
+            color: '#000000',
+          }
+        });
+        const text = a.button.appendChild('div').set({
+          style: {
+            transform: 'translate(-1px,-1px)',
+          }
+        });
+        text.node.innerText = 'A';
+      }
+      const aLabel = a.insertChild(HtmlView, null, "label").set({
         style: {
+          marginTop: '4px',
           height: '24px',
           lineHeight: '24px',
           paddingTop: '4px',
@@ -338,14 +330,10 @@ export class MainController extends BoardController {
           borderRadius: '4px',
           boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.8)',
         },
-        classList: ['button-label', 'circle-label'],
+        classList: ['button-label', 'c-label'],
       });
-      triangleLabel.node.innerText = "Order A: $10.00";
-      triangle.addEventListener("click", handleClick(OrderType.OrderA));
-      triangle.button?.icon.push(
-        VectorIcon.create(24, 24, "M12,2L22,22L2,22Z"),
-        false
-      );
+      aLabel.node.innerText = "$10.00";
+      a.addEventListener("click", handleClick(OrderType.OrderA));
 
       return buttonStackView;
     },
@@ -368,10 +356,11 @@ export class MainController extends BoardController {
           width: '56px',
           height: '56px',
           overflow: 'unset',
+          zIndex: 1,
         },
         classList: ['pickup-orders-fab-button'],
       });
-      fab.style.backgroundColor.set('#66FFDD');
+      fab.style.backgroundColor.set(MainController.orderStatusColors[OrderStatus.readyForPickup]);
       fab.icon.attachView();
       fab.icon.push(VectorIcon.create(
         24,
@@ -397,10 +386,13 @@ export class MainController extends BoardController {
           bottom: '34px',
           right: '35px',
           width: '200px',
-          color: '#66FFDD',
+          color: MainController.orderStatusColors[OrderStatus.readyForPickup],
           fontSize: '20px',
           fontWeight: '400',
           lineHeight: '27px',
+          backgroundColor: 'rgba(33, 33, 33, 0.9)',
+          borderRadius: '4px',
+          boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.9)',
         },
         classList: ['pickup-orders-helper-text']
       });
@@ -419,8 +411,6 @@ export class MainController extends BoardController {
   })
   readonly orderListController!: ControllerRef<this, OrderListController>;
 
-  // lane: status AFTER
-  // @event(node:"/customer/cam",lane:status){orderPlaced:{A:5,B:2,C:1}}
   @ValueDownlink({
     hostUri: 'warp://localhost:9001',
     laneUri: 'status',
@@ -504,5 +494,12 @@ export class MainController extends BoardController {
     [OrderType.OrderB]: 20,
     [OrderType.OrderC]: 30,
     [OrderType.Unknown]: 0,
+  };
+
+  static readonly orderStatusColors: Record<OrderStatus, string> = {
+    [OrderStatus.orderPlaced]: '#F7913E',
+    [OrderStatus.orderProcessed]: '#F9F070',
+    [OrderStatus.readyForPickup]: '#57FAD6',
+    [OrderStatus.pickupCompleted]: '#FFFFFF',
   };
 }
