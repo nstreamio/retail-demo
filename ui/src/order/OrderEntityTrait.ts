@@ -1,7 +1,7 @@
 // Copyright 2015-2022 Swim.inc
 // All rights reserved.
 import {Class, Lazy} from "@swim/util";
-import {EntityTrait, EntityTraitObserver} from "@swim/domain";
+import {EntityTrait, EntityTraitObserver} from "@nstream/domain";
 import { Graphics, VectorIcon } from "@swim/graphics";
 import { Model, TraitModelRef } from "@swim/model";
 import { OrderAspectTrait } from "./OrderAspectTrait";

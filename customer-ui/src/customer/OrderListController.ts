@@ -2,7 +2,7 @@ import { MapDownlink } from "@swim/client";
 import { Property } from "@swim/component";
 import { Value } from "@swim/structure";
 import { Uri } from "@swim/uri";
-import { TimeTableController } from "@swim/widget";
+import { TimeTableController } from "@nstream/widget";
 import { OrderController } from "../order";
 import { HtmlView } from "@swim/dom";
 import { View, ViewRef } from "@swim/view";
@@ -12,7 +12,7 @@ import { PanelView } from "@swim/panel";
 import { Trait } from "@swim/model";
 import { Feel, Look } from "@swim/theme";
 import { Length } from "@swim/math";
-import { Status } from "@swim/domain";
+import { Status } from "@nstream/domain";
 import { OrderStatus, OrderType } from "../types";
 
 export class OrderListController extends TimeTableController {
@@ -193,10 +193,8 @@ export class OrderListController extends TimeTableController {
         nodeUri.pathName,
         OrderController
       );
-      console.log('!!orderController: ', !!orderController);
 
       const status: OrderStatus = (value.get("status").stringValue() ?? "unknown") as OrderStatus;
-      console.log('status: ', status);
       let orderType: OrderType = OrderType.Unknown;
       if (value.get("products").get("A").numberValue() ?? 0) {
         orderType = OrderType.OrderA;
@@ -205,18 +203,14 @@ export class OrderListController extends TimeTableController {
       } else if (value.get("products").get("C").numberValue() ?? 0) {
         orderType = OrderType.OrderC;
       }
-      console.log('orderType: ', orderType);
 
       if (status === "pickupCompleted") {
-        console.log('status was pickupCompleted');
         if (orderController) {
-          console.log('removing child 1');
           this.owner.removeChild(nodeUri.pathName);
         }
 
       // If there is a new order, and the order is the same status that his controller is managing then add it to the list
       } else if (orderController) {
-        console.log('existing orderController found');
         let moodStatus = OrderListController.orderStatusMood.get(status);
 
         const orderTypeCell = orderController.orderTypeCell.attachView() as TextCellView;
@@ -230,7 +224,6 @@ export class OrderListController extends TimeTableController {
 
         // If no OrderController is found, create and insert a new one
       } else if (orderController === null) {
-        console.log('no existing orderController found');
         orderController = new OrderController(nodeUri.pathName, orderType);
         orderController.title.setValue(nodeUri.pathName);
 
@@ -272,7 +265,6 @@ export class OrderListController extends TimeTableController {
         orderController.statusCell.insertView();
 
         // add the OrderController into the series
-        console.log('adding the new orderController to the series');
         this.owner.series.addController(
           orderController,
           void 0,

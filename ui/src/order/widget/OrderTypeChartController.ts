@@ -1,4 +1,4 @@
-import { TimeSeriesController, TimeTableController } from "@swim/widget";
+import { TimeSeriesController, TimeTableController } from "@nstream/widget";
 import { OrderStatus, OrderType, StoreStatus } from "../../types";
 import { Property } from "@swim/component";
 import { DateTime, TimeZone } from "@swim/time";

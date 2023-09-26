@@ -10,9 +10,9 @@ import {ViewRef} from "@swim/view";
 import {CellView, LeafView, RowView} from "@swim/table";
 import {TextCellView} from "@swim/table";
 import { Uri } from "@swim/uri";
-import {TimeSeriesController} from "@swim/widget";
+import {TimeSeriesController} from "@nstream/widget";
 import { OrderStatus, OrderType } from "../../types";
-import { Status } from "@swim/domain";
+import { Status } from "@nstream/domain";
 import { OrderListController } from "./OrderListController";
 import { KanbanBoardController } from "./KanbanBoardController";
 
@@ -201,7 +201,6 @@ export class OrderController extends TimeSeriesController {
             const customerId = this.owner.customerId.value;
 
             if (newValue && newValue === customerId) {
-                console.log('this.owner.nodeUri: ', this.owner.nodeUri);
                 leaf.set({style: {backgroundColor: '#555555'}})
             } else if (newValue !== customerId) {
                 leaf.set({style: {backgroundColor: 'transparent'}})

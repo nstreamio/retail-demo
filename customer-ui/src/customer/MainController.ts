@@ -17,7 +17,7 @@ import { Uri } from "@swim/uri";
 import { Value } from "@swim/structure";
 import { Transform } from "@swim/math";
 import { OrderStatus, OrderType, StoreStatus } from "../types";
-import { TimeSeriesController } from "@swim/widget";
+import { TimeSeriesController } from "@nstream/widget";
 import { Observes } from "@swim/util";
 
 export class MainController extends BoardController {

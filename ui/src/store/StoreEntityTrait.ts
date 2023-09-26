@@ -1,7 +1,7 @@
 // Copyright 2015-2022 Swim.inc
 // All rights reserved.
 import {Class} from "@swim/util";
-import {EntityTrait, EntityTraitObserver} from "@swim/domain";
+import {EntityTrait, EntityTraitObserver} from "@nstream/domain";
 import { CustomersRelationTrait } from "../customer";
 import { Model, TraitModelRef } from "@swim/model";
 import { StoreAspectTrait } from "./StoreAspectTrait";

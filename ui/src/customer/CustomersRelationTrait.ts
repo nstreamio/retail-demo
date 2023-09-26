@@ -5,7 +5,7 @@ import {Strings, Observes} from "@swim/util";
 import {type Value} from "@swim/structure";
 import {MapDownlink} from "@swim/client";
 import {TraitModelSet} from "@swim/model";
-import {RelationTrait} from "@swim/domain";
+import {RelationTrait} from "@nstream/domain";
 import {CustomerEntityTrait} from "./CustomerEntityTrait";
 import { Uri } from "@swim/uri";
 

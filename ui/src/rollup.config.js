@@ -6,41 +6,18 @@ import * as pkg from "../package.json";
 const script = "retail-demo";
 
 const external = [
-  "@swim/util",
-  "@swim/codec",
-  "@swim/component",
-  "@swim/collections",
-  "@swim/constraint",
-  "@swim/structure",
-  "@swim/recon",
-  "@swim/uri",
-  "@swim/math",
-  "@swim/time",
-  "@swim/warp",
-  "@swim/client",
-  "@swim/model",
-  "@swim/style",
-  "@swim/theme",
-  "@swim/view",
-  "@swim/dom",
-  "@swim/graphics",
-  "@swim/controller",
-  "@swim/button",
-  "@swim/toolbar",
-  "@swim/table",
-  "@swim/window",
-  "@swim/sheet",
-  "@swim/panel",
-  "@swim/gauge",
-  "@swim/pie",
-  "@swim/chart",
-  "@swim/leaflet",
-  "@swim/domain",
-  "@swim/widget",
-  "@swim/token",
+  /^@nstream\//,
+  /^@swim\//
 ];
 
-const globals = Object.fromEntries(external.map(name => [name, "swim"]));
+const globals = function (name) {
+  if (/^@nstream\//.test(name)) {
+    return "nstream";
+  } else if (/^@swim\//.test(name)) {
+    return "swim";
+  }
+  return void 0;
+};
 
 const beautify = terser({
   compress: false,

@@ -1,4 +1,4 @@
-import { TimeSeriesController } from "@swim/widget";
+import { TimeSeriesController } from "@nstream/widget";
 import { View, ViewRef } from "@swim/view";
 import { LeafView, RowView, TextCellView } from "@swim/table";
 import { Look } from "@swim/theme";

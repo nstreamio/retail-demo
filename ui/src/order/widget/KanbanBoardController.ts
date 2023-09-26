@@ -4,7 +4,7 @@
 import {Trait, TraitRef} from "@swim/model";
 import {TraitViewRef} from "@swim/controller";
 import {PanelView, BoardView, BoardController, PanelController} from "@swim/panel";
-import {EntityTrait} from "@swim/domain";
+import {EntityTrait} from "@nstream/domain";
 import { OrderListController } from "..";
 import { OrderStatus } from "../../types";
 import { OrderStatusPieController } from "./OrderStatusPieController";

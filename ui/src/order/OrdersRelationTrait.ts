@@ -3,7 +3,7 @@
 
 import {type Value} from "@swim/structure";
 import {MapDownlink} from "@swim/client";
-import {RelationTrait} from "@swim/domain";
+import {RelationTrait} from "@nstream/domain";
 import {OrderEntityTrait} from "./OrderEntityTrait";
 import { Observes, Strings } from "@swim/util";
 import { TraitModelSet } from "@swim/model";

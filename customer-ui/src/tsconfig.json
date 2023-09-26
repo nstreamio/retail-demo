@@ -1,4 +1,5 @@
 {
+  "include": ["**/*"],
   "compilerOptions": {
     "allowUmdGlobalAccess": true,
     "alwaysStrict": true,
@@ -8,8 +9,9 @@
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
     "incremental": true,
+    "lib": ["esnext", "dom"],
     "module": "es2020",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmitHelpers": true,
     "noEmitOnError": true,
     "noImplicitAny": true,
@@ -21,7 +23,7 @@
     "outDir": "../build/typescript",
     "preserveConstEnums": true,
     "pretty": true,
-    "removeComments": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "strictBindCallApply": true,
     "strictFunctionTypes": true,

@@ -19,8 +19,9 @@
 <script src="libs/swim-ux.min.js"></script>
 <script src="libs/swim-vis.min.js"></script>
 <script src="libs/swim-maps.min.js"></script>
-<script src="libs/swim-gui.min.js"></script>
+<script src="libs/nstream-gui.min.js"></script>
 <script src="libs/retail-demo.min.js"></script>
+
 <script>
 
 if (navigator.standalone) {
@@ -57,8 +58,7 @@ storeModel.mount();
 storeEntityTrait.portal.insertModel();
 storeEntityTrait.customersRelation.insertModel();
 
-
-const entityFolioController = new swim.EntityFolioController();
+const entityFolioController = new nstream.EntityFolioController();
 entityFolioController.hostUri.set("warp://localhost:9001");
 
 entityFolioController.folio.attachView().style.set({

@@ -1,6 +1,6 @@
 import { TraitViewRef } from "@swim/controller";
 import { PanelController, PanelView } from "@swim/panel";
-import { TimeTableController } from "@swim/widget";
+import { TimeTableController } from "@nstream/widget";
 import { CumulativeOrdersPanelController } from "./CumulativeOrdersPanelController";
 import { OrderType } from "../../types";
 import { Trait } from "@swim/model";

@@ -5,7 +5,7 @@ import {Lazy} from "@swim/util";
 import type {Graphics} from "@swim/graphics";
 import {VectorIcon} from "@swim/graphics";
 import type {SheetController} from "@swim/sheet";
-import {AspectTrait} from "@swim/domain";
+import {AspectTrait} from "@nstream/domain";
 import { OrderBoardController } from "./OrderBoardController";
 
 /** @public */
@@ -19,9 +19,9 @@ export class OrderAspectTrait extends AspectTrait {
 
   // Define the board controller to be used that will control all the widgets/cards the orders will have
   // We will use the 'OrderBoard' which is currently blank
-  override createTabController(): SheetController | null {
-    return new OrderBoardController();
-  }
+  // override createTabController(): SheetController | null {
+  //   return new OrderBoardController();
+  // }
 
   // The icon to show the 'portal' (at the top - alternative to atlas)
   @Lazy

@@ -5,7 +5,7 @@ import {Lazy} from "@swim/util";
 import type {Graphics} from "@swim/graphics";
 import {VectorIcon} from "@swim/graphics";
 import type {SheetController} from "@swim/sheet";
-import {AspectTrait} from "@swim/domain";
+import {AspectTrait} from "@nstream/domain";
 import { KanbanBoardController } from "../order";
 
 /** @public */

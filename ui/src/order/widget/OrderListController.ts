@@ -2,7 +2,7 @@
 // All rights reserved.
 
 import { PanelView } from "@swim/panel";
-import { TimeTableController} from "@swim/widget";
+import { TimeTableController} from "@nstream/widget";
 import {View, ViewRef} from "@swim/view";
 import { MapDownlink, ValueDownlink } from "@swim/client";
 import { Value } from "@swim/structure";
