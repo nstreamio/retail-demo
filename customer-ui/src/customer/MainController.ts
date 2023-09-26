@@ -36,18 +36,26 @@ export class MainController extends BoardController {
     ) ?? [""])[0];
     this.customerId.set(customerId);
 
-    const hostUri = 'warp://localhost:9001';
+    const query = window.location.search;
+    const urlParams = new URLSearchParams(query);
+    let host = urlParams.get("host");
+    const baseUri = Uri.parse(document.location.href);
+    if (!host) {
+      host = baseUri.base().withScheme(baseUri.schemeName === "https" ? "warps" : "warp").toString();
+    }
     const nodeUri = `/customer/${this.customerId.value}`;
 
     // set up and open orders downlink
-    this.placeOrderDownlink.setHostUri(hostUri);
+    this.placeOrderDownlink.setHostUri(host);
     this.placeOrderDownlink.setNodeUri(nodeUri);
     this.placeOrderDownlink.open();
 
     // set up and open status downlink
-    this.statusDownlink.setHostUri(hostUri);
+    this.statusDownlink.setHostUri(host);
     this.statusDownlink.setNodeUri(nodeUri);
     this.statusDownlink.open();
+
+    this.updateOrderDownlink.setHostUri(host);
 
     // attach controller but don't insert any of its views
     this.orderListController.attachController(new OrderListController(MainController.ORDER_LIST_CONTROLLER_KEY));
@@ -412,7 +420,6 @@ export class MainController extends BoardController {
   readonly orderListController!: ControllerRef<this, OrderListController>;
 
   @ValueDownlink({
-    hostUri: 'warp://localhost:9001',
     laneUri: 'status',
     consumed: true,
     didSet(value: Value): void {
@@ -440,7 +447,6 @@ export class MainController extends BoardController {
   readonly placeOrderDownlink!: MapDownlink<this, Uri, Value>;
 
   @MapDownlink({
-    hostUri: 'warp://localhost:9001',
     laneUri: 'updateOrder',
     consumed: true,
     keyForm: Uri.form(),

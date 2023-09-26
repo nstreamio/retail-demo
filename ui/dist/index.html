@@ -50,7 +50,16 @@ if (navigator.standalone) {
 // We also set the host + node uri of the entity 
 const storeModel = new swim.Model();
 const storeEntityTrait = storeModel.appendTrait(swim.retaildemo.StoreEntityTrait, "entity");
-storeEntityTrait.hostUri.set("warp://localhost:9001");
+
+const query = window.location.search;
+const urlParams = new URLSearchParams(query);
+let host = urlParams.get("host");
+const baseUri = swim.Uri.parse(document.location.href);
+if (!host) {
+  host = baseUri.base().withScheme(baseUri.schemeName === "https" ? "warps" : "warp").toString();
+}
+
+storeEntityTrait.hostUri.set(host);
 storeEntityTrait.nodeUri.set("/store/main");
 storeModel.appendTrait(swim.SelectableTrait, "selectable");
 storeModel.mount();

@@ -28,8 +28,16 @@ export class OrderListController extends TimeTableController {
     ) ?? [""])[0];
     this.customerId.set(customerId);
 
+    const query = window.location.search;
+    const urlParams = new URLSearchParams(query);
+    let host = urlParams.get("host");
+    const baseUri = Uri.parse(document.location.href);
+    if (!host) {
+      host = baseUri.base().withScheme(baseUri.schemeName === "https" ? "warps" : "warp").toString();
+    }
+
     // set up and open orders downlink
-    this.ordersDownlink.setHostUri("warp://localhost:9001");
+    this.ordersDownlink.setHostUri(host);
     this.ordersDownlink.setNodeUri(`/customer/${this.customerId.value}`);
     this.ordersDownlink.open();
   }
@@ -184,7 +192,6 @@ export class OrderListController extends TimeTableController {
   readonly statusCol!: ViewRef<this, ColView>;
 
   @MapDownlink({
-    hostUri: "warp://localhost:9001",
     laneUri: "orders",
     consumed: true,
     keyForm: Uri.form(),
