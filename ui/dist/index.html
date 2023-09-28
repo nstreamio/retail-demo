@@ -68,7 +68,7 @@ storeEntityTrait.portal.insertModel();
 storeEntityTrait.customersRelation.insertModel();
 
 const entityFolioController = new nstream.EntityFolioController();
-entityFolioController.hostUri.set("warp://localhost:9001");
+entityFolioController.hostUri.set(host);
 
 entityFolioController.folio.attachView().style.set({
   flexGrow: 1,
