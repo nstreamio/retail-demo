@@ -30,14 +30,12 @@ export class MainController extends BoardController {
     const boardView = this.sheet.attachView();
     boardView.appendChild(PanelView, MainController.MAIN_PANEL_KEY);
 
+    const urlParams = new URLSearchParams(window.location.search);
+    
     // set customerId
-    const customerId = (/(?<=\/customer\/)[^\s!?\/.*#|]+(?=\/|$|\?)/gm.exec(
-      window.location.href
-    ) ?? [""])[0];
+    const customerId = urlParams.get('customer') || '';
     this.customerId.set(customerId);
 
-    const query = window.location.search;
-    const urlParams = new URLSearchParams(query);
     let host = urlParams.get("host");
     const baseUri = Uri.parse(document.location.href);
     if (!host) {

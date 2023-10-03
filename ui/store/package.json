@@ -73,18 +73,18 @@
     "@swim/window": "4.0.0-dev.20230923"
   },
   "scripts": {
-    "mkdir-ui": "mkdir -p dist/libs && mkdir -p dist/assets",
-    "copy-core": "cp node_modules/@swim/core/dist/umd/*.min.js* dist/libs",
-    "copy-gui": "cp node_modules/@nstream/gui/dist/umd/*.min.js* dist/libs",
-    "copy-host": "cp node_modules/@swim/host/dist/umd/*.min.js* dist/libs",
-    "copy-maps": "cp node_modules/@swim/maps/dist/umd/*.min.js* dist/libs",
-    "copy-ui": "cp node_modules/@swim/ui/dist/umd/*.min.js* dist/libs",
-    "copy-ux": "cp node_modules/@swim/ux/dist/umd/*.min.js* dist/libs",
-    "copy-vis": "cp node_modules/@swim/vis/dist/umd/*.min.js* dist/libs",
+    "mkdir-ui": "mkdir -p ../dist/store/libs && mkdir -p ../dist/store/assets",
+    "copy-core": "cp node_modules/@swim/core/dist/umd/*.min.js* ../dist/store/libs",
+    "copy-gui": "cp node_modules/@nstream/gui/dist/umd/*.min.js* ../dist/store/libs",
+    "copy-host": "cp node_modules/@swim/host/dist/umd/*.min.js* ../dist/store/libs",
+    "copy-maps": "cp node_modules/@swim/maps/dist/umd/*.min.js* ../dist/store/libs",
+    "copy-ui": "cp node_modules/@swim/ui/dist/umd/*.min.js* ../dist/store/libs",
+    "copy-ux": "cp node_modules/@swim/ux/dist/umd/*.min.js* ../dist/store/libs",
+    "copy-vis": "cp node_modules/@swim/vis/dist/umd/*.min.js* ../dist/store/libs",
     "copy-libs": "npm run copy-core && npm run copy-host && npm run copy-ui && npm run copy-ux && npm run copy-vis && npm run copy-maps && npm run copy-gui",
     "compile": "tsc -b",
     "bundle": "cd src/ && rollup -c",
-    "copy-app": "cp index.html dist/ && cp build/javascript/*.min.js* dist/libs && cp assets/* dist/assets",
+    "copy-app": "cp index.html ../dist/store/ && cp build/javascript/*.min.js* ../dist/store/libs && cp assets/* ../dist/store/assets",
     "build": "npm run compile && npm run bundle && npm run copy-app",
     "postinstall": "npm run mkdir-ui && npm run copy-libs"
   }

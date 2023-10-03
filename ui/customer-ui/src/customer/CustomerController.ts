@@ -11,9 +11,8 @@ export class CustomerController extends BoardController {
     super();
 
     // set customerId
-    const customerId = (/(?<=\/customer\/)[^\s!?\/.*#|]+(?=\/|$|\?)/gm.exec(
-      window.location.href
-    ) ?? [""])[0];
+    const urlParams = new URLSearchParams(window.location.search);
+    const customerId = urlParams.get('customer') || '';
     this.customerId.set(customerId);
 
     // insert appBar view
