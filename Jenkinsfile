@@ -1,3 +1,3 @@
 library('jenkins-pipeline')
 
-demoPipeline("retail")
+demoServerUiPipeline("transit")
