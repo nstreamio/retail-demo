@@ -54,8 +54,8 @@ const storeEntityTrait = storeModel.appendTrait(swim.retaildemo.StoreEntityTrait
 const query = window.location.search;
 const urlParams = new URLSearchParams(query);
 let host = urlParams.get("host");
-const baseUri = swim.Uri.parse(document.location.href);
 if (!host) {
+  const baseUri = swim.Uri.parse(document.location.href);
   host = baseUri.base().withScheme(baseUri.schemeName === "https" ? "warps" : "warp").toString();
 }
 
