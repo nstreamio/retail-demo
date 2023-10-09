@@ -1,22 +1,22 @@
-package swim.retail360;
+package swim.retail;
 
 import swim.actor.ActorSpace;
 import swim.api.plane.AbstractPlane;
 import swim.kernel.Kernel;
 import swim.server.ServerLoader;
 
-public class Retail360Plane extends AbstractPlane {
+public class RetailPlane extends AbstractPlane {
 
-  public Retail360Plane() {
+  public RetailPlane() {
 
   }
 
   public static void main(String[] args) {
     final Kernel kernel = ServerLoader.loadServer();
-    final ActorSpace space = (ActorSpace) kernel.getSpace("retail360");
+    final ActorSpace space = (ActorSpace) kernel.getSpace("retail");
 
     kernel.start();
-    System.out.println("Running Retail-360 plane...");
+    System.out.println("Running Retail Plane...");
     kernel.run();
   }
 

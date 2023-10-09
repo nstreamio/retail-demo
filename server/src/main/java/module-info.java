@@ -3,6 +3,6 @@ open module swim.retail {
   requires swim.server;
   requires swim.meta;
 
-  exports swim.retail360;
-  exports swim.retail360.agent;
+  exports swim.retail;
+  exports swim.retail.agent;
 }
