@@ -1,4 +1,4 @@
-package swim.retail360.agent;
+package swim.retail.agent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,9 +7,6 @@ import swim.api.agent.AbstractAgent;
 import swim.api.lane.CommandLane;
 import swim.api.lane.JoinValueLane;
 import swim.api.lane.ValueLane;
-import swim.observable.function.DidRemoveKey;
-import swim.observable.function.DidUpdateKey;
-import swim.streamlet.In;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;

@@ -1,4 +1,4 @@
-package swim.retail360.agent;
+package swim.retail.agent;
 
 import java.util.Random;
 import java.util.UUID;
@@ -6,10 +6,9 @@ import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
 import swim.api.lane.ValueLane;
 import swim.concurrent.TimerRef;
-import swim.retail360.model.Product;
+import swim.retail.model.Product;
 import swim.structure.Record;
 import swim.structure.Value;
-import swim.uri.Uri;
 
 public class CustomerSimAgent extends AbstractAgent {
 

@@ -1,4 +1,4 @@
-package swim.retail360.agent;
+package swim.retail.agent;
 
 import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
