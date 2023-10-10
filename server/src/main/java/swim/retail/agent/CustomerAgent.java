@@ -55,7 +55,7 @@ public class CustomerAgent extends AbstractAgent {
     final boolean notifyCustomer = computeCustomerStatus(statusOrders);
     final Value customerStatus =
           Record.create().slot("notify", notifyCustomer)
-                .appended(Form.forMap(Form.forString(), Form.forMap(Form.forString(), Form.forInteger())).mold(statusOrders).toValue());
+                .slot("orders", Form.forMap(Form.forString(), Form.forMap(Form.forString(), Form.forInteger())).mold(statusOrders).toValue());
     this.status.set(customerStatus);
   }
 
