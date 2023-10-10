@@ -47,7 +47,7 @@ export class KanbanBoardController extends BoardController {
       }
     });
 
-    const orderPlacedListController = orderPlacedColumnController.appendChild(new OrderListController(OrderStatus.orderPlaced, this), `List${OrderStatus.orderPlaced}`);
+    const orderPlacedListController = orderPlacedColumnController.appendChild(new OrderListController(OrderStatus.orderPlaced), `List${OrderStatus.orderPlaced}`);
     orderPlacedListController.focusedOrderType.bindInlet(orderPlacedColumnController.focusedOrderType);
     orderPlacedListController.panel.insertView(orderPlacedPanelView).set({
       unitWidth: 1,
@@ -76,7 +76,7 @@ export class KanbanBoardController extends BoardController {
       }
     });
 
-    const orderProcessedListController = orderProcessedColumnController.appendChild(new OrderListController(OrderStatus.orderProcessed, this), `List${OrderStatus.orderProcessed}`);
+    const orderProcessedListController = orderProcessedColumnController.appendChild(new OrderListController(OrderStatus.orderProcessed), `List${OrderStatus.orderProcessed}`);
     orderProcessedListController.focusedOrderType.bindInlet(orderProcessedColumnController.focusedOrderType);
     orderProcessedListController.panel.insertView(orderProcessedPanelView).set({
       unitWidth: 1,
@@ -105,7 +105,7 @@ export class KanbanBoardController extends BoardController {
       }
     });
 
-    const orderReadyListController = orderReadyColumnController.appendChild(new OrderListController(OrderStatus.readyForPickup, this), `List${OrderStatus.readyForPickup}`);
+    const orderReadyListController = orderReadyColumnController.appendChild(new OrderListController(OrderStatus.readyForPickup), `List${OrderStatus.readyForPickup}`);
     orderReadyListController.focusedOrderType.bindInlet(orderReadyColumnController.focusedOrderType);
     orderReadyListController.panel.insertView(orderReadyPanelView).set({
       unitWidth: 1,

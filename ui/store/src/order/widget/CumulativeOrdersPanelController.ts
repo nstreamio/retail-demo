@@ -15,10 +15,6 @@ export class CumulativeOrdersPanelController extends PanelController {
     super();
     this.orderType = orderType;
     this.isCumulative = isCumulative;
-    window.setTimeout(() => {
-      this.statusDownlink.setNodeUri(this.nodeUri.value?.stringValue ?? '');
-      this.statusDownlink.open();
-    }, 300);
     this.initView();
   }
 
@@ -109,29 +105,21 @@ export class CumulativeOrdersPanelController extends PanelController {
   })
   readonly value!: ViewRef<this, HtmlView>;
 
-  @ValueDownlink({
-    hostUri: 'warp://localhost:9001',
-    laneUri: 'status',
-    consumed: true,
-    didSet(value: Value): void {
-      const storeStatus = OrderListController.parseStoreStatus(value);
+  updateDisplay(storeStatus: StoreStatus): void {
+    if (this.orderType !== OrderType.Unknown) {
+      const readyCount = storeStatus[OrderStatus.readyForPickup][this.orderType].count;
+      const pickedUpCount = storeStatus[OrderStatus.pickupCompleted][this.orderType].count;
+      this.count.attachView().node.innerText = `Count: ${readyCount + pickedUpCount}`;
 
-      if (this.owner.orderType !== OrderType.Unknown) {
-        const readyCount = storeStatus[OrderStatus.readyForPickup][this.owner.orderType].count;
-        const pickedUpCount = storeStatus[OrderStatus.pickupCompleted][this.owner.orderType].count;
-        this.owner.count.attachView().node.innerText = `Count: ${readyCount + pickedUpCount}`;
-
-        const readyValue = storeStatus[OrderStatus.readyForPickup][this.owner.orderType].value;
-        const pickedUpValue = storeStatus[OrderStatus.pickupCompleted][this.owner.orderType].value;
-        this.owner.value.attachView().node.innerText = `Value: $${readyValue + pickedUpValue}.00`;
-      } else {
-        const totalCount = storeStatus[OrderStatus.readyForPickup].total.count + storeStatus[OrderStatus.pickupCompleted].total.count;
-        this.owner.count.attachView().node.innerText = `Count: ${totalCount}`;
-        
-        const totalValue = storeStatus[OrderStatus.readyForPickup].total.value + storeStatus[OrderStatus.pickupCompleted].total.value;
-        this.owner.value.attachView().node.innerText = `Value: $${totalValue}.00`;
-      }
+      const readyValue = storeStatus[OrderStatus.readyForPickup][this.orderType].value;
+      const pickedUpValue = storeStatus[OrderStatus.pickupCompleted][this.orderType].value;
+      this.value.attachView().node.innerText = `Value: $${readyValue + pickedUpValue}.00`;
+    } else {
+      const totalCount = storeStatus[OrderStatus.readyForPickup].total.count + storeStatus[OrderStatus.pickupCompleted].total.count;
+      this.count.attachView().node.innerText = `Count: ${totalCount}`;
+      
+      const totalValue = storeStatus[OrderStatus.readyForPickup].total.value + storeStatus[OrderStatus.pickupCompleted].total.value;
+      this.value.attachView().node.innerText = `Value: $${totalValue}.00`;
     }
-  })
-  readonly statusDownlink!: ValueDownlink<this>;
+  }
 }

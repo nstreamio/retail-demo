@@ -1,9 +1,12 @@
 import { TraitViewRef } from "@swim/controller";
 import { PanelController, PanelView } from "@swim/panel";
 import { TimeTableController } from "@nstream/widget";
+import { Trait } from "@swim/model";
+import { ValueDownlink } from "@swim/client";
+import { Value } from "@swim/structure";
 import { CumulativeOrdersPanelController } from "./CumulativeOrdersPanelController";
 import { OrderType } from "../../types";
-import { Trait } from "@swim/model";
+import { OrderListController } from "./OrderListController";
 
 export class CumulativeOrdersSectionController extends TimeTableController {
   constructor() {
@@ -53,8 +56,25 @@ export class CumulativeOrdersSectionController extends TimeTableController {
         style: {
           margin: 0
         }
+      }); 
+    },
+  })
+  override readonly panel!: TraitViewRef<this, Trait, PanelView> & TimeTableController['panel'];
+
+
+  @ValueDownlink({
+    laneUri: 'status',
+    inherits: true,
+    consumed: true,
+    didSet(value: Value): void {
+      const storeStatus = OrderListController.parseStoreStatus(value);
+
+      this.owner.forEachChild(function(child) {
+        if (Object.getPrototypeOf(child).constructor.name === 'CumulativeOrdersPanelController') {
+          (child as CumulativeOrdersPanelController).updateDisplay(storeStatus);
+        }
       });
     }
   })
-  override readonly panel!: TraitViewRef<this, Trait, PanelView> & TimeTableController['panel'];
+  readonly statusDownlink!: ValueDownlink<this>;
 }

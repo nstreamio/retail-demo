@@ -3,7 +3,7 @@
 import {EntityTrait} from "@nstream/domain";
 import { Model, TraitModelRef } from "@swim/model";
 import { StoreAspectTrait } from "./StoreAspectTrait";
-import { CustomersRelationTrait } from "..";
+import { CustomersRelationTrait } from "../customer";
 
 export class StoreEntityTrait extends EntityTrait {
   constructor() {
