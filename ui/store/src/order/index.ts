@@ -1,5 +1,4 @@
 export { OrderEntityTrait } from "./OrderEntityTrait";
-export { OrderEntityTraitObserver } from "./OrderEntityTrait";
 
 export { OrdersRelationTrait } from "./OrdersRelationTrait";
 

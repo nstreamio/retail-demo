@@ -99,7 +99,7 @@ export class MainController extends BoardController {
       }
     }
   })
-  readonly inFlightCount!: Property<this, number | undefined>;
+  readonly unfulfilledCount!: Property<this, number | undefined>;
 
   @Property({
     valueType: Boolean,
@@ -117,7 +117,7 @@ export class MainController extends BoardController {
       } else {
         // remove pickupOrdersFab
         this.owner.pickupOrdersFab.removeView();
-        // insert placeOrerFab
+        // insert placeOrderFab
         this.owner.placeOrderFab.insertView(boardView);
       }
     }
@@ -422,16 +422,16 @@ export class MainController extends BoardController {
     consumed: true,
     didSet(value: Value): void {
       const status = MainController.parseStoreStatus(value);
-      // propagate new value of inFlightCount
-      const newInFlightCount = [
+      // propagate new value of unfulfilledCount
+      const newUnfulfilledCount = [
         OrderStatus.orderPlaced,
         OrderStatus.orderProcessed,
         OrderStatus.readyForPickup
       ].reduce((acc, nextStatus: OrderStatus) => acc + status[nextStatus].total.count, 0);
-      this.owner.inFlightCount.set(newInFlightCount);
+      this.owner.unfulfilledCount.set(newUnfulfilledCount);
 
       // propagate new value of pickupReady
-      const newPickupReadyValue = !status.orderPlaced.total.count && !status.orderProcessed.total.count && !!status.readyForPickup.total.count;
+      const newPickupReadyValue = value.get('notify').booleanValue();
       this.owner.pickupReady.set(newPickupReadyValue);
     },
   })
@@ -482,7 +482,7 @@ export class MainController extends BoardController {
   static parseStoreStatus(v: Value): StoreStatus {
     return [OrderStatus.orderPlaced, OrderStatus.orderProcessed, OrderStatus.readyForPickup, OrderStatus.pickupCompleted].reduce((acc, s) => {
       [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
-        let count = v.get(s).get(t).numberValue(0);
+        let count = v.getItem(1).get(s).get(t).numberValue(0);
         let value = count * MainController.valuePerOrderType[t];
         if (!acc[s]) { acc[s] = { total: { count: 0, value: 0 } } as StoreStatus[OrderStatus]; }
         acc[s][t] = { count, value };

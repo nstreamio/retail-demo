@@ -24,8 +24,7 @@ export class OrderController extends TimeSeriesController {
         super();
         this.setKey(nodeUri);
         this.eventKey = orderStatus;
-        this.updateOrderDownlink.setNodeUri(nodeUri);
-        this.updateOrderDownlink.open();
+        this.nodeUri.setValue(nodeUri);
         this.focusedCustomerId.bindInlet(olc.focusedCustomerId);
     }
 
@@ -193,7 +192,8 @@ export class OrderController extends TimeSeriesController {
         valueType: String,
         value: '',
         didSetValue(newValue: string, oldValue: string): void {
-            if (this.owner.nodeUri.value?.stringValue !== '/store/main') {
+            const olc = this.owner.getAncestor(OrderListController);
+            if (olc?.nodeUri.value?.stringValue !== '/store/main') {
                 // only highlight leaves on main store view
                 return;
             }
@@ -220,8 +220,8 @@ export class OrderController extends TimeSeriesController {
     }
     
     @MapDownlink({
-        hostUri: 'warp://localhost:9001',
         laneUri: "updateOrder",
+        inherits: true,
         consumed: true,
         keyForm: Uri.form(),
     })
