@@ -482,7 +482,7 @@ export class MainController extends BoardController {
   static parseStoreStatus(v: Value): StoreStatus {
     return [OrderStatus.orderPlaced, OrderStatus.orderProcessed, OrderStatus.readyForPickup, OrderStatus.pickupCompleted].reduce((acc, s) => {
       [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
-        let count = v.getItem(1).get(s).get(t).numberValue(0);
+        let count = v.get('orders').get(s).get(t).numberValue(0);
         let value = count * MainController.valuePerOrderType[t];
         if (!acc[s]) { acc[s] = { total: { count: 0, value: 0 } } as StoreStatus[OrderStatus]; }
         acc[s][t] = { count, value };
