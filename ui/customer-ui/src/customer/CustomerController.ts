@@ -117,7 +117,7 @@ export class CustomerController extends BoardController {
           boxSizing: "border-box",
         },
       });
-      title.node.innerText = "NStream - Retail 360";
+      title.node.innerText = "Retail Demo";
 
       const detailsInnerContainer = detailsContainer.appendChild("div").set({
         style: {
