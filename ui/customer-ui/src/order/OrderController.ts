@@ -11,7 +11,6 @@ export class OrderController extends TimeSeriesController {
   readonly orderType: OrderType;
 
   constructor(orderId: string, orderType: OrderType) {
-    console.log('OrderController constructor');
     super();
     this.setKey(orderId);
     this.orderId = orderId;

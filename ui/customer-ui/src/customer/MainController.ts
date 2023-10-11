@@ -21,14 +21,12 @@ import { TimeSeriesController } from "@nstream/widget";
 import { Observes } from "@swim/util";
 
 export class MainController extends BoardController {
-  static readonly MAIN_PANEL_KEY: string = "mainPanelView";
-  static readonly ORDER_LIST_CONTROLLER_KEY: string = "orderListController";
 
   constructor() {
     super();
 
     const boardView = this.sheet.attachView();
-    boardView.appendChild(PanelView, MainController.MAIN_PANEL_KEY);
+    this.panel.insertView(boardView);
 
     const urlParams = new URLSearchParams(window.location.search);
     
@@ -56,7 +54,7 @@ export class MainController extends BoardController {
     this.updateOrderDownlink.setHostUri(host);
 
     // attach controller but don't insert any of its views
-    this.orderListController.attachController(new OrderListController(MainController.ORDER_LIST_CONTROLLER_KEY));
+    this.orderListController.attachController(new OrderListController());
   }
 
   // repeated from CustomerController; not very DRY; there's probably a way to connect these values
@@ -72,25 +70,20 @@ export class MainController extends BoardController {
     extends: true,
     binds: true,
     didSetValue(newValue = 0, oldValue) {
-      const panelView = this.owner.sheet.attachView().getChild(MainController.MAIN_PANEL_KEY);
+      const panelView = this.owner.panel.view;
+      const olc = this.owner.orderListController;
 
       if (newValue > 0 && (oldValue === void 0 || oldValue === 0) && panelView) {
         // remove empty state
         this.owner.emptyState.removeView();
 
         // insert orders table
-        this.owner.orderListController.controller?.panel.insertView(
-          panelView,
-          void 0,
-          void 0,
-          MainController.ORDER_LIST_CONTROLLER_KEY
-        ).set({
+        olc.controller?.panel.insertView(panelView).set({
           unitWidth: 1,
           unitHeight: 1,
         });
       } else if (newValue === 0 && (oldValue === void 0 || oldValue > 0) && panelView) {
-        // remove orders table
-        panelView.removeChild(MainController.ORDER_LIST_CONTROLLER_KEY);
+        olc.controller?.panel.view?.remove();
 
         // insert empty state
         this.owner.emptyState.insertView(panelView).set({
@@ -144,6 +137,11 @@ export class MainController extends BoardController {
   })
   override readonly sheet!: TraitViewRef<this, Trait, BoardView> &
     BoardController["sheet"];
+
+  @ViewRef({
+    viewType: PanelView,
+  })
+  readonly panel!: ViewRef<this, PanelView>;
 
   @ViewRef({
     viewType: HtmlView,
