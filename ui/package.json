@@ -1,0 +1,40 @@
+{
+  "name": "@swim/retail-demo",
+  "version": "0.1.0",
+  "description": "Swim Retail Demo",
+  "homepage": "https://github.com/swimos/retail-demo",
+  "copyright": "2015-2022 Swim.inc",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/retail-demo.git",
+  "main": "build/javascript/retail-demo.js",
+  "devDependencies": {
+    "@types/eslint": "8",
+    "@types/node": "20",
+    "@typescript-eslint/eslint-plugin": "5",
+    "@typescript-eslint/parser": "5",
+    "eslint": "8",
+    "tslib": ">=2.5",
+    "typescript": "~5.2"
+  },
+  "dependencies": {},
+  "scripts": {
+    "mkdir-ui": "mkdir -p ./dist/store/libs && mkdir -p ./dist/store/assets",
+    "store:compile": "pwd && cd ./store && npm run compile && cd .. && pwd",
+    "customer:compile": "pwd && cd ./customer-ui && npm run compile && cd .. && pwd",
+    "all:compile": "npm run store:compile && npm run customer:compile",
+    "compile": "npm run all:compile",
+    "store:bundle": "pwd && cd ./store && npm run bundle && cd .. && pwd",
+    "customer:bundle": "pwd && cd ./customer-ui && npm run bundle && cd .. && pwd",
+    "all:bundle": "npm run store:bundle && npm run customer:bundle",
+    "bundle": "npm run all:bundle",
+    "store:copy-app": "pwd && cd ./store && npm run copy-app && cd .. && pwd",
+    "customer:copy-app": "pwd && cd ./customer-ui && npm run copy-app && cd .. && pwd",
+    "all:copy-app": "npm run store:copy-app && npm run customer:copy-app",
+    "copy-app": "npm run all:copy-app",
+    "build": "npm run compile && npm run bundle && npm run copy-app",
+    "store:install": "pwd && cd ./store && pwd && npm install && pwd && cd .. && pwd",
+    "customer:install": "pwd && cd ./customer-ui && pwd && npm install && pwd && cd .. && pwd",
+    "all:install": "npm run store:install && npm run customer:install",
+    "postinstall": "npm run mkdir-ui && npm run all:install"
+  }
+}
