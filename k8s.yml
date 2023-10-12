@@ -1,0 +1,31 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: demo-retail
+  namespace: demo-retail
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      demo: retail
+  serviceName: demo
+  template:
+    metadata:
+      labels:
+        demo: retail
+    spec:
+      containers:
+        - image: DOCKER_IMAGE
+          imagePullPolicy: Always
+          name: demo
+          ports:
+            - containerPort: 9001
+              protocol: TCP
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+            requests:
+              cpu: "2"
+              memory: 2Gi
