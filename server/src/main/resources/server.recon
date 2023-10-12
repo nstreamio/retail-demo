@@ -1,4 +1,5 @@
 @kernel(class: "swim.meta.MetaKernel")
+@kernel(class: "swim.service.web.UiRouter")
 
 retail: @fabric {
   @plane(class: "swim.retail.RetailPlane")
@@ -22,7 +23,6 @@ retail: @fabric {
 
 @web(port: 9001) {
   space: "retail"
-  documentRoot: "./ui/"
   @websocket {
     serverCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level
     clientCompressionLevel: 0# -1 = default; 0 = off; 1-9 = deflate level
