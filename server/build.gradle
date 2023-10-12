@@ -83,34 +83,6 @@ afterEvaluate {
     }
   }
 
-  startScripts {
-    inputs.property("moduleName", moduleName)
-    doFirst {
-      classpath = files()
-      defaultJvmOpts = [
-              '-Dswim.config=/server.recon',
-              '-Xms3g',
-              '-Xmx3g',
-              '--module-path', 'APP_HOME_LIBS',
-              '--module', "${moduleName}/${mainClassName}"
-      ]
-    }
-    doLast {
-      def bashFile = new File(outputDir, applicationName)
-      String bashContent = bashFile.text
-      bashFile.text = bashContent.replaceFirst('APP_HOME_LIBS', Matcher.quoteReplacement('$APP_HOME/lib'))
-
-      def batFile = new File(outputDir, applicationName + ".bat")
-      String batContent = batFile.text
-      batFile.text = batContent.replaceFirst('APP_HOME_LIBS', Matcher.quoteReplacement('%APP_HOME%\\lib'))
-    }
-  }
-
-  ospackage {
-    release '1'
-    prefix '/opt/swim-retail360'
-  }
-
   jib {
     from {
       image = "openjdk:11"
@@ -136,39 +108,6 @@ afterEvaluate {
           includes = ['*.recon']
         }
       }
-    }
-  }
-
-
-  task packageDeb(type: Deb) {
-    maintainer = 'developer@swim.inc'
-
-    configurationFile("/etc/sysconfig/${project.name}")
-    preInstall "addgroup --quiet --system ${project.name}"
-    preInstall "adduser --quiet --system --ingroup ${project.name} --no-create-home --disabled-password ${project.name}"
-    postInstall "systemctl preset ${project.name} > /dev/null 2>&1"
-    postInstall "systemctl start ${project.name} > /dev/null 2>&1"
-    preUninstall "systemctl disable ${project.name} > /dev/null 2>&1"
-    preUninstall "systemctl stop ${project.name} > /dev/null 2>&1"
-    postUninstall "systemctl daemon-reload > /dev/null 2>&1"
-
-    from('pkg') {
-      into '/etc/systemd/system'
-      include '*.service'
-      addParentDirs false
-      expand project.properties
-      user 'root'
-      permissionGroup 'root'
-      fileMode = 0644
-    }
-
-    from('pkg') {
-      into '/etc/sysconfig'
-      include "${project.name}"
-      user 'root'
-      permissionGroup 'root'
-      fileMode = 0644
-      fileType CONFIG | NOREPLACE
     }
   }
 }
