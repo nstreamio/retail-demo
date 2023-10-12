@@ -10,13 +10,14 @@ plugins {
   id "java"
   id "java-library"
   id "application"
+  id 'com.google.cloud.tools.jib' version '3.3.1'
 }
 
 group = 'org.swimos'
 description = 'Customer Retail Demo'
 ext.moduleName = 'swim.retail'
 sourceCompatibility = 11
-version = project.property('swim.version')
+version = project.property('application.version')
 mainClassName = 'swim.retail.RetailPlane'
 
 def jvmVersion = System.getProperty('java.version').split('\\.')[0] as Integer
@@ -27,9 +28,9 @@ repositories {
 }
 
 dependencies {
-  api group: 'org.swimos', name: 'swim-server', version: version
-  api group: 'org.swimos', name:'swim-meta', version: version
-  api group: 'org.swimos', name: 'swim-service-web', version: version
+  api group: 'org.swimos', name: 'swim-server', version: project.property('swim.version')
+  api group: 'org.swimos', name:'swim-meta', version: project.property('swim.version')
+  api group: 'org.swimos', name: 'swim-service-web', version: project.property('swim.version')
 }
 
 afterEvaluate {
@@ -81,26 +82,31 @@ afterEvaluate {
     }
   }
 
-  startScripts {
-    inputs.property("moduleName", moduleName)
-    doFirst {
-      classpath = files()
-      defaultJvmOpts = [
-              '-Dswim.config=/server.recon',
-              '-Xms3g',
-              '-Xmx3g',
-              '--module-path', 'APP_HOME_LIBS',
-              '--module', "${moduleName}/${mainClass}"
-      ]
+  jib {
+    from {
+      image = "openjdk:11"
     }
-    doLast {
-      def bashFile = new File(outputDir, applicationName)
-      String bashContent = bashFile.text
-      bashFile.text = bashContent.replaceFirst('APP_HOME_LIBS', Matcher.quoteReplacement('$APP_HOME/lib'))
-
-      def batFile = new File(outputDir, applicationName + ".bat")
-      String batContent = batFile.text
-      batFile.text = batContent.replaceFirst('APP_HOME_LIBS', Matcher.quoteReplacement('%APP_HOME%\\lib'))
+    to {
+      image = "nstream/demo-retail:${version}"
+      auth {
+        username = "$System.env.REGISTRY_USERNAME"
+        password = "$System.env.REGISTRY_PASSWORD"
+      }
+    }
+    container {
+      mainClass = mainClassName
+      ports = ['9001/tcp']
+      jvmFlags = ['-Dswim.config=/config/server.recon']
+    }
+    extraDirectories {
+      paths {
+        path {
+          // copies a single-file.xml
+          from = 'src/main/resources'
+          into = '/config'
+          includes = ['*.recon']
+        }
+      }
     }
   }
 
