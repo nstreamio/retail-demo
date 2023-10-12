@@ -1,16 +1,18 @@
-package swim.retail360.agent;
+package swim.retail.agent;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
 import swim.api.lane.*;
 import swim.structure.Form;
 import swim.structure.Record;
 import swim.structure.Value;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import swim.uri.Uri;
+import static swim.retail.model.OrderStatus.ORDER_PLACED;
+import static swim.retail.model.OrderStatus.ORDER_PROCESSED;
+import static swim.retail.model.OrderStatus.ORDER_READY;
 
 public class CustomerAgent extends AbstractAgent {
 
@@ -39,6 +41,7 @@ public class CustomerAgent extends AbstractAgent {
         continue;
       }
       final String status = orderStatus.get("status").stringValue("");
+
       if (!status.equals("")) {
         final Map<String, Integer> statusOrder = statusOrders.getOrDefault(status, new HashMap<>());
         orderStatus.get("products").forEach(item ->
@@ -49,7 +52,28 @@ public class CustomerAgent extends AbstractAgent {
         statusOrders.put(status, statusOrder);
       }
     }
-    this.status.set(Form.forMap(Form.forString(), Form.forMap(Form.forString(), Form.forInteger())).mold(statusOrders).toValue());
+    final boolean notifyCustomer = computeCustomerStatus(statusOrders);
+    final Value customerStatus =
+          Record.create().slot("notify", notifyCustomer)
+                .slot("orders", Form.forMap(Form.forString(), Form.forMap(Form.forString(), Form.forInteger())).mold(statusOrders).toValue());
+    this.status.set(customerStatus);
+  }
+
+  private boolean computeCustomerStatus(Map<String, Map<String, Integer>> statusOrders) {
+    int placedProcessedCount = 0, readyCount = 0;
+    for (String status: statusOrders.keySet()) {
+      if (status.equals(ORDER_PLACED) || status.equals(ORDER_PROCESSED)  || status.equals(ORDER_READY)) {
+        final Map<String, Integer> orders = statusOrders.get(status);
+        for (Integer count: orders.values()) {
+          if (status.equals(ORDER_READY)) {
+            readyCount += count;
+          } else {
+            placedProcessedCount += count;
+          }
+        }
+      }
+    }
+    return placedProcessedCount == 0 && readyCount > 0;
   }
 
   @SwimLane("placeOrder")

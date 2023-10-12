@@ -1,15 +1,11 @@
 // Copyright 2015-2022 Swim.inc
 // All rights reserved.
-import {Class, Lazy} from "@swim/util";
-import {EntityTrait, EntityTraitObserver} from "@nstream/domain";
+import {Lazy} from "@swim/util";
+import {EntityTrait} from "@nstream/domain";
 import { Model, TraitModelRef } from "@swim/model";
 import { OrdersRelationTrait } from "../order/OrdersRelationTrait";
 import { Graphics, PolygonIcon } from "@swim/graphics";
 import { CustomerAspectTrait } from "./CustomerAspectTrait";
-
-/** @public */
-export interface CustomerEntityTraitObserver<T extends CustomerEntityTrait = CustomerEntityTrait> extends EntityTraitObserver<T> {
-}
 
 /** @public */
 export class CustomerEntityTrait extends EntityTrait {
@@ -17,8 +13,6 @@ export class CustomerEntityTrait extends EntityTrait {
     super();
     this.icon.setIntrinsic(CustomerEntityTrait.icon);
   }
-
-  override readonly observerType?: Class<CustomerEntityTraitObserver>;
 
   // Aspect/Portal trait showing that this entity will have a board of widgets/cards
   @TraitModelRef({

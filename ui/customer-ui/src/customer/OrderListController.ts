@@ -16,11 +16,9 @@ import { Status } from "@nstream/domain";
 import { OrderStatus, OrderType } from "../types";
 
 export class OrderListController extends TimeTableController {
-  readonly listTitle: string;
 
-  constructor(title: string) {
+  constructor() {
     super();
-    this.listTitle = title;
 
     const urlParams = new URLSearchParams(window.location.search);
     

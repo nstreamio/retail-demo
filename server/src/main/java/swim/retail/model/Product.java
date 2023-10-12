@@ -1,4 +1,4 @@
-package swim.retail360.model;
+package swim.retail.model;
 
 public enum Product {
   A(10), B(20), C(30);

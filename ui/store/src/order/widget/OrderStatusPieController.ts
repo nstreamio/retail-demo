@@ -28,12 +28,6 @@ export class OrderStatusPieController extends TimePieController {
     super();
     this.orderStatus = orderStatus;
     this.headerTitle = headerTitle;
-
-    // open downlink
-    window.setTimeout(() => {
-      this.statusDownlink.setNodeUri(this.nodeUri.value?.stringValue ?? '');
-      this.statusDownlink.open();
-    }, 300);
   }
 
   @TraitViewRef({
@@ -177,8 +171,8 @@ export class OrderStatusPieController extends TimePieController {
   readonly focusedOrderType!: Property<this, String>;
 
   @ValueDownlink({
-    hostUri: 'warp://localhost:9001',
     laneUri: 'status',
+    inherits: true,
     consumed: true,
     didSet(value: Value): void {
       const storeStatus = OrderListController.parseStoreStatus(value);

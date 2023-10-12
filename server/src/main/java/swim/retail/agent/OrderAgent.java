@@ -1,4 +1,4 @@
-package swim.retail360.agent;
+package swim.retail.agent;
 
 import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
@@ -9,14 +9,11 @@ import swim.recon.Recon;
 import swim.structure.Record;
 import swim.structure.Value;
 import swim.uri.Uri;
+import static swim.retail.model.OrderStatus.ORDER_PLACED;
+import static swim.retail.model.OrderStatus.ORDER_STATUSES;
 
 public class OrderAgent extends AbstractAgent {
 
-  private static final String ORDER_PLACED = "orderPlaced";
-  private static final String ORDER_PROCESSED = "orderProcessed";
-  private static final String ORDER_READY = "readyForPickup";
-  private static final String ORDER_PICKED_UP_COMPLETED = "pickupCompleted";
-  private static final String[] ORDER_STATUS = {ORDER_PLACED, ORDER_PROCESSED, ORDER_READY, ORDER_PICKED_UP_COMPLETED};
 
   public OrderAgent() {}
 
@@ -83,9 +80,9 @@ public class OrderAgent extends AbstractAgent {
   }
 
   private String nextOrderStatus(final String currentOrderStatus) {
-    for (int i = 0; i < ORDER_STATUS.length - 1; i++) {
-      if (ORDER_STATUS[i].equals(currentOrderStatus)) {
-        return ORDER_STATUS[i + 1];
+    for (int i = 0; i < ORDER_STATUSES.length - 1; i++) {
+      if (ORDER_STATUSES[i].equals(currentOrderStatus)) {
+        return ORDER_STATUSES[i + 1];
       }
     }
     return null;

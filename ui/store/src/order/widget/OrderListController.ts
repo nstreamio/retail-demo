@@ -29,10 +29,14 @@ export class OrderListController extends TimeTableController {
 
   readonly eventKey: OrderStatus;
 
-  constructor(key: OrderStatus, kbController: KanbanBoardController) {
+  constructor(key: OrderStatus) {
     super();
     this.setKey(`orderListController-${key}`);
     this.eventKey = key;
+  }
+
+  protected override onMount(): void {
+    const kbController = this.getAncestor(KanbanBoardController);
     if (kbController) {
       this.focusedCustomerId.bindInlet(kbController.focusedCustomerId);
     }
@@ -96,12 +100,6 @@ export class OrderListController extends TimeTableController {
           },
         });
       }
-
-      // open downlink
-      window.setTimeout(() => {
-        this.owner.statusDownlink.setNodeUri(this.owner.nodeUri.value?.stringValue ?? '');
-        this.owner.statusDownlink.open();
-      }, 300);
     },
   })
   override readonly panel!: TraitViewRef<this, Trait, PanelView> & TimeTableController["panel"];
@@ -238,8 +236,9 @@ export class OrderListController extends TimeTableController {
 
   @MapDownlink({
     laneUri: "orders",
-    keyForm: Uri.form(),
+    inherits: true,
     consumed: true,
+    keyForm: Uri.form(),
     didUpdate(nodeUri: Uri, value: Value): void {
       let orderController = this.owner.getChild(nodeUri.pathName, OrderController);
       let orderStatus = value.get("status").stringValue("");
@@ -280,8 +279,8 @@ export class OrderListController extends TimeTableController {
   readonly orderDownlink!: MapDownlink<this, Uri, Value>;
 
   @ValueDownlink({
-    hostUri: 'warp://localhost:9001',
     laneUri: 'status',
+    inherits: true,
     consumed: true,
     didSet(value: Value): void {
       const storeStatus = OrderListController.parseStoreStatus(value);
