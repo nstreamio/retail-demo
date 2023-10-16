@@ -18,7 +18,7 @@
   },
   "dependencies": {},
   "scripts": {
-    "mkdir-ui": "mkdir -p ./dist/store/libs && mkdir -p ./dist/store/assets",
+    "mkdir-ui": "mkdir -p ./dist/libs && mkdir -p ./dist/assets",
     "store:install": "cd ./store && npm install && cd ..",
     "store:compile": "cd ./store && npm run compile && cd ..",
     "store:bundle": "cd ./store && npm run bundle && cd ..",

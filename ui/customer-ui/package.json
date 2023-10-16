@@ -70,22 +70,16 @@
     "@swim/view": "4.0.0-dev.20230923",
     "@swim/vis": "4.0.0-dev.20230923",
     "@swim/warp": "4.0.0-dev.20230923",
-    "@swim/window": "4.0.0-dev.20230923"
+    "@swim/window": "4.0.0-dev.20230923",
+    "unique-names-generator": "4.7.1"
   },
   "scripts": {
     "mkdir-ui": "mkdir -p ../dist/customer-ui/libs && mkdir -p ../dist/customer-ui/assets",
-    "copy-core": "cp node_modules/@swim/core/dist/umd/*.min.js* ../dist/customer-ui/libs",
-    "copy-host": "cp node_modules/@swim/host/dist/umd/*.min.js* ../dist/customer-ui/libs",
-    "copy-ui": "cp node_modules/@swim/ui/dist/umd/*.min.js* ../dist/customer-ui/libs",
-    "copy-ux": "cp node_modules/@swim/ux/dist/umd/*.min.js* ../dist/customer-ui/libs",
-    "copy-vis": "cp node_modules/@swim/vis/dist/umd/*.min.js* ../dist/customer-ui/libs",
-    "copy-maps": "cp node_modules/@swim/maps/dist/umd/*.min.js* ../dist/customer-ui/libs",
-    "copy-gui": "cp node_modules/@nstream/gui/dist/umd/*.min.js* ../dist/customer-ui/libs",
-    "copy-libs": "npm run copy-core && npm run copy-host && npm run copy-ui && npm run copy-ux && npm run copy-vis && npm run copy-maps && npm run copy-gui",
+    "cp-unique-names": "cp node_modules/unique-names-generator/dist/index.umd.js ../dist/customer-ui/libs/unique-names.umd.js",
     "compile": "tsc -b",
     "bundle": "cd src/ && rollup -c && npm run copy-app",
     "copy-app": "cp index.html ../dist/customer-ui/ && cp build/javascript/*.min.js* ../dist/customer-ui/libs && cp assets/* ../dist/customer-ui/assets",
     "build": "npm run compile && npm run bundle",
-    "postinstall": "npm run mkdir-ui && npm run copy-libs"
+    "postinstall": "npm run mkdir-ui && npm run cp-unique-names"
   }
 }
