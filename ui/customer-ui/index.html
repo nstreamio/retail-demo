@@ -19,30 +19,24 @@
       .svg {
         height: 100%;
       }
-      .svg.orange path{
-        fill: swim.MainController.orderStatusColors.orderPlaced;
-      }
-      .svg.yellow path{
-        fill: swim.MainController.orderStatusColors.orderProcessed;
-      }
-      .svg.teal path{
-        fill: swim.MainController.orderStatusColors.readyForPickup;
-      }
       .svg.black path{
         fill: #000000;
       }
     </style>
 </head>
 <body swim-theme style="display: flex;">
-<script src="libs/swim-core.min.js"></script>
-<script src="libs/swim-host.min.js"></script>
-<script src="libs/swim-ui.min.js"></script>
-<script src="libs/swim-ux.min.js"></script>
-<script src="libs/swim-vis.min.js"></script>
-<script src="libs/swim-maps.min.js"></script>
-<script src="libs/nstream-gui.min.js"></script>
+<script src="https://cdn.nstream.io/js/4.0.0/swim.js"></script>
+<script src="https://cdn.nstream.io/js/4.0.0/nstream.js"></script>
+<script src="libs/unique-names.umd.js"></script>
 <script src="libs/retail-demo-customer.min.js"></script>
 <script>
+
+let urlParams = new URLSearchParams(window.location.search);    
+let customerId = urlParams.get('customer') || '';
+if (!customerId) {
+  const genName = uniqueNamesGenerator.uniqueNamesGenerator({ dictionaries: [uniqueNamesGenerator.adjectives, uniqueNamesGenerator.animals] });
+  window.location.search = window.location.search ? `${window.location.search}&customer=${genName}` : `?customer=${genName}`;
+}
 
 if (navigator.standalone) {
   document.documentElement.style.width = "100vw";

@@ -81,7 +81,6 @@ export class OrderListController extends TimeTableController {
           fontSize: "20px",
           fontWeight: "400",
           maxWidth: "400px",
-          color: "yellow",
         },
       });
       containerView.node.innerText =
@@ -277,15 +276,6 @@ export class OrderListController extends TimeTableController {
     },
   })
   readonly ordersDownlink!: MapDownlink<this, Uri, Value>;
-
-  private static getColorFromStatus(status: OrderStatus): string {
-    if (status === OrderStatus.orderPlaced) {
-      return "orange";
-    } else if (status === OrderStatus.orderProcessed) {
-      return "yellow";
-    }
-    return "teal";
-  }
 
   private static orderStatusMood: Map<OrderStatus, Status> = new Map<OrderStatus, Status>(
     [
