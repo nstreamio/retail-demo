@@ -14,7 +14,7 @@ import { ViewRef } from "@swim/view";
 import { PieView, SliceView } from "@swim/pie";
 import { Feel, Look } from "@swim/theme";
 import { HtmlView } from "@swim/dom";
-import { StoreStatus } from "../../types";
+import { EntityStatus } from "../../types";
 import { OrderListController } from "./OrderListController";
 import { Property } from "@swim/component";
 
@@ -175,13 +175,13 @@ export class OrderStatusPieController extends TimePieController {
     inherits: true,
     consumed: true,
     didSet(value: Value): void {
-      const storeStatus = OrderListController.parseStoreStatus(value);
+      const entityStatus = OrderListController.parseOrdersStatus(value);
       
-      this.owner.updateSlice(storeStatus, this.owner.aSlice, OrderType.OrderA);
-      this.owner.updateSlice(storeStatus, this.owner.bSlice, OrderType.OrderB);
-      this.owner.updateSlice(storeStatus, this.owner.cSlice, OrderType.OrderC);
+      this.owner.updateSlice(entityStatus, this.owner.aSlice, OrderType.OrderA);
+      this.owner.updateSlice(entityStatus, this.owner.bSlice, OrderType.OrderB);
+      this.owner.updateSlice(entityStatus, this.owner.cSlice, OrderType.OrderC);
 
-      const totalValue = storeStatus[this.owner.orderStatus].total.value;
+      const totalValue = entityStatus[this.owner.orderStatus].total.value;
       this.owner.totalMonetaryValue.view!.node.innerText = totalValue ? `$${totalValue}` : this.owner.getEmptyStateText();
     }
   })
@@ -197,15 +197,15 @@ export class OrderStatusPieController extends TimePieController {
     }
   };
 
-  private updateSlice(storeStatus: StoreStatus, slice: ViewRef<this, SliceView>, type: OrderType) {
-    const value = storeStatus[this.orderStatus][type].value;
-    const label = `$${storeStatus[this.orderStatus][type].value}`;
+  private updateSlice(entityStatus: EntityStatus, slice: ViewRef<this, SliceView>, type: OrderType) {
+    const value = entityStatus[this.orderStatus][type].value;
+    const label = `$${entityStatus[this.orderStatus][type].value}`;
     if (!value) {
       slice.removeView();
     } else {
       slice.insertView(this.pie.attachView()).set({
         value,
-        label: value / storeStatus[this.orderStatus].total.value > 0.2 ? label : '',
+        label: value / entityStatus[this.orderStatus].total.value > 0.2 ? label : '',
       });
     }
   };

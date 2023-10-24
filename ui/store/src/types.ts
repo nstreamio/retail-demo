@@ -12,4 +12,4 @@ export enum OrderStatus {
   pickupCompleted = 'pickupCompleted',
 }
 
-export type StoreStatus = Record<OrderStatus, Record<OrderType | 'total', { count: number, value: number}>>;
+export type EntityStatus = Record<OrderStatus, Record<OrderType | 'total', { count: number, value: number}>>;

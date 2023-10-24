@@ -2,10 +2,7 @@ import { HtmlView } from "@swim/dom";
 import { PanelController } from "@swim/panel"
 import { ViewRef } from "@swim/view";
 import { OrderStatus, OrderType } from "../../types";
-import { ValueDownlink } from "@swim/client";
-import { StoreStatus } from "../../types";
-import { Value } from "@swim/structure";
-import { OrderListController } from "./OrderListController";
+import { EntityStatus } from "../../types";
 
 export class CumulativeOrdersPanelController extends PanelController {
   readonly orderType: OrderType;
@@ -105,20 +102,20 @@ export class CumulativeOrdersPanelController extends PanelController {
   })
   readonly value!: ViewRef<this, HtmlView>;
 
-  updateDisplay(storeStatus: StoreStatus): void {
+  updateDisplay(entityStatus: EntityStatus): void {
     if (this.orderType !== OrderType.Unknown) {
-      const readyCount = storeStatus[OrderStatus.readyForPickup][this.orderType].count;
-      const pickedUpCount = storeStatus[OrderStatus.pickupCompleted][this.orderType].count;
+      const readyCount = entityStatus[OrderStatus.readyForPickup][this.orderType].count;
+      const pickedUpCount = entityStatus[OrderStatus.pickupCompleted][this.orderType].count;
       this.count.attachView().node.innerText = `Count: ${readyCount + pickedUpCount}`;
 
-      const readyValue = storeStatus[OrderStatus.readyForPickup][this.orderType].value;
-      const pickedUpValue = storeStatus[OrderStatus.pickupCompleted][this.orderType].value;
+      const readyValue = entityStatus[OrderStatus.readyForPickup][this.orderType].value;
+      const pickedUpValue = entityStatus[OrderStatus.pickupCompleted][this.orderType].value;
       this.value.attachView().node.innerText = `Value: $${readyValue + pickedUpValue}.00`;
     } else {
-      const totalCount = storeStatus[OrderStatus.readyForPickup].total.count + storeStatus[OrderStatus.pickupCompleted].total.count;
+      const totalCount = entityStatus[OrderStatus.readyForPickup].total.count + entityStatus[OrderStatus.pickupCompleted].total.count;
       this.count.attachView().node.innerText = `Count: ${totalCount}`;
       
-      const totalValue = storeStatus[OrderStatus.readyForPickup].total.value + storeStatus[OrderStatus.pickupCompleted].total.value;
+      const totalValue = entityStatus[OrderStatus.readyForPickup].total.value + entityStatus[OrderStatus.pickupCompleted].total.value;
       this.value.attachView().node.innerText = `Value: $${totalValue}.00`;
     }
   }
