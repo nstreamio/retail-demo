@@ -67,11 +67,11 @@ export class CumulativeOrdersSectionController extends TimeTableController {
     inherits: true,
     consumed: true,
     didSet(value: Value): void {
-      const storeStatus = OrderListController.parseStoreStatus(value);
+      const entityStatus = OrderListController.parseOrdersStatus(value);
 
       this.owner.forEachChild(function(child) {
         if (Object.getPrototypeOf(child).constructor.name === 'CumulativeOrdersPanelController') {
-          (child as CumulativeOrdersPanelController).updateDisplay(storeStatus);
+          (child as CumulativeOrdersPanelController).updateDisplay(entityStatus);
         }
       });
     }

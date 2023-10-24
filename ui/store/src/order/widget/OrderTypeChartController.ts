@@ -1,5 +1,5 @@
 import { TimeSeriesController, TimeTableController } from "@nstream/widget";
-import { OrderStatus, OrderType, StoreStatus } from "../../types";
+import { OrderStatus, OrderType, EntityStatus } from "../../types";
 import { Property } from "@swim/component";
 import { DateTime, TimeZone } from "@swim/time";
 import { DataPointView, LinePlotView, SeriesPlotView } from "@swim/chart";
@@ -57,13 +57,13 @@ export class OrderTypeChartController extends TimeSeriesController {
   })
   readonly fakeTimestamp!: Property<this, Number> & { getNextTimestamp: () => number };
 
-  stats(storeStatus: StoreStatus): void {
+  stats(entityStatus: EntityStatus): void {
     const timestamp = this.fakeTimestamp.getNextTimestamp();
     const t = new DateTime(timestamp * 1000, TimeZone.local());
     const dataPointKey = "" + t.time;
     
     const plotView = this.plot.attachView();
-    const value = storeStatus[this.orderStatus][this.orderType].value;
+    const value = entityStatus[this.orderStatus][this.orderType].value;
     let dataPointView = plotView.getChild(
       dataPointKey,
       DataPointView

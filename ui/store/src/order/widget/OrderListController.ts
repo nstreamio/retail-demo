@@ -14,7 +14,7 @@ import { Uri } from "@swim/uri";
 import { Length } from "@swim/math";
 import { Look } from "@swim/theme";
 import { OrderController } from "./OrderController";
-import { OrderStatus, OrderType, StoreStatus } from "../../types";
+import { OrderStatus, OrderType, EntityStatus } from "../../types";
 import { Color } from "@swim/style";
 import { OrderTypeChartController } from "./OrderTypeChartController";
 import { CumulativeOrdersSectionController } from "./CumulativeOrdersSectionController";
@@ -283,14 +283,14 @@ export class OrderListController extends TimeTableController {
     inherits: true,
     consumed: true,
     didSet(value: Value): void {
-      const storeStatus = OrderListController.parseStoreStatus(value);
+      const entityStatus = OrderListController.parseOrdersStatus(value);
      
       // get orderTypeChartController out of this.owner.children or this.series.controllers
       [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
         const orderTypeChartController = this.owner.getChild(t, OrderTypeChartController);
         if (orderTypeChartController !== null) {
           // call .stats() on typeChartController
-          orderTypeChartController.stats(storeStatus);
+          orderTypeChartController.stats(entityStatus);
         } else {
           console.log('orderTypeChartController is null for some reason!');
         }
@@ -299,18 +299,19 @@ export class OrderListController extends TimeTableController {
   })
   readonly statusDownlink!: ValueDownlink<this>;
 
-  static parseStoreStatus(v: Value): StoreStatus {
+  static parseOrdersStatus(value: Value): EntityStatus {
+    const v = value.getField('notify') === void 0 ? value : value.get('orders');
     return [OrderStatus.orderPlaced, OrderStatus.orderProcessed, OrderStatus.readyForPickup, OrderStatus.pickupCompleted].reduce((acc, s) => {
       [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
         let count = v.get(s).get(t).numberValue(0);
         let value = count * OrderListController.valuePerOrderType[t];
-        if (!acc[s]) { acc[s] = { total: { count: 0, value: 0 } } as StoreStatus[OrderStatus]; }
+        if (!acc[s]) { acc[s] = { total: { count: 0, value: 0 } } as EntityStatus[OrderStatus]; }
         acc[s][t] = { count, value };
         acc[s].total.count += count;
         acc[s].total.value += value;
       });
       return acc;
-    }, {} as StoreStatus);
+    }, {} as EntityStatus);
   };
 
   private static valuePerOrderType: Record<OrderType, number> = {
