@@ -31,21 +31,12 @@
 <script src="libs/retail-demo-customer.min.js"></script>
 <script>
 
-console.log(window);
-console.log(uniqueNamesGenerator);
 let urlParams = new URLSearchParams(window.location.search);    
 let customerId = urlParams.get('customer') || '';
-console.log('customerId before: ', customerId);
 if (!customerId) {
-  console.log('uniqueNamesGenerator: ', uniqueNamesGenerator);
-  console.log('uniqueNamesGenerator.uniqueNamesGenerator: ', uniqueNamesGenerator.uniqueNamesGenerator);
-  console.log('uniqueNamesGenerator.uniqueNamesGenerator(): ', uniqueNamesGenerator.uniqueNamesGenerator({ dictionaries: [uniqueNamesGenerator.adjectives, uniqueNamesGenerator.animals] }));
   const genName = uniqueNamesGenerator.uniqueNamesGenerator({ dictionaries: [uniqueNamesGenerator.adjectives, uniqueNamesGenerator.animals] });
   window.location.search = window.location.search ? `${window.location.search}&customer=${genName}` : `?customer=${genName}`;
 }
-urlParams = new URLSearchParams(window.location.search);    
-customerId = urlParams.get('customer') || '';
-console.log('customerId after: ', customerId);
 
 if (navigator.standalone) {
   document.documentElement.style.width = "100vw";
