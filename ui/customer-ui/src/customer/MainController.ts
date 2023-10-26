@@ -6,12 +6,8 @@ import { ViewRef } from "@swim/view";
 import { HtmlView } from "@swim/dom";
 import { PanelView } from "@swim/panel";
 import { OrderListController } from "./OrderListController";
-import { ButtonItem, ButtonStack, ButtonStackObserver, FloatingButton } from "@swim/button";
-import {
-  HtmlIconView,
-  PolygonIcon,
-  VectorIcon,
-} from "@swim/graphics";
+import { ButtonItem, ButtonStack, FloatingButton } from "@swim/button";
+import { VectorIcon } from "@swim/graphics";
 import { MapDownlink, ValueDownlink } from "@swim/client";
 import { Uri } from "@swim/uri";
 import { Value } from "@swim/structure";
@@ -19,6 +15,7 @@ import { Transform } from "@swim/math";
 import { OrderStatus, OrderType, StoreStatus } from "../types";
 import { TimeSeriesController } from "@nstream/widget";
 import { Observes } from "@swim/util";
+import { PlaceOrderFab } from "./PlaceOrderFab";
 
 export class MainController extends BoardController {
 
@@ -181,45 +178,26 @@ export class MainController extends BoardController {
   readonly emptyState!: ViewRef<this, HtmlView>;
 
   @ViewRef({
-    viewType: ButtonStack,
-    createView(): ButtonStack {
-      const buttonStackView: ButtonStack = super.createView().set({
-        style: {
-          position: "absolute",
-          bottom: "24px",
-          right: "24px",
-        },
-      });
-      buttonStackView.button.view?.style.backgroundColor.set(MainController.orderStatusColors[OrderStatus.orderPlaced]);
-      buttonStackView.button.attachView().icon.attachView();
-      buttonStackView.button.view?.icon.push(VectorIcon.create(24, 24, 'M11,13L5,13L5,11L11,11L11,5L13,5L13,11L19,11L19,13L13,13L13,19L11,19Z'), false);
-      buttonStackView.button.view?.set({
-        style: {
-          width: '100%',
-          height: '100%',
-        },
-        classList: ['button-stack-view'],
-      });
-      buttonStackView.button.view?.icon.view?.set({
-        style: {
-          transform: Transform.parse("scale(1.5,1.5)"),
-        },
-        classList: ['svg-container-view'],
-      });
+    viewType: PlaceOrderFab,
+    observes: true,
+    createView(): PlaceOrderFab {
+      const placeOrderFab = super.createView();
 
-      // icon button handler
-      const that: ViewRef<MainController, ButtonStack> = this;
-      const handleClick = function (orderType: OrderType) {
-        return function () {
-          that.owner.createOrder(orderType);
-        };
-      };
+      return placeOrderFab;
+    },
+    initView(placeOrderFab: PlaceOrderFab) {
+      this.owner.cButtonItem.insertView(placeOrderFab, void 0, null, 'c');
+      this.owner.bButtonItem.insertView(placeOrderFab, void 0, null, 'b');
+      this.owner.aButtonItem.insertView(placeOrderFab, void 0, null, 'a');
+    },
+  })
+  readonly placeOrderFab!: ViewRef<this, PlaceOrderFab> & Observes<ButtonStack>;
 
-      /* c icon button */
-      const c: ButtonItem = buttonStackView.appendChild(
-        ButtonItem,
-        "c"
-      );
+  @ViewRef({
+    viewType: ButtonItem,
+    createView(): ButtonItem {
+      console.log('cButtonItem createView');
+      const c: ButtonItem = ButtonItem.create();
       const cButton = c.button;
       if (cButton) {
         cButton.set({
@@ -255,13 +233,18 @@ export class MainController extends BoardController {
         classList: ['button-label', 'c-label'],
       });
       cLabel.node.innerText = "$30.00";
-      c.addEventListener("click", handleClick(OrderType.OrderC));
 
-      /* b icon button */
-      const b: ButtonItem = buttonStackView.appendChild(
-        ButtonItem,
-        "b"
-      );
+      c.addEventListener("click", () => { this.owner.createOrder(OrderType.OrderC); });
+
+      return c;
+    }
+  })
+  readonly cButtonItem!: ViewRef<this, ButtonItem>;
+
+  @ViewRef({
+    viewType: ButtonItem,
+    createView(): ButtonItem {
+      const b: ButtonItem = ButtonItem.create();
       if (b.button) {
         b.button.set({
           style: {
@@ -296,13 +279,18 @@ export class MainController extends BoardController {
         classList: ['button-label', 'c-label'],
       });
       bLabel.node.innerText = "$20.00";
-      b.addEventListener("click", handleClick(OrderType.OrderB));
 
-      /* a icon button */
-      const a: ButtonItem = buttonStackView.appendChild(
-        ButtonItem,
-        "a"
-      );
+      b.addEventListener("click", () => { this.owner.createOrder(OrderType.OrderB); });
+
+      return b;
+    }
+  })
+  readonly bButtonItem!: ViewRef<this, ButtonItem>;
+
+  @ViewRef({
+    viewType: ButtonItem,
+    createView(): ButtonItem {
+      const a: ButtonItem = ButtonItem.create();
       if (a.button) {
         a.button.set({
           style: {
@@ -337,17 +325,13 @@ export class MainController extends BoardController {
         classList: ['button-label', 'c-label'],
       });
       aLabel.node.innerText = "$10.00";
-      a.addEventListener("click", handleClick(OrderType.OrderA));
 
-      return buttonStackView;
-    },
-    initView(buttonStackView: ButtonStack): void {
-      buttonStackView.node.addEventListener('click', () => {
-        buttonStackView.presence.toggle();
-      });
-    },
+      a.addEventListener("click", () => { this.owner.createOrder(OrderType.OrderA); });
+
+      return a;
+    }
   })
-  readonly placeOrderFab!: ViewRef<this, ButtonStack> & Observes<ButtonStackObserver>;
+  readonly aButtonItem!: ViewRef<this, ButtonItem>;
 
   @ViewRef({
     viewType: FloatingButton,
