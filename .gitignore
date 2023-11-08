@@ -7,3 +7,4 @@ build
 out
 node_modules/
 server/bin/
+server/src/main/resources/ui
