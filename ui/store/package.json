@@ -13,6 +13,7 @@
     "@rollup/plugin-terser": "0.4",
     "@types/eslint": "8",
     "@types/node": "20",
+    "@types/qrcode": "1.5.1",
     "@typescript-eslint/eslint-plugin": "5",
     "@typescript-eslint/parser": "5",
     "eslint": "8",
@@ -70,10 +71,12 @@
     "@swim/view": "4.0.0-dev.20230923",
     "@swim/vis": "4.0.0-dev.20230923",
     "@swim/warp": "4.0.0-dev.20230923",
-    "@swim/window": "4.0.0-dev.20230923"
+    "@swim/window": "4.0.0-dev.20230923",
+    "qrcode": "1.5.1"
   },
   "scripts": {
     "mkdir-ui": "mkdir -p ../dist/libs && mkdir -p ../dist/assets",
+    "copy-qrcode": "cp node_modules/qrcode/build/qrcode.js ../dist/libs/qrcode.js",
     "copy-core": "cp node_modules/@swim/core/dist/umd/*.min.js* ../dist/libs",
     "copy-gui": "cp node_modules/@nstream/gui/dist/umd/*.min.js* ../dist/libs",
     "copy-host": "cp node_modules/@swim/host/dist/umd/*.min.js* ../dist/libs",
@@ -81,7 +84,7 @@
     "copy-ui": "cp node_modules/@swim/ui/dist/umd/*.min.js* ../dist/libs",
     "copy-ux": "cp node_modules/@swim/ux/dist/umd/*.min.js* ../dist/libs",
     "copy-vis": "cp node_modules/@swim/vis/dist/umd/*.min.js* ../dist/libs",
-    "copy-libs": "npm run copy-core && npm run copy-host && npm run copy-ui && npm run copy-ux && npm run copy-vis && npm run copy-maps && npm run copy-gui",
+    "copy-libs": "npm run copy-core && npm run copy-host && npm run copy-ui && npm run copy-ux && npm run copy-vis && npm run copy-maps && npm run copy-gui && npm run copy-qrcode",
     "compile": "tsc -b",
     "bundle": "cd src/ && rollup -c && npm run copy-app",
     "copy-app": "cp index.html ../dist/ && cp build/javascript/*.min.js* ../dist/libs && cp assets/* ../dist/assets",
