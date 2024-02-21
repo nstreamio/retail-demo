@@ -104,18 +104,16 @@ export class CumulativeOrdersPanelController extends PanelController {
 
   updateDisplay(entityStatus: EntityStatus): void {
     if (this.orderType !== OrderType.Unknown) {
-      const readyCount = entityStatus[OrderStatus.readyForPickup][this.orderType].count;
       const pickedUpCount = entityStatus[OrderStatus.pickupCompleted][this.orderType].count;
-      this.count.attachView().node.innerText = `Count: ${readyCount + pickedUpCount}`;
+      this.count.attachView().node.innerText = `Count: ${pickedUpCount}`;
 
-      const readyValue = entityStatus[OrderStatus.readyForPickup][this.orderType].value;
       const pickedUpValue = entityStatus[OrderStatus.pickupCompleted][this.orderType].value;
-      this.value.attachView().node.innerText = `Value: $${readyValue + pickedUpValue}.00`;
+      this.value.attachView().node.innerText = `Value: $${pickedUpValue}.00`;
     } else {
-      const totalCount = entityStatus[OrderStatus.readyForPickup].total.count + entityStatus[OrderStatus.pickupCompleted].total.count;
+      const totalCount = entityStatus[OrderStatus.pickupCompleted].total.count;
       this.count.attachView().node.innerText = `Count: ${totalCount}`;
       
-      const totalValue = entityStatus[OrderStatus.readyForPickup].total.value + entityStatus[OrderStatus.pickupCompleted].total.value;
+      const totalValue = entityStatus[OrderStatus.pickupCompleted].total.value;
       this.value.attachView().node.innerText = `Value: $${totalValue}.00`;
     }
   }

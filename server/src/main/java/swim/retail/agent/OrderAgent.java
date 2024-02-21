@@ -18,10 +18,10 @@ public class OrderAgent extends AbstractAgent {
   public OrderAgent() {}
 
   @SwimLane("status")
-  private final ValueLane<Value> status = this.<Value>valueLane();
+  private final ValueLane<Value> status = valueLane();
 
   @SwimLane("statusHistory")
-  private final MapLane<Long, String> statusHistory = this.<Long, String>mapLane();
+  private final MapLane<Long, String> statusHistory = mapLane();
 
   @SwimLane("placeOrder")
   public final CommandLane<Value> placeOrder = this.<Value>commandLane()
@@ -48,7 +48,10 @@ public class OrderAgent extends AbstractAgent {
     final String orderId = this.nodeUri().pathName();
     final String customerId = orderDetails.get("customerId").stringValue();
     final String orderStatus = ORDER_PLACED;
-
+    final boolean hasHistory = !this.statusHistory.isEmpty();
+    if (hasHistory) {
+      this.statusHistory.clear();
+    }
     this.statusHistory.put(timestamp, orderStatus);
     this.status.set(
         Record.create(5)
@@ -58,8 +61,8 @@ public class OrderAgent extends AbstractAgent {
             .slot("status", orderStatus)
             .slot("timestamp", timestamp)
     );
-
     joinCustomer(customerId);
+    joinStore();
   }
 
   private void progressOrder(final Value orderDetails) {
@@ -67,8 +70,8 @@ public class OrderAgent extends AbstractAgent {
 
     final String currentOrderStatus = this.status.get().get("status").stringValue();
     final String newOrderStatus = orderDetails.get("status").isDefined() ? orderDetails.get("status").stringValue() : nextOrderStatus(currentOrderStatus);
-    if (newOrderStatus == null || newOrderStatus.equals(currentOrderStatus)) {
-      return; // No change or final state already
+    if (newOrderStatus.equals(currentOrderStatus)) {
+      return; // No change
     }
 
     this.statusHistory.put(timestamp, newOrderStatus);
@@ -96,9 +99,5 @@ public class OrderAgent extends AbstractAgent {
     this.command("/store/main", "addOrder", Uri.form().mold(nodeUri()).toValue());
   }
 
-  @Override
-  public void didStart() {
-    joinStore();
-  }
 
 }

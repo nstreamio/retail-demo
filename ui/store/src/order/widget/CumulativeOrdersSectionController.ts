@@ -67,7 +67,7 @@ export class CumulativeOrdersSectionController extends TimeTableController {
     inherits: true,
     consumed: true,
     didSet(value: Value): void {
-      const entityStatus = OrderListController.parseOrdersStatus(value);
+      const entityStatus = OrderListController.parseProcessedOrders(value);
 
       this.owner.forEachChild(function(child) {
         if (Object.getPrototypeOf(child).constructor.name === 'CumulativeOrdersPanelController') {

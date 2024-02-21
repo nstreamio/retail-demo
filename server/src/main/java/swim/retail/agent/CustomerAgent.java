@@ -1,29 +1,32 @@
 package swim.retail.agent;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import swim.api.SwimLane;
 import swim.api.agent.AbstractAgent;
-import swim.api.lane.*;
-import swim.structure.Form;
-import swim.structure.Record;
+import swim.api.lane.CommandLane;
+import swim.api.lane.JoinValueLane;
+import swim.api.lane.ValueLane;
+import swim.retail.model.Orders;
 import swim.structure.Value;
 import swim.uri.Uri;
-import static swim.retail.model.OrderStatus.ORDER_PLACED;
-import static swim.retail.model.OrderStatus.ORDER_PROCESSED;
-import static swim.retail.model.OrderStatus.ORDER_READY;
+import static swim.retail.model.OrderStatus.ORDER_PICKED_UP_COMPLETED;
 
 public class CustomerAgent extends AbstractAgent {
 
   public CustomerAgent() {}
 
   @SwimLane("status")
-  private final ValueLane<Value> status = this.<Value>valueLane();
+  private final ValueLane<Value> status = valueLane();
 
   @SwimLane("orders")
   private final JoinValueLane<Value, Value> orders = this.<Value, Value>joinValueLane()
-      .didUpdate((orderId, newStatus, oldStatus) -> updateStatus());
+      .didUpdate((orderId, newStatus, oldStatus) -> {
+        updateStatus();
+        final String orderStatus = newStatus.get("status").stringValue("");
+        if (orderStatus.equals("") || orderStatus.equals(ORDER_PICKED_UP_COMPLETED)) {
+          this.orders.remove(orderId);
+        }
+      });
 
   @SwimLane("addOrder")
   public final CommandLane<Value> addOrder = this.<Value>commandLane()
@@ -33,47 +36,8 @@ public class CustomerAgent extends AbstractAgent {
           .open());
 
   private void updateStatus() {
-    final Map<String, Map<String, Integer>> statusOrders = new HashMap<>();
-    for (Value orderId: orders.keySet()) {
-      final Value orderStatus = this.orders.get(orderId);
-      if (!orderStatus.isDefined()) {
-        this.orders.remove(orderId);
-        continue;
-      }
-      final String status = orderStatus.get("status").stringValue("");
-
-      if (!status.equals("")) {
-        final Map<String, Integer> statusOrder = statusOrders.getOrDefault(status, new HashMap<>());
-        orderStatus.get("products").forEach(item ->
-              statusOrder.put(
-                    item.key().stringValue(),
-                    statusOrder.getOrDefault(item.key().stringValue(), 0) + item.intValue(0))
-        );
-        statusOrders.put(status, statusOrder);
-      }
-    }
-    final boolean notifyCustomer = computeCustomerStatus(statusOrders);
-    final Value customerStatus =
-          Record.create().slot("notify", notifyCustomer)
-                .slot("orders", Form.forMap(Form.forString(), Form.forMap(Form.forString(), Form.forInteger())).mold(statusOrders).toValue());
-    this.status.set(customerStatus);
-  }
-
-  private boolean computeCustomerStatus(Map<String, Map<String, Integer>> statusOrders) {
-    int placedProcessedCount = 0, readyCount = 0;
-    for (String status: statusOrders.keySet()) {
-      if (status.equals(ORDER_PLACED) || status.equals(ORDER_PROCESSED)  || status.equals(ORDER_READY)) {
-        final Map<String, Integer> orders = statusOrders.get(status);
-        for (Integer count: orders.values()) {
-          if (status.equals(ORDER_READY)) {
-            readyCount += count;
-          } else {
-            placedProcessedCount += count;
-          }
-        }
-      }
-    }
-    return placedProcessedCount == 0 && readyCount > 0;
+    final Value customerOrderStatus = Orders.computeCustomerStatus(this.orders, this.status.get());
+    this.status.set(customerOrderStatus);
   }
 
   @SwimLane("placeOrder")
@@ -86,9 +50,7 @@ public class CustomerAgent extends AbstractAgent {
   // invoked only for simulated customers
   @SwimLane("startSim")
   public final CommandLane<Value> startSim = this.<Value>commandLane()
-      .onCommand(v -> {
-        openAgent("sim", CustomerSimAgent.class);
-      });
+      .onCommand(v -> openAgent("sim", CustomerSimAgent.class));
 
   private void joinStore() {
     this.command("/store/main", "addCustomer", Uri.form().mold(nodeUri()).toValue());

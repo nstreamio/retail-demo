@@ -300,10 +300,25 @@ export class OrderListController extends TimeTableController {
   readonly statusDownlink!: ValueDownlink<this>;
 
   static parseOrdersStatus(value: Value): EntityStatus {
-    const v = value.getField('notify') === void 0 ? value : value.get('orders');
+    const v = value.get('orders');
     return [OrderStatus.orderPlaced, OrderStatus.orderProcessed, OrderStatus.readyForPickup, OrderStatus.pickupCompleted].reduce((acc, s) => {
       [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
         let count = v.get(s).get(t).numberValue(0);
+        let value = count * OrderListController.valuePerOrderType[t];
+        if (!acc[s]) { acc[s] = { total: { count: 0, value: 0 } } as EntityStatus[OrderStatus]; }
+        acc[s][t] = { count, value };
+        acc[s].total.count += count;
+        acc[s].total.value += value;
+      });
+      return acc;
+    }, {} as EntityStatus);
+  };
+
+  static parseProcessedOrders(value: Value): EntityStatus {
+    const v = value.get('pickedUpOrders');
+    return [OrderStatus.pickupCompleted].reduce((acc, s) => {
+      [OrderType.OrderA, OrderType.OrderB, OrderType.OrderC].forEach(t => {
+        let count = v.get(t).numberValue(0);
         let value = count * OrderListController.valuePerOrderType[t];
         if (!acc[s]) { acc[s] = { total: { count: 0, value: 0 } } as EntityStatus[OrderStatus]; }
         acc[s][t] = { count, value };

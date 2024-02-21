@@ -9,7 +9,7 @@ import swim.uri.Uri;
 
 public class OrderSimAgent extends AbstractAgent {
 
-  private static final long TIMER_FREQUENCY_MS = 1000;
+  private static final long TIMER_FREQUENCY_MS = 2000;
   private static final double CHANCE_TO_PROGRESS_ORDER = 0.1;
 
   private static final String ORDER_PICKED_UP_COMPLETED = "pickupCompleted";
@@ -19,18 +19,14 @@ public class OrderSimAgent extends AbstractAgent {
   public OrderSimAgent() {}
 
   @SwimLane("status")
-  private final ValueLane<Value> status = this.<Value>valueLane();
+  private final ValueLane<Value> status = valueLane();
 
   private String getCurrentStatus() {
     return this.status.get().get("status").stringValue();
   }
 
   private void timerFunction() {
-    if (ORDER_PICKED_UP_COMPLETED.equals(getCurrentStatus())) {
-      return; // Already picked up, cancel sim
-    }
-
-    if (Math.random() < CHANCE_TO_PROGRESS_ORDER) {
+    if (!ORDER_PICKED_UP_COMPLETED.equals(getCurrentStatus()) && Math.random() < CHANCE_TO_PROGRESS_ORDER) {
       this.command(this.nodeUri(), Uri.parse("updateOrder"), Value.absent());
     }
 

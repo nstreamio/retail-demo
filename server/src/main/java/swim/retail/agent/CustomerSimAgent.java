@@ -1,5 +1,7 @@
 package swim.retail.agent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import swim.api.SwimLane;
@@ -12,7 +14,7 @@ import swim.structure.Value;
 
 public class CustomerSimAgent extends AbstractAgent {
 
-  private static final long TIMER_FREQUENCY_MS = 1000;
+  private static final long TIMER_FREQUENCY_MS = 2000;
   private static final double CHANCE_TO_PLACE_ORDER = 0.3;
   private static final int MAXIMUM_ORDER_COUNT = 2;
   private static final int MAX_PRODUCT_COUNT = 4;
@@ -24,7 +26,7 @@ public class CustomerSimAgent extends AbstractAgent {
   public CustomerSimAgent() {}
 
   @SwimLane("status")
-  private final ValueLane<Value> status = this.<Value>valueLane();
+  private final ValueLane<Value> status = valueLane();
 
   private int getActiveOrderCount() {
     final Value orderCounts = this.status.get().get("orderStates");
@@ -45,13 +47,23 @@ public class CustomerSimAgent extends AbstractAgent {
     this.timer = setTimer(TIMER_FREQUENCY_MS, this::timerFunction);
   }
 
+  private List<String> simOrderIds = new ArrayList<>();
+  private int simOrderIdIndex = -1;
+
   private void placeRandomOrder() {
     // Pick at least one random product to add
     final int productIndex = new Random().nextInt(PRODUCT_NAMES.length);
     Record products = Record.create(1)
         .slot(PRODUCT_NAMES[productIndex].name(),  1);
+    final String orderId;
+    if (this.simOrderIds.size() == 20) {
+      this.simOrderIdIndex = this.simOrderIdIndex  == 19 ? 0 : this.simOrderIdIndex  + 1;
+      orderId = this.simOrderIds.get(this.simOrderIdIndex);
+    } else {
+      orderId = UUID.randomUUID().toString();
+      this.simOrderIds.add(orderId);
+    }
 
-    final String orderId = UUID.randomUUID().toString();
     final Value payload = Record.create(1).slot("products", products).slot("customerId", this.nodeUri().pathName());
     this.command("/order/" + orderId, "simOrder", payload);
   }
