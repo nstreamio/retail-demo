@@ -49,6 +49,10 @@ public class StoreAgent extends AbstractAgent {
           .laneUri("status")
           .open());
 
+  @SwimLane("removeCustomer")
+  public final CommandLane<Value> removeCustomer = this.<Value>commandLane()
+          .onCommand(this.customers::remove);
+
   @Override
   public void didStart() {
     info(nodeUri() + " didStart");
