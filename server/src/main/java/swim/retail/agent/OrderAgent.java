@@ -70,7 +70,7 @@ public class OrderAgent extends AbstractAgent {
 
     final String currentOrderStatus = this.status.get().get("status").stringValue();
     final String newOrderStatus = orderDetails.get("status").isDefined() ? orderDetails.get("status").stringValue() : nextOrderStatus(currentOrderStatus);
-    if (newOrderStatus.equals(currentOrderStatus)) {
+    if (newOrderStatus != null && newOrderStatus.equals(currentOrderStatus)) {
       return; // No change
     }
 

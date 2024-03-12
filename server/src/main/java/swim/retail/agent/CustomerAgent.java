@@ -26,7 +26,7 @@ public class CustomerAgent extends AbstractAgent {
         if (orderStatus.equals("") || orderStatus.equals(ORDER_PICKED_UP_COMPLETED)) {
           this.orders.remove(orderId);
         }
-        if (this.orders.isEmpty()) {
+        if (this.orders.isEmpty() && this.getAgent("sim") == null) {
             removeCustomer();
         }
       });
