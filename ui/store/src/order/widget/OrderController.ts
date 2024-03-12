@@ -131,7 +131,7 @@ export class OrderController extends TimeSeriesController {
             const customerId = value.get('customerId').stringValue('');
             this.owner.customerId.setValue(customerId);
             customerCellView.set({
-                content: `/${customerId}`,
+                content: `${customerId}`,
                 classList: ['customer-cell-view'],
             });
 
@@ -163,10 +163,17 @@ export class OrderController extends TimeSeriesController {
             orderTypeCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
         }
 
+
         // update content and mood of timeInProcessingCell
         const timeInProcessingCellView = this.owner.timeInProcessingCell.view as TextCellView | null;
         if (timeInProcessingCellView !== null) {
-            timeInProcessingCellView.content.set(new Date(value.get('timestamp').numberValue() ?? 0).toString());
+            const date = new Date(value.get('timestamp').numberValue(0));
+            const seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+            const minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+            const month = date.getMonth() + 1;
+            const dateStr = date.getHours() + ":" + minutes + ":" + seconds + " " + 
+                            month + "/" + date.getDate() + "/" + date.getFullYear();
+            timeInProcessingCellView.content.set(dateStr);
             timeInProcessingCellView.set({
                 classList: ['time-in-processing-cell-view'],
             });
