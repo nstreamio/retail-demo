@@ -196,7 +196,7 @@ export class OrderListController extends TimeTableController {
         OrderController
       );
 
-      const status: OrderStatus = (value.get("status").stringValue() ?? "unknown") as OrderStatus;
+      const status: OrderStatus = (value.get("status").stringValue() ?? "pickupCompleted") as OrderStatus;
       let orderType: OrderType = OrderType.Unknown;
       if (value.get("products").get("A").numberValue() ?? 0) {
         orderType = OrderType.OrderA;

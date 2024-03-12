@@ -6,7 +6,7 @@ import swim.structure.Value;
 public class StoreSimAgent extends AbstractAgent {
 
   private static final String[] CUSTOMER_NAMES = {
-      "Customer0"
+      "Customer0", "Customer1"
   };
 
   public StoreSimAgent() {}

@@ -50,12 +50,16 @@ export class CustomersRelationTrait extends RelationTrait<CustomerEntityTrait> {
       if (customerTrait === null) {
         customerTrait = this.owner.entities.createTrait(nodeUri.pathName);
         customerTrait.nodeUri.set(nodeUri); 
-        this.owner.entities.addTrait(customerTrait);
+        this.owner.entities.addTrait(customerTrait, customerTrait.getModel(), nodeUri.toString());
       }
     },
     didRemove(nodeUri: Uri, status: Value): void {
       // When a customer is removed in the backend, remove it from the navigation/relation
-      this.owner.removeChild(nodeUri.pathName);
+      this.owner.removeChild(nodeUri.toString());
+      let customerTrait = this.owner.entities.get(nodeUri.pathName);
+      if (customerTrait != null) {
+        this.owner.removeTrait(customerTrait);
+      }
     }
   })
   readonly customers!: MapDownlink<this, Uri, Value>;

@@ -26,9 +26,16 @@ public class CustomerAgent extends AbstractAgent {
         if (orderStatus.equals("") || orderStatus.equals(ORDER_PICKED_UP_COMPLETED)) {
           this.orders.remove(orderId);
         }
+        if (this.orders.isEmpty()) {
+            removeCustomer();
+        }
       });
 
-  @SwimLane("addOrder")
+    private void removeCustomer() {
+        this.command("/store/main", "removeCustomer", Uri.form().mold(nodeUri()).toValue());
+    }
+
+    @SwimLane("addOrder")
   public final CommandLane<Value> addOrder = this.<Value>commandLane()
       .onCommand(v -> this.orders.downlink(v)
           .nodeUri(Uri.form().cast(v))
@@ -45,6 +52,7 @@ public class CustomerAgent extends AbstractAgent {
       .onCommand(v -> {
         final String orderId = UUID.randomUUID().toString();
         this.command("/order/" + orderId, "placeOrder", v.updated("customerId", this.nodeUri().pathName()));
+        this.joinStore();
       });
 
   // invoked only for simulated customers
@@ -61,5 +69,5 @@ public class CustomerAgent extends AbstractAgent {
     info(nodeUri() + " didStart");
     joinStore();
   }
-
+    
 }
