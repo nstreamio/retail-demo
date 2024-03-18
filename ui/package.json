@@ -21,15 +21,20 @@
     "store:install": "cd ./store && npm install && cd ..",
     "store:compile": "cd ./store && npm run compile && cd ..",
     "store:bundle": "cd ./store && npm run bundle && cd ..",
+    "store:copy": "cd ./store && npm run copy && cd ..",
     "customer:install": "cd ./customer-ui && npm install && cd ..",
     "customer:compile": "cd ./customer-ui && npm run compile && cd ..",
     "customer:bundle": "cd ./customer-ui && npm run bundle && cd ..",
+    "customer:copy": "cd ./customer-ui && npm run copy && cd ..",
     "all:install": "npm run store:install && npm run customer:install",
     "all:compile": "npm run store:compile && npm run customer:compile",
     "all:bundle": "npm run store:bundle && npm run customer:bundle",
+    "all:copy": "npm run store:copy && npm run customer:copy",
     "compile": "npm run all:compile",
-    "bundle": "npm run all:bundle",
+    "bundle": "npm run all:bundle npm run all:copy",
     "build": "npm run compile && npm run bundle",
+    "server": "cd ../server && ./gradlew run",
+    "dev": "rm -rf ../server/src/main/resources/ui/ && mkdir ../server/src/main/resources/ui/ && npm run build && cp -rf ./dist/* ../server/src/main/resources/ui/ && npm run server",
     "postinstall": "npm run all:install"
   }
 }
