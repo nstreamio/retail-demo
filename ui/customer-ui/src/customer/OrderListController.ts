@@ -166,6 +166,9 @@ export class OrderListController extends TimeTableController {
     createView(): ColView {
       return TextColView.create().set({
         label: "Order Type",
+        style: {
+          fontWeight: "900"
+        }
       });
     }
   })
@@ -181,6 +184,9 @@ export class OrderListController extends TimeTableController {
     createView(): ColView {
       return TextColView.create().set({
         label: "Status",
+        style: {
+          fontWeight: "900"
+        }
       });
     }
   })
@@ -216,12 +222,21 @@ export class OrderListController extends TimeTableController {
         let moodStatus = OrderListController.orderStatusMood.get(status);
 
         const orderTypeCell = orderController.orderTypeCell.attachView() as TextCellView;
+        orderTypeCell.set({
+          style: {
+            fontWeight: "700",
+          }
+        });
         orderTypeCell.modifyMood(Feel.default, moodStatus!.moodModifier);
 
         const statusCell = orderController.statusCell.attachView() as TextCellView;
-        statusCell.content.set(
-          OrderListController.orderStatusDescription.get(status)
-        );
+        statusCell.set({
+          content: OrderListController.orderStatusDescription.get(status),
+          style: {
+            fontSize: "16px",
+            fontWeight: "700",
+          }
+        });
         statusCell.modifyMood(Feel.default, moodStatus!.moodModifier);
 
         // If no OrderController is found, create and insert a new one
@@ -241,6 +256,7 @@ export class OrderListController extends TimeTableController {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'flex-end',
+            fontWeight: "700",
           }
         })
         .modifyMood(Feel.default, moodStatus!.moodModifier);
@@ -250,15 +266,17 @@ export class OrderListController extends TimeTableController {
         // set statusCell of row
         const statusCell = orderController.statusCell.attachView() as TextCellView;
         statusCell.set({
+          content: OrderListController.orderStatusDescription.get(status),
           style: {
             height: '40px',
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'flex-end',
+            fontSize: "16px",
+            fontWeight: "700",
           }
         })
         .modifyMood(Feel.default, moodStatus!.moodModifier);
-        statusCell.content.set(OrderListController.orderStatusDescription.get(status));
         (statusCell.node.firstChild as HTMLElement).style.alignSelf = 'unset';
 
         // insert the name cell and current cell for each order into the table

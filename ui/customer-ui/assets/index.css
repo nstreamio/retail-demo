@@ -1,0 +1,105 @@
+body {
+  background-color: white;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #212121;
+  }
+}
+
+.button-label {
+  height: 24px;
+  line-height: 24px;
+  background-color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    margin-top: 6px;
+    height: 24px;
+    padding: 2px 4px 2px 4px;
+    background-color: rgba(33, 33, 33, 0.8);
+    border-radius: 4px;
+    box-shadow: 0px 0px 4px rgba(33, 33, 33, 0.8);
+  }
+}
+
+.pickup-orders-fab-button {
+  position: absolute !important;
+  bottom: 24px;
+  right: 24px;
+  width: 56px !important;
+  height: 56px !important;
+  overflow: unset !important;
+  z-index: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pickup-orders-fab-button {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    overflow: unset;
+    z-index: 1;
+  }
+}
+
+.pickup-orders-helper-text {
+  position: absolute;
+  bottom: 38px;
+  right: 35px;
+  width: 200px;
+  color: black;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 27px;
+  padding: 8px;
+  background-color: rgba(87, 250, 214, 0.3);
+  border-radius: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pickup-orders-helper-text {
+    color: #57FAD6;
+    padding: 0px;
+    background-color: rgba(33, 33, 33, 0.9);
+    box-shadow: 0px 0px 4px rgba(33, 33, 33, 0.9);
+  }
+}
+
+nav {
+  background-color: #FFFFFF !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  nav {
+    background-color: #161616 !important;
+  }
+}
+
+nav h1, nav p {
+  color: #000000 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  nav h1, nav p {
+    color: #FFFFFF !important;
+  }
+}
+
+main.sheet.board {
+  background-color: #F1F1F1 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  main.sheet.board {
+    background-color: #212121 !important;
+  }
+}
+
+.membrane.floating-button.button-stack-view svg path {
+  fill: #000000;
+}
