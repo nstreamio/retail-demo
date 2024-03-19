@@ -49,7 +49,8 @@ export class CustomerController extends BoardController {
     viewType: HtmlView,
     createView() {
       const nav = document.createElement("nav");
-      nav.style.backgroundColor = "#181818";
+      const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      nav.style.backgroundColor = isDarkMode ? "#FFFFFF" : "#181818";
       return new HtmlView(nav).set({
         style: {
           width: "100%",
@@ -63,6 +64,7 @@ export class CustomerController extends BoardController {
       });
     },
     initView(appBarView: HtmlView): void {
+      const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const container = appBarView.appendChild("div").set({
         style: {
           width: "100%",
@@ -112,7 +114,7 @@ export class CustomerController extends BoardController {
           fontWeight: "600",
           fontSize: "20px",
           lineHeight: "24px",
-          color: "#FFFFFF",
+          color: isDarkMode ? "#FFFFFF" : "#000000",
           margin: "0px",
           boxSizing: "border-box",
         },
@@ -136,7 +138,7 @@ export class CustomerController extends BoardController {
           fontWeight: "400",
           fontSize: "16px",
           lineHeight: "17px",
-          color: "#FFFFFF",
+          color: isDarkMode ? "#FFFFFF" : "#000000",
           boxSizing: "border-box",
           margin: "0px",
         },
@@ -149,7 +151,7 @@ export class CustomerController extends BoardController {
           fontWeight: "400",
           fontSize: "16px",
           lineHeight: "17px",
-          color: "#FFFFFF",
+          color: isDarkMode ? "#FFFFFF" : "#000000",
           margin: "0px",
           boxSizing: "border-box",
         },

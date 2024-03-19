@@ -43,36 +43,14 @@ export class AppEntityFolioController extends EntityFolioController {
     viewType: HtmlView,
     createView(): HtmlView {
       return HtmlView.create().set({
-        style: {
-          position: "sticky",
-          top: "unset",
-          bottom: "0px",
-          left: "0px",
-          width: "100%",
-          height: "158px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          paddingBottom: "24px",
-          paddingTop: "9px",
-          zIndex: 1,
-          backgroundColor: "#212121",
-        }
+        classList: ['qr-container'],
       });
     },
     initView(view): void {
       const labelEl = document.createElement("p");
       labelEl.innerText = "Store UI";
       const labelView = new HtmlView(labelEl).set ({
-        style: {
-          fontSize: "14px",
-          width: "100%",
-          height: "28px",
-          marginTop: "8px",
-          marginBottom: "8px",
-          textAlign: "center"
-        }
+        classList: ['qr-label'],
       })
       view.appendChild(labelView);
       this.owner.qrCanvas.insertView(this.attachView());

@@ -85,10 +85,10 @@
     "copy-ux": "cp node_modules/@swim/ux/dist/umd/*.min.js* ../dist/libs",
     "copy-vis": "cp node_modules/@swim/vis/dist/umd/*.min.js* ../dist/libs",
     "copy-libs": "npm run copy-core && npm run copy-host && npm run copy-ui && npm run copy-ux && npm run copy-vis && npm run copy-maps && npm run copy-gui && npm run copy-qrcode",
-    "compile": "tsc -b",
-    "bundle": "cd src/ && rollup -c && npm run copy-app",
     "copy-app": "cp index.html ../dist/ && cp build/javascript/*.min.js* ../dist/libs && cp assets/* ../dist/assets",
-    "build": "npm run compile && npm run bundle",
-    "postinstall": "npm run mkdir-ui && npm run copy-libs"
+    "copy": "npm run mkdir-ui && npm run copy-libs && npm run copy-app",
+    "compile": "tsc -b",
+    "bundle": "cd src/ && rollup -c && npm run copy",
+    "build": "npm run compile && npm run bundle"
   }
 }

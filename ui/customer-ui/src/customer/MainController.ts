@@ -125,7 +125,6 @@ export class MainController extends BoardController {
           flexShrink: 1,
           flexBasis: "0px",
           margin: "0px",
-          backgroundColor: '#212121',
         },
       });
 
@@ -196,7 +195,6 @@ export class MainController extends BoardController {
   @ViewRef({
     viewType: ButtonItem,
     createView(): ButtonItem {
-      console.log('cButtonItem createView');
       const c: ButtonItem = ButtonItem.create();
       const cButton = c.button;
       if (cButton) {
@@ -218,18 +216,6 @@ export class MainController extends BoardController {
         text.node.innerText = 'C';
       }
       const cLabel = c.insertChild(HtmlView, null, "label").set({
-        style: {
-          marginTop: '6px',
-          height: '24px',
-          lineHeight: '24px',
-          paddingTop: '2px',
-          paddingBottom: '2px',
-          paddingLeft: '4px',
-          paddingRight: '4px',
-          backgroundColor: 'rgba(33, 33, 33, 0.8)',
-          borderRadius: '4px',
-          boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.8)',
-        },
         classList: ['button-label', 'c-label'],
       });
       cLabel.node.innerText = "$30.00";
@@ -264,18 +250,6 @@ export class MainController extends BoardController {
         text.node.innerText = 'B';
       }
       const bLabel = b.insertChild(HtmlView, null, "label").set({
-        style: {
-          marginTop: '6px',
-          height: '24px',
-          lineHeight: '24px',
-          paddingTop: '2px',
-          paddingBottom: '2px',
-          paddingLeft: '4px',
-          paddingRight: '4px',
-          backgroundColor: 'rgba(33, 33, 33, 0.8)',
-          borderRadius: '4px',
-          boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.8)',
-        },
         classList: ['button-label', 'c-label'],
       });
       bLabel.node.innerText = "$20.00";
@@ -310,18 +284,6 @@ export class MainController extends BoardController {
         text.node.innerText = 'A';
       }
       const aLabel = a.insertChild(HtmlView, null, "label").set({
-        style: {
-          marginTop: '4px',
-          height: '24px',
-          lineHeight: '24px',
-          paddingTop: '4px',
-          paddingBottom: '4px',
-          paddingLeft: '6px',
-          paddingRight: '6px',
-          backgroundColor: 'rgba(33, 33, 33, 0.8)',
-          borderRadius: '4px',
-          boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.8)',
-        },
         classList: ['button-label', 'c-label'],
       });
       aLabel.node.innerText = "$10.00";
@@ -337,15 +299,6 @@ export class MainController extends BoardController {
     viewType: FloatingButton,
     createView() {
       const fab: FloatingButton = super.createView().set({
-        style: {
-          position: "absolute",
-          bottom: "24px",
-          right: "24px",
-          width: '56px',
-          height: '56px',
-          overflow: 'unset',
-          zIndex: 1,
-        },
         classList: ['pickup-orders-fab-button'],
       });
       fab.style.backgroundColor.set(MainController.orderStatusColors[OrderStatus.readyForPickup]);
@@ -369,19 +322,6 @@ export class MainController extends BoardController {
 
       // helper text
       const helperText = fab.insertChild('p', null).set({
-        style: {
-          position: 'absolute',
-          bottom: '34px',
-          right: '35px',
-          width: '200px',
-          color: MainController.orderStatusColors[OrderStatus.readyForPickup],
-          fontSize: '20px',
-          fontWeight: '400',
-          lineHeight: '27px',
-          backgroundColor: 'rgba(33, 33, 33, 0.9)',
-          borderRadius: '4px',
-          boxShadow: '0px 0px 4px rgba(33, 33, 33, 0.9)',
-        },
         classList: ['pickup-orders-helper-text']
       });
       helperText.node.innerText = (
