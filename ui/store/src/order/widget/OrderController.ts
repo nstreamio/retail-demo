@@ -139,7 +139,8 @@ export class OrderController extends TimeSeriesController {
             const viewingCustomerModel = (/\/customer\//).test(window.location.protocol.includes('file') ? window.location.hash : window.location.pathname);
             const isFocusedCustomer = customerId === this.owner.focusedCustomerId.value;
             if (isFocusedCustomer && !viewingCustomerModel) {
-                this.owner.leaf.attachView().set({ style: { backgroundColor: '#555555' }});
+                const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                this.owner.leaf.attachView().set({ style: { backgroundColor: isDarkTheme ? '#555555' : '#FFFFFF' }});
             }
 
             customerCellView.modifyMood(Feel.default, moodStatus!.moodModifier);
@@ -204,11 +205,12 @@ export class OrderController extends TimeSeriesController {
                 // only highlight leaves on main store view
                 return;
             }
+            const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const leaf = this.owner.leaf.attachView();
             const customerId = this.owner.customerId.value;
 
             if (newValue && newValue === customerId) {
-                leaf.set({style: {backgroundColor: '#555555'}})
+                leaf.set({style: {backgroundColor: isDarkTheme ? '#555555' : '#FFFFFF'}})
             } else if (newValue !== customerId) {
                 leaf.set({style: {backgroundColor: 'transparent'}})
             }

@@ -13,7 +13,7 @@ import { OrderStatus, OrderType } from "../../types";
 import { ViewRef } from "@swim/view";
 import { PieView, SliceView } from "@swim/pie";
 import { Feel, Look } from "@swim/theme";
-import { HtmlView } from "@swim/dom";
+import { HtmlView, TextView } from "@swim/dom";
 import { EntityStatus } from "../../types";
 import { OrderListController } from "./OrderListController";
 import { Property } from "@swim/component";
@@ -60,18 +60,6 @@ export class OrderStatusPieController extends TimePieController {
       const el = document.createElement('h2');
       el.innerText = '33%';
       const htmlView = HtmlView.fromNode(el).set({
-        style: {
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          margin: 0,
-          transform: 'translate(-50%, -50%)',
-          font: 'sans-serif',
-          fontSize: '16px',
-          fontWeight: '500',
-          textAlign: 'center',
-          color: '#CCCCCC'
-        },
         classList: ['total-monetary-value'],
       });
       return htmlView;
@@ -84,17 +72,18 @@ export class OrderStatusPieController extends TimePieController {
     viewKey: OrderType.OrderA,
     extends: true,
     initView(sliceView: SliceView): void {
+      const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
       sliceView.set({
         sliceColor: OrderStatusPieController.sliceColors[this.owner.orderStatus][OrderType.OrderA],
         font: "14px sans-serif",
-        textColor: Look.backgroundColor,
+        textColor: isDarkTheme ? Look.backgroundColor : Look.labelColor,
         innerRadius: 30,
         outerRadius: 80,
         value: 1 / 3,
         legend: "A Orders",
       });
       sliceView.modifyMood(Feel.default, Status.Normal!.moodModifier);
-      sliceView.legend.attachView().modifyMood(Feel.default, [[Feel.selected, 2]]);
+      sliceView.legend.attachView().modifyMood(Feel.default, [[isDarkTheme ? Feel.hovering : Feel.darker, 2]]);
     }
   })
   readonly aSlice!: ViewRef<this, SliceView>;
@@ -104,17 +93,18 @@ export class OrderStatusPieController extends TimePieController {
     viewKey: OrderType.OrderB,
     extends: true,
     initView(sliceView: SliceView): void {
+      const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
       sliceView.set({
         sliceColor: OrderStatusPieController.sliceColors[this.owner.orderStatus][OrderType.OrderB],
         font: "14px sans-serif",
-        textColor: Look.backgroundColor,
+        textColor: isDarkTheme ? Look.backgroundColor : Look.labelColor,
         innerRadius: 30,
         outerRadius: 80,
         value: 1 / 3,
         legend: "B Orders",
       });
       sliceView.modifyMood(Feel.default, Status.Warning!.moodModifier);
-      sliceView.legend.attachView().modifyMood(Feel.default, [[Feel.selected, 2]]);
+      sliceView.legend.attachView().modifyMood(Feel.default, [[isDarkTheme ? Feel.hovering : Feel.darker, 2]]);
     }
   })
   readonly bSlice!: ViewRef<this, SliceView>;
@@ -124,17 +114,18 @@ export class OrderStatusPieController extends TimePieController {
     viewKey: OrderType.OrderC,
     extends: true,
     initView(sliceView: SliceView): void {
+      const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
       sliceView.set({
         sliceColor: OrderStatusPieController.sliceColors[this.owner.orderStatus][OrderType.OrderC],
         font: "14px sans-serif",
-        textColor: Look.backgroundColor,
+        textColor: isDarkTheme ? Look.backgroundColor : Look.labelColor,
         innerRadius: 30,
         outerRadius: 80,
         value: 1 / 3,
         legend: "C Orders",
       });
       sliceView.modifyMood(Feel.default, Status.Unknown!.moodModifier);
-      sliceView.legend.attachView().modifyMood(Feel.default, [[Feel.selected, 2]]);
+      sliceView.legend.attachView().modifyMood(Feel.default, [[isDarkTheme ? Feel.hovering : Feel.darker, 2]]);
     }
   })
   readonly cSlice!: ViewRef<this, SliceView>;

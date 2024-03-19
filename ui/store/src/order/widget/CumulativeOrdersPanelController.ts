@@ -18,17 +18,7 @@ export class CumulativeOrdersPanelController extends PanelController {
   private initView(): void {
     const panelView = this.panel.insertView().set({
       minPanelHeight: 106,
-      style: {
-        backgroundColor: '#212121',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'flex-start',
-        paddingTop: '0px',
-        paddingLeft: '16px',
-        paddingBottom: '16px',
-        paddingRight: '16px',
-      }
+      classList: ["cumulative-orders-panel"],
     });
     this.header.insertView(panelView);
     this.count.insertView(panelView);
@@ -42,6 +32,8 @@ export class CumulativeOrdersPanelController extends PanelController {
     createView(): HtmlView {
       const el = document.createElement('h2');
       el.innerText = `Processed ${this.owner.isCumulative ? 'All' : this.owner.orderType} Orders`;
+
+      const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
       return HtmlView.fromNode(el).set({
         style: {
           fontFamily: 'sans-serif',
@@ -50,7 +42,7 @@ export class CumulativeOrdersPanelController extends PanelController {
           textAlign: 'center',
           margin: 0,
           marginBottom: '16px',
-          color: '#CCCCCC',
+          color: isDarkTheme ? "#CCCCCC" : "#000000",
         }
       })
     }
@@ -64,6 +56,8 @@ export class CumulativeOrdersPanelController extends PanelController {
     createView(): HtmlView {
       const el = document.createElement('p');
       el.innerText = `Count: 0`;
+
+      const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
       return HtmlView.fromNode(el).set({
         style: {
           margin: 0,
@@ -73,7 +67,7 @@ export class CumulativeOrdersPanelController extends PanelController {
           fontWeight: '400',
           textAlign: 'center', 
           whiteSpace: 'nowrap',
-          color: '#CCCCCC',
+          color: isDarkTheme ? "#CCCCCC" : "#000000",
         }
       })
     }
@@ -87,6 +81,8 @@ export class CumulativeOrdersPanelController extends PanelController {
     createView(): HtmlView {
       const el = document.createElement('p');
       el.innerText = `Value: $0.00`;
+
+      const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
       return HtmlView.fromNode(el).set({
         style: {
           margin: '0px',
@@ -95,7 +91,7 @@ export class CumulativeOrdersPanelController extends PanelController {
           fontWeight: '400',
           textAlign: 'center',
           whiteSpace: 'nowrap',
-          color: '#CCCCCC',
+          color: isDarkTheme ? "#CCCCCC" : "#000000",
         }
       })
     }

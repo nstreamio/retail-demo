@@ -199,9 +199,14 @@ export class OrderListController extends TimeTableController {
       return this.owner.header.attachView();
     },
     createView(): ColView {
-      return TextColView.create().set({
+      const textView = TextColView.create().set({
         label: "Customer",
+        style: {
+          fontWeight: "500",
+        }
       });
+
+      return textView;
     },
   })
   readonly customerCol!: ViewRef<this, ColView>;
@@ -213,9 +218,14 @@ export class OrderListController extends TimeTableController {
       return this.owner.header.attachView();
     },
     createView(): ColView {
-      return TextColView.create().set({
+      const textView = TextColView.create().set({
         label: "Order Type",
+        style: {
+          fontWeight: "500",
+        }
       });
+
+      return textView;
     },
   })
   readonly orderTypeCol!: ViewRef<this, ColView>;
@@ -227,9 +237,14 @@ export class OrderListController extends TimeTableController {
       return this.owner.header.attachView();
     },
     createView(): ColView {
-      return TextColView.create().set({
+      const textView = TextColView.create().set({
         label: "Time In Processing",
+        style: {
+          fontWeight: "500",
+        }
       });
+
+      return textView;
     },
   })
   readonly timeInProcessingCol!: ViewRef<this, ColView>;
